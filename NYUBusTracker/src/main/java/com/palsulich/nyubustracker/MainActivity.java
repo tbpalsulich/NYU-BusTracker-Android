@@ -6,6 +6,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,7 +18,7 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity{
 
     String charset = "UTF-8";
     String agencies = "72";
@@ -69,11 +73,13 @@ public class MainActivity extends Activity {
     private static final String TAG_WEEKEND = "Weekend";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        BusManager sharedManager = BusManager.getBusManager();
+        final ListView listView = (ListView) findViewById(R.id.mainActivityList);
+
+        final BusManager sharedManager = BusManager.getBusManager();
         JSONArray jStops = null;
         JSONArray jRoutes = null;
         JSONArray jSegments = null;
@@ -99,12 +105,16 @@ public class MainActivity extends Activity {
                 String stopLat = location.getString(TAG_LAT);
                 String stopLng = location.getString(TAG_LNG);
                 JSONArray stopRoutes = stopObject.getJSONArray(TAG_ROUTES);
-                String[] routes = new String[25];
+                String[] routes = new String[stopRoutes.length()];
+                String routesString = "";
                 for (int j = 0; j < stopRoutes.length(); j++) {
                     routes[j] = stopRoutes.getString(j);
+                    routesString += routes[j];
+                    if (j != stopRoutes.length() - 1) routesString += ", ";
                 }
-                sharedManager.addStop(new Stop(stopName, stopLat, stopLng, stopID, routes));
-                Log.v("JSONDebug", "Stop name: " + stopName + ", stop ID: " + stopID);
+                Stop s = new Stop(stopName, stopLat, stopLng, stopID, routes);
+                sharedManager.addStop(s);
+                Log.v("JSONDebug", "Stop name: " + stopName + ", stop ID: " + stopID + ", routes: " + routesString);
             }
 
             jRoutes = routesJson.getJSONObject(TAG_DATA).getJSONArray("72");
@@ -113,7 +123,7 @@ public class MainActivity extends Activity {
                 String routeLongName = routeObject.getString(TAG_LONG_NAME);
                 String routeID = routeObject.getString(TAG_ROUTE_ID);
                 sharedManager.addRoute(new Route(routeLongName, routeID));
-                Log.v("JSONDebug", "Route name: " + routeLongName + " | ID:" + routeID);
+                Log.v("JSONDebug", "Route name: " + routeLongName + " | ID:" + routeID + " | Number of stops: " + sharedManager.getRouteByID(routeID).getStops().size());
             }
 
             jVehicles = vehiclesJson.getJSONObject(TAG_DATA).getJSONArray("72");
@@ -122,15 +132,29 @@ public class MainActivity extends Activity {
                 JSONObject busLocation = busObject.getJSONObject(TAG_LOCATION);
                 String busLat = busLocation.getString(TAG_LAT);
                 String busLng = busLocation.getString(TAG_LNG);
+                String busRoute = busObject.getString(TAG_ROUTE_ID);
                 String vehicleID = busObject.getString(TAG_VEHICLE_ID);
                 String busHeading = busObject.getString(TAG_HEADING);
-                sharedManager.addBus(new Bus(vehicleID).setHeading(busHeading).setLocation(busLat, busLng));
+                sharedManager.addBus(new Bus(vehicleID).setHeading(busHeading).setLocation(busLat, busLng).setRoute(busRoute));
                 Log.v("JSONDebug", "Bus ID: " + vehicleID + " | Heading: " + busHeading + " | (" + busLat + ", " + busLng + ")");
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
+        ArrayAdapter<String> mAdapter =
+                new ArrayAdapter<String>(this,
+                        android.R.layout.simple_list_item_1,
+                        sharedManager.getRoutesAsArray());
+        listView.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String routeName = listView.getItemAtPosition(position).toString();
+                Log.v("Debugging", "Clicked on route:" + routeName);
+                Intent myIntent = new Intent(MainActivity.this, RouteActivity.class);
+                myIntent.putExtra("route_name", routeName);
+                startActivity(myIntent);
+            }
+        });
+        listView.setAdapter(mAdapter);
     }
 
 

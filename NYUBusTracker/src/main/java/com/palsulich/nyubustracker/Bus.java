@@ -8,6 +8,7 @@ public class Bus {
     String busLat = "";
     String busLng = "";
     String heading = "";
+    String route;
     public Bus(String mVehicleID){
         vehicleID = mVehicleID;
     }
@@ -19,6 +20,10 @@ public class Bus {
     }
     public Bus setHeading(String mHeading){
         heading = mHeading;
+        return this;
+    }
+    public Bus setRoute(String mRoute){
+        route = mRoute;
         return this;
     }
 }
