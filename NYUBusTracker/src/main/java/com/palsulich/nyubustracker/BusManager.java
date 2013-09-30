@@ -27,6 +27,18 @@ public final class BusManager {
     public ArrayList<Stop> getStops(){
         return stops;
     }
+    public Stop getStopByName(String stopName){
+        for (int j = 0; j < stops.size(); j++){
+            if (stops.get(j).name.equals(stopName)) return stops.get(j);
+        }
+        return null;
+    }
+    public Stop getStopByID(String stopID){
+        for (int j = 0; j < stops.size(); j++){
+            if (stops.get(j).id.equals(stopID)) return stops.get(j);
+        }
+        return null;
+    }
     public String[] getStopsAsArray(){
         String[] stopsArray = new String[stops.size()];
         for (int i = 0; i < stopsArray.length; i++){

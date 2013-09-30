@@ -39,6 +39,14 @@
             android:name="com.palsulich.nyubustracker.RouteActivity"
             android:label="@string/title_activity_route" >
         </activity>
+        <activity
+            android:name="com.palsulich.nyubustracker.DayActivity"
+            android:label="@string/title_activity_day" >
+        </activity>
+        <activity
+            android:name="com.palsulich.nyubustracker.TimeActivity"
+            android:label="@string/title_activity_time" >
+        </activity>
     </application>
 
 </manifest>

@@ -11,5 +11,7 @@
     <string name="title_activity_bus_e">Bus B</string>
     <string name="title_activity_bus_f">Bus F</string>
     <string name="title_activity_route">Stops</string>
+    <string name="title_activity_day">Day</string>
+    <string name="title_activity_time">Schedule</string>
 
 </resources>
