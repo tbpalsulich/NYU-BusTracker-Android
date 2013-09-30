@@ -43,31 +43,12 @@ public class MainActivity extends Activity {
         return "";
     }
 
-    private static final String TAG_API_CURRENT_VERSION = "api_current_version";
-    private static final String TAG_API_VERSION = "api_version";
-    private static final String TAG_GENERATED_ON = "generated_on";
-    private static final String TAG_EXPIRES_IN = "expires_in";
-    private static final String TAG_RATE_LIMIT = "rate_limit";
     private static final String TAG_DATA = "data";
-    private static final String TAG_AGENCY_ID = "agency_id";
-    private static final String TAG_NAME = "name";
     private static final String TAG_LONG_NAME = "long_name";
-    private static final String TAG_DESCRIPTION = "description";
-    private static final String TAG_CODE = "code";
-    private static final String TAG_URL = "url";
-    private static final String TAG_LOCATION_TYPE = "location_type";
     private static final String TAG_LOCATION = "location";
     private static final String TAG_LAT = "lat";
     private static final String TAG_LNG = "lng";
-    private static final String TAG_VEHICLE_ID = "vehicle_id";
-    private static final String TAG_CALL_NAME = "call_name";
-    private static final String TAG_TRACKING_STATUS = "tracking_status";
     private static final String TAG_HEADING = "heading";
-    private static final String TAG_ARRIVAL_ESTIMATES = "arrival_estimates";
-    private static final String TAG_ARRIVAL_AT = "arrival_at";
-    private static final String TAG_SEGMENT_ID = "segment_id";
-    private static final String TAG_SPEED = "speed";
-    private static final String TAG_LAST_UPDATE = "last_updated_on";
     private static final String TAG_STOP_NAME = "name";
     private static final String TAG_STOP_ID = "stop_id";
     private static final String TAG_ROUTES = "routes";
@@ -76,7 +57,7 @@ public class MainActivity extends Activity {
     private static final String TAG_WEEKDAY = "Weekday";
     private static final String TAG_FRIDAY = "Friday";
     private static final String TAG_WEEKEND = "Weekend";
-
+    private static final String TAG_VEHICLE_ID = "vehicle_id";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -225,21 +206,6 @@ public class MainActivity extends Activity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
-    }
-
-    public void routeBButton(View view) {
-        Intent myIntent = new Intent(this, BusEActivity.class);
-        this.startActivity(myIntent);
-    }
-
-    public void routeEButton(View view) {
-        Intent myIntent = new Intent(this, BusEActivity.class);
-        this.startActivity(myIntent);
-    }
-
-    public void routeFButton(View view) {
-        Intent myIntent = new Intent(this, BusFActivity.class);
-        this.startActivity(myIntent);
     }
 
 
