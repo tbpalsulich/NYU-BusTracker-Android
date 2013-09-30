@@ -13,7 +13,6 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 
 public class MainActivity extends Activity {
 
@@ -26,10 +25,10 @@ public class MainActivity extends Activity {
     private String segmentsURL = "http://api.transloc.com/1.2/segments.json?" + query;
     private String vehiclesURL = "http://api.transloc.com/1.2/vehicles.json?" + query;
 
-    private String makeQuery(String param, String value, String charset){
+    private String makeQuery(String param, String value, String charset) {
         try {
             return String.format(param + "=" + URLEncoder.encode(agencies, charset));
-        } catch (UnsupportedEncodingException e){
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
         return "";
@@ -43,6 +42,7 @@ public class MainActivity extends Activity {
     private static final String TAG_DATA = "data";
     private static final String TAG_AGENCY_ID = "agency_id";
     private static final String TAG_NAME = "name";
+    private static final String TAG_LONG_NAME = "long_name";
     private static final String TAG_DESCRIPTION = "description";
     private static final String TAG_CODE = "code";
     private static final String TAG_URL = "url";
@@ -63,6 +63,7 @@ public class MainActivity extends Activity {
     private static final String TAG_STOP_ID = "stop_id";
     private static final String TAG_ROUTES = "routes";
     private static final String TAG_ROUTE = "route";
+    private static final String TAG_ROUTE_ID = "route_id";
     private static final String TAG_WEEKDAY = "Weekday";
     private static final String TAG_FRIDAY = "Friday";
     private static final String TAG_WEEKEND = "Weekend";
@@ -72,8 +73,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        BusManager sharedManager = BusManager.getBusManager();
         JSONArray jStops = null;
-        ArrayList<Stop> stops = new ArrayList<Stop>();
         JSONArray jRoutes = null;
         JSONArray jSegments = null;
         JSONArray jVehicles = null;
@@ -82,33 +83,49 @@ public class MainActivity extends Activity {
         JSONParser jParser = new JSONParser();
 
         // getting JSON string from URL
-        JSONObject stopsJson = jParser.getJSONFromUrl(stopsURL);/*
+        JSONObject stopsJson = jParser.getJSONFromUrl(stopsURL);
         JSONObject routesJson = jParser.getJSONFromUrl(routesURL);
         JSONObject segmentsJson = jParser.getJSONFromUrl(segmentsURL);
-        JSONObject vehiclesJson = jParser.getJSONFromUrl(vehiclesURL);*/
+        JSONObject vehiclesJson = jParser.getJSONFromUrl(vehiclesURL);
 
         try {
             jStops = stopsJson.getJSONArray(TAG_DATA);
             Log.v("JSONDebug", "Number of stops: " + jStops.length());
-            for(int i = 0; i < jStops.length(); i++){
-                try {
-                    JSONObject stopObject = jStops.getJSONObject(i);
-                    String stopID = stopObject.getString(TAG_STOP_ID);
-                    String stopName = stopObject.getString(TAG_STOP_NAME);
-                    JSONObject location = stopObject.getJSONObject(TAG_LOCATION);
-                    String stopLat = location.getString(TAG_LAT);
-                    String stopLng = location.getString(TAG_LNG);
-                    JSONArray stopRoutes = stopObject.getJSONArray(TAG_ROUTES);
-                    String[] routes = new String[5];
-                    for(int j = 0; j < stopRoutes.length(); j++){
-                        routes[j] = stopRoutes.getString(j);
-                    }
-                    stops.add(new Stop(stopName, stopLat, stopLng, stopID, routes));
-                    Log.v("JSONDebug", "Stop name: " + stopName + ", stop ID: " + stopID);
-                } catch (JSONException e) {
-                    Log.v("JSONDebug", "Found a bug in parsing the JSON:\n" + jStops.getJSONObject(i).toString());
-                    // Oops
+            for (int i = 0; i < jStops.length(); i++) {
+                JSONObject stopObject = jStops.getJSONObject(i);
+                String stopID = stopObject.getString(TAG_STOP_ID);
+                String stopName = stopObject.getString(TAG_STOP_NAME);
+                JSONObject location = stopObject.getJSONObject(TAG_LOCATION);
+                String stopLat = location.getString(TAG_LAT);
+                String stopLng = location.getString(TAG_LNG);
+                JSONArray stopRoutes = stopObject.getJSONArray(TAG_ROUTES);
+                String[] routes = new String[25];
+                for (int j = 0; j < stopRoutes.length(); j++) {
+                    routes[j] = stopRoutes.getString(j);
                 }
+                sharedManager.addStop(new Stop(stopName, stopLat, stopLng, stopID, routes));
+                Log.v("JSONDebug", "Stop name: " + stopName + ", stop ID: " + stopID);
+            }
+
+            jRoutes = routesJson.getJSONObject(TAG_DATA).getJSONArray("72");
+            for (int j = 0; j < jRoutes.length(); j++) {
+                JSONObject routeObject = jRoutes.getJSONObject(j);
+                String routeLongName = routeObject.getString(TAG_LONG_NAME);
+                String routeID = routeObject.getString(TAG_ROUTE_ID);
+                sharedManager.addRoute(new Route(routeLongName, routeID));
+                Log.v("JSONDebug", "Route name: " + routeLongName + " | ID:" + routeID);
+            }
+
+            jVehicles = vehiclesJson.getJSONObject(TAG_DATA).getJSONArray("72");
+            for (int j = 0; j < jVehicles.length(); j++) {
+                JSONObject busObject = jVehicles.getJSONObject(j);
+                JSONObject busLocation = busObject.getJSONObject(TAG_LOCATION);
+                String busLat = busLocation.getString(TAG_LAT);
+                String busLng = busLocation.getString(TAG_LNG);
+                String vehicleID = busObject.getString(TAG_VEHICLE_ID);
+                String busHeading = busObject.getString(TAG_HEADING);
+                sharedManager.addBus(new Bus(vehicleID).setHeading(busHeading).setLocation(busLat, busLng));
+                Log.v("JSONDebug", "Bus ID: " + vehicleID + " | Heading: " + busHeading + " | (" + busLat + ", " + busLng + ")");
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -140,5 +157,4 @@ public class MainActivity extends Activity {
     }
 
 
-    
 }

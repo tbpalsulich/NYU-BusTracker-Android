@@ -6,11 +6,11 @@ package com.palsulich.nyubustracker;
 public class Stop {
     String name, lat, lng, id;
     String[] routes;
-    public Stop(String name, String lat, String lng, String id, String... routes){
-        name = name;
-        lat = lat;
-        lng = lng;
-        id = id;
-        routes = routes;
+    public Stop(String mName, String mLat, String mLng, String mID, String... mRoutes){
+        name = mName;
+        lat = mLat;
+        lng = mLng;
+        id = mID;
+        routes = mRoutes;
     }
 }
