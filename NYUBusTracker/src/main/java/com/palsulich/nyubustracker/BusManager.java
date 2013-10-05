@@ -27,6 +27,9 @@ public final class BusManager {
     public ArrayList<Stop> getStops(){
         return stops;
     }
+    public boolean hasStops(){
+        return stops.size() > 0;
+    }
     public Stop getStopByName(String stopName){
         for (int j = 0; j < stops.size(); j++){
             if (stops.get(j).name.equals(stopName)) return stops.get(j);
@@ -59,6 +62,9 @@ public final class BusManager {
     }
     public ArrayList<Route> getRoutes(){
         return routes;
+    }
+    public boolean hasRoutes(){
+        return routes.size() > 0;
     }
     public String[] getRoutesAsArray(){
         String[] routesArray = new String[routes.size()];

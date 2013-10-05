@@ -16,7 +16,6 @@ import java.net.URL;
 import java.util.concurrent.ExecutionException;
 
 public class JSONParser {
-
     private class Downloader extends AsyncTask<String, Integer, JSONObject>{
         @Override
         public JSONObject doInBackground(String... urls){

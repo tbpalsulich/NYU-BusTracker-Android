@@ -19,27 +19,30 @@ public class RouteActivity extends Activity {
         final ListView listView = (ListView) findViewById(R.id.route_list_view);
 
         final BusManager sharedManager = BusManager.getBusManager();
+        if (sharedManager.hasStops() && sharedManager.hasRoutes()) {
+            Intent intent = getIntent();
+            String routeName = intent.getStringExtra("route_name");
+            Route route = sharedManager.getRouteByName(routeName);
 
-        Intent intent = getIntent();
-        String routeName = intent.getStringExtra("route_name");
-        Route route = sharedManager.getRouteByName(routeName);
-
-        ArrayAdapter<String> mAdapter =
-                new ArrayAdapter<String>(this,
-                        android.R.layout.simple_list_item_1,
-                        route.getStopsAsArray());
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String stopName = listView.getItemAtPosition(position).toString();
-                Intent myIntent = new Intent(RouteActivity.this, DayActivity.class);
-                myIntent.putExtra("route_name", getIntent().getStringExtra("route_name"));
-                myIntent.putExtra("stop_name", stopName);
-                startActivity(myIntent);
-            }
-        });
-        listView.setAdapter(mAdapter);
+            ArrayAdapter<String> mAdapter =
+                    new ArrayAdapter<String>(this,
+                            android.R.layout.simple_list_item_1,
+                            route.getStopsAsArray());
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    String stopName = listView.getItemAtPosition(position).toString();
+                    Intent myIntent = new Intent(RouteActivity.this, DayActivity.class);
+                    myIntent.putExtra("route_name", getIntent().getStringExtra("route_name"));
+                    myIntent.putExtra("stop_name", stopName);
+                    startActivity(myIntent);
+                }
+            });
+            listView.setAdapter(mAdapter);
+        } else {
+            Intent myIntent = new Intent(RouteActivity.this, MainActivity.class);
+            startActivity(myIntent);
+        }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -47,5 +50,5 @@ public class RouteActivity extends Activity {
         getMenuInflater().inflate(R.menu.route, menu);
         return true;
     }
-    
+
 }

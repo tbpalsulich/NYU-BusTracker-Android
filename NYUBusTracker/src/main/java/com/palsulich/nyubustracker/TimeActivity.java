@@ -1,6 +1,7 @@
 package com.palsulich.nyubustracker;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -16,20 +17,24 @@ public class TimeActivity extends Activity {
 
         final ListView listView = (ListView) findViewById(R.id.time_activity_list_view);
         final BusManager sharedManager = BusManager.getBusManager();
+        if (sharedManager.hasStops()) {
+            String dayOfWeek = getIntent().getStringExtra("day_of_week");
+            String routeName = getIntent().getStringExtra("route_name");
+            String stopName = getIntent().getStringExtra("stop_name");
 
-        String dayOfWeek = getIntent().getStringExtra("day_of_week");
-        String routeName = getIntent().getStringExtra("route_name");
-        String stopName =  getIntent().getStringExtra("stop_name");
-
-        Stop stop = sharedManager.getStopByName(stopName);
-        String[] times = stop.times.get(dayOfWeek).get(routeName);
-        Log.v("Debugging", "Looking for times for " + routeName);
-        Log.v("Debugging", "Number of times on " + dayOfWeek + ": " + stop.times.get(dayOfWeek).get(routeName).length);
-        ArrayAdapter<String> mAdapter =
-                new ArrayAdapter<String>(this,
-                        android.R.layout.simple_list_item_1,
-                        times);
-        listView.setAdapter(mAdapter);
+            Stop stop = sharedManager.getStopByName(stopName);
+            String[] times = stop.times.get(dayOfWeek).get(routeName);
+            Log.v("Debugging", "Looking for times for " + routeName);
+            Log.v("Debugging", "Number of times on " + dayOfWeek + ": " + stop.times.get(dayOfWeek).get(routeName).length);
+            ArrayAdapter<String> mAdapter =
+                    new ArrayAdapter<String>(this,
+                            android.R.layout.simple_list_item_1,
+                            times);
+            listView.setAdapter(mAdapter);
+        } else {
+            Intent myIntent = new Intent(TimeActivity.this, MainActivity.class);
+            startActivity(myIntent);
+        }
     }
 
 
@@ -39,5 +44,5 @@ public class TimeActivity extends Activity {
         getMenuInflater().inflate(R.menu.time, menu);
         return true;
     }
-    
+
 }
