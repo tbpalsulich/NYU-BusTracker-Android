@@ -2,6 +2,10 @@ package com.palsulich.nyubustracker;
 
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -56,5 +60,31 @@ public class Stop {
     public void addTime(String route, String dayOfWeek, String[] mTimes){
         times.get(dayOfWeek).put(route, mTimes);
         Log.v("Debugging", "Adding " + mTimes.length + " times to " + name + "/" + route + " for " + dayOfWeek);
+    }
+
+    public static void parseJSON(JSONObject stopsJson) throws JSONException{
+        JSONArray jStops = null;
+        BusManager sharedManager = BusManager.getBusManager();
+        jStops = stopsJson.getJSONArray(MainActivity.TAG_DATA);
+        Log.v("JSONDebug", "Number of stops: " + jStops.length());
+        for (int i = 0; i < jStops.length(); i++) {
+            JSONObject stopObject = jStops.getJSONObject(i);
+            String stopID = stopObject.getString(MainActivity.TAG_STOP_ID);
+            String stopName = stopObject.getString(MainActivity.TAG_STOP_NAME);
+            JSONObject location = stopObject.getJSONObject(MainActivity.TAG_LOCATION);
+            String stopLat = location.getString(MainActivity.TAG_LAT);
+            String stopLng = location.getString(MainActivity.TAG_LNG);
+            JSONArray stopRoutes = stopObject.getJSONArray(MainActivity.TAG_ROUTES);
+            String[] routes = new String[stopRoutes.length()];
+            String routesString = "";
+            for (int j = 0; j < stopRoutes.length(); j++) {
+                routes[j] = stopRoutes.getString(j);
+                routesString += routes[j];
+                if (j != stopRoutes.length() - 1) routesString += ", ";
+            }
+            Stop s = new Stop(stopName, stopLat, stopLng, stopID, routes);
+            sharedManager.addStop(s);
+            Log.v("JSONDebug", "Stop name: " + stopName + ", stop ID: " + stopID + ", routes: " + routesString);
+        }
     }
 }

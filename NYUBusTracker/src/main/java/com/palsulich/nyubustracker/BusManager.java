@@ -2,12 +2,17 @@ package com.palsulich.nyubustracker;
 
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 /**
  * Created by tyler on 9/30/13.
  */
 public final class BusManager {
+    private static String timesURL = "https://s3.amazonaws.com/nyubustimes/1.0/";
     static BusManager sharedBusManager = null;
     private ArrayList<Stop> stops = null;
     private ArrayList<Route> routes = null;
@@ -114,6 +119,63 @@ public final class BusManager {
     }
     public void addBus(Bus bus){
         buses.add(bus);
+    }
+
+    public static void parseTimes(JSONObject versionJson, FileGrabber mFileGrabber) throws JSONException{
+        BusManager sharedManager = BusManager.getBusManager();
+        ArrayList<Stop> stops = sharedManager.getStops();
+        Log.v("Debugging", "Looking for times for " + stops.size() + " stops.");
+        JSONArray jVersion = versionJson.getJSONArray("versions");
+        for (int j = 0; j < jVersion.length(); j++) {
+            JSONObject stopObject = jVersion.getJSONObject(j);
+            String file = stopObject.getString("file");
+            Log.v("Debugging", "Looking for times for " + file);
+            JSONObject timesJson = mFileGrabber.getJSON(timesURL + file, file);
+            JSONObject routes = timesJson.getJSONObject(MainActivity.TAG_ROUTES);
+            Stop s = sharedManager.getStopByID(file.substring(0, file.indexOf(".")));
+            for (int i = 0; i < s.routes.size(); i++) {
+                if (routes.has(s.routes.get(i).routeID)) {
+                    JSONObject routeTimes = routes.getJSONObject(s.routes.get(i).routeID);
+                    if (routeTimes.has(MainActivity.TAG_WEEKDAY)) {
+                        JSONArray weekdayTimesJson = routeTimes.getJSONArray(MainActivity.TAG_WEEKDAY);
+                        String[] weekdayTimes = new String[weekdayTimesJson.length()];
+                        if (weekdayTimesJson != null) {
+                            for (int k = 0; k < weekdayTimes.length; k++) {
+                                weekdayTimes[k] = weekdayTimesJson.getString(k);
+                            }
+                            String weekdayRoute = routeTimes.getString(MainActivity.TAG_ROUTE);
+                            s.addTime(weekdayRoute.substring(weekdayRoute.indexOf("Route ") + "Route ".length()), "Weekday", weekdayTimes);
+
+                        }
+                    }
+                    if (routeTimes.has(MainActivity.TAG_FRIDAY)) {
+                        JSONArray fridayTimesJson = routeTimes.getJSONArray(MainActivity.TAG_FRIDAY);
+                        String[] fridayTimes = new String[fridayTimesJson.length()];
+                        if (fridayTimesJson != null) {
+                            for (int k = 0; k < fridayTimes.length; k++) {
+                                fridayTimes[k] = fridayTimesJson.getString(k);
+                            }
+                            String fridayRoute = routeTimes.getString(MainActivity.TAG_ROUTE);
+                            s.addTime(fridayRoute.substring(fridayRoute.indexOf("Route ") + "Route ".length()), "Friday", fridayTimes);
+
+                        }
+                    }
+                    if (routeTimes.has(MainActivity.TAG_WEEKEND)) {
+                        JSONArray weekendTimesJson = routeTimes.getJSONArray(MainActivity.TAG_WEEKEND);
+                        String[] weekendTimes = new String[weekendTimesJson.length()];
+                        if (weekendTimesJson != null) {
+                            for (int k = 0; k < weekendTimes.length; k++) {
+                                weekendTimes[k] = weekendTimesJson.getString(k);
+                            }
+                            String weekendRoute = routeTimes.getString(MainActivity.TAG_ROUTE);
+                            s.addTime(weekendRoute.substring(weekendRoute.indexOf("Route ") + "Route ".length()), "Weekend", weekendTimes);
+
+                        }
+                    }
+                }
+            }
+
+        }
     }
 
 }

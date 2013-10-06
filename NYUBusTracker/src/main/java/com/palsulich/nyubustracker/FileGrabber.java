@@ -21,6 +21,7 @@ public class FileGrabber {
     // Creating JSON Parser instance
     JSONParser jParser;
     File[] files;
+
     public FileGrabber(File mCacheDir){
         jParser = new JSONParser();
         cacheDir = mCacheDir;
