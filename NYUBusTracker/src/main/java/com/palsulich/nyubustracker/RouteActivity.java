@@ -18,7 +18,7 @@ public class RouteActivity extends Activity {
 
         final ListView listView = (ListView) findViewById(R.id.route_list_view);
 
-        final BusManager sharedManager = BusManager.getBusManager();
+        final BusManager sharedManager = BusManager.getBusManager(getApplicationContext());
         if (sharedManager.hasStops() && sharedManager.hasRoutes()) {
             Intent intent = getIntent();
             String routeName = intent.getStringExtra("route_name");
@@ -31,10 +31,12 @@ public class RouteActivity extends Activity {
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     String stopName = listView.getItemAtPosition(position).toString();
-                    Intent myIntent = new Intent(RouteActivity.this, DayActivity.class);
-                    myIntent.putExtra("route_name", getIntent().getStringExtra("route_name"));
-                    myIntent.putExtra("stop_name", stopName);
-                    startActivity(myIntent);
+                    if (!stopName.equals(getApplicationContext().getString(R.string.no_stops))) {
+                        Intent myIntent = new Intent(RouteActivity.this, DayActivity.class);
+                        myIntent.putExtra("route_name", getIntent().getStringExtra("route_name"));
+                        myIntent.putExtra("stop_name", stopName);
+                        startActivity(myIntent);
+                    }
                 }
             });
             listView.setAdapter(mAdapter);

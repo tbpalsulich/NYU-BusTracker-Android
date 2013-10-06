@@ -17,7 +17,7 @@ public class DayActivity extends Activity {
         setContentView(R.layout.activity_day);
 
         final ListView listView = (ListView) findViewById(R.id.day_activity_list_view);
-        final BusManager sharedManager = BusManager.getBusManager();
+        final BusManager sharedManager = BusManager.getBusManager(getApplicationContext());
 
         if (sharedManager.hasStops() && sharedManager.hasRoutes()) {
             ArrayAdapter<String> mAdapter =

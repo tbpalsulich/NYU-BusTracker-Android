@@ -60,7 +60,7 @@ public class MainActivity extends Activity {
 
         final ListView listView = (ListView) findViewById(R.id.mainActivityList);
 
-        final BusManager sharedManager = BusManager.getBusManager();
+        final BusManager sharedManager = BusManager.getBusManager(getApplicationContext());
         if (!sharedManager.hasStops() && !sharedManager.hasRoutes()) {
             FileGrabber mFileGrabber = new FileGrabber(getCacheDir());
             try {

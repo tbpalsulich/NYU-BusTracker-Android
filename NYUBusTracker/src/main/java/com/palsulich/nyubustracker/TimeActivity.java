@@ -21,11 +21,17 @@ public class TimeActivity extends Activity {
             String dayOfWeek = getIntent().getStringExtra("day_of_week");
             String routeName = getIntent().getStringExtra("route_name");
             String stopName = getIntent().getStringExtra("stop_name");
+            Log.v("Debugging", "Looking for times for " + routeName);
 
             Stop stop = sharedManager.getStopByName(stopName);
             String[] times = stop.times.get(dayOfWeek).get(routeName);
-            Log.v("Debugging", "Looking for times for " + routeName);
-            Log.v("Debugging", "Number of times on " + dayOfWeek + ": " + stop.times.get(dayOfWeek).get(routeName).length);
+            if (times == null) {
+                times = new String[1];
+                times[0] = getApplicationContext().getString(R.string.no_times);
+                Log.v("Debugging", "Number of times on " + dayOfWeek + ": 0");
+            } else {
+                Log.v("Debugging", "Number of times on " + dayOfWeek + ": " + stop.times.get(dayOfWeek).get(routeName).length);
+            }
             ArrayAdapter<String> mAdapter =
                     new ArrayAdapter<String>(this,
                             android.R.layout.simple_list_item_1,

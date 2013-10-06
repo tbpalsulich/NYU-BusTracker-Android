@@ -1,5 +1,6 @@
 package com.palsulich.nyubustracker;
 
+import android.content.Context;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -17,113 +18,146 @@ public final class BusManager {
     private ArrayList<Stop> stops = null;
     private ArrayList<Route> routes = null;
     private ArrayList<Bus> buses = null;
-    public static BusManager getBusManager(){
-        if (sharedBusManager == null){
-            sharedBusManager = new BusManager();
+    static Context mContext = null;
+
+    public static BusManager getBusManager(Context context) {
+        if (sharedBusManager == null) {
+            sharedBusManager = new BusManager(context);
         }
         return sharedBusManager;
     }
-    private BusManager(){
+    public static BusManager getBusManager() {
+        if (sharedBusManager == null) {
+            sharedBusManager = new BusManager(mContext);
+        }
+        return sharedBusManager;
+    }
+
+    private BusManager(Context context) {
+        mContext = context;
         stops = new ArrayList<Stop>();
         routes = new ArrayList<Route>();
         buses = new ArrayList<Bus>();
     }
 
-    public ArrayList<Stop> getStops(){
+    public ArrayList<Stop> getStops() {
         return stops;
     }
-    public boolean hasStops(){
+
+    public boolean hasStops() {
         return stops.size() > 0;
     }
-    public Stop getStopByName(String stopName){
-        for (int j = 0; j < stops.size(); j++){
+
+    public Stop getStopByName(String stopName) {
+        for (int j = 0; j < stops.size(); j++) {
             if (stops.get(j).name.equals(stopName)) return stops.get(j);
         }
         return null;
     }
-    public Stop getStopByID(String stopID){
-        for (int j = 0; j < stops.size(); j++){
+
+    public Stop getStopByID(String stopID) {
+        for (int j = 0; j < stops.size(); j++) {
             if (stops.get(j).id.equals(stopID)) return stops.get(j);
         }
         return null;
     }
-    public String[] getStopsAsArray(){
+
+    public String[] getStopsAsArray() {
         String[] stopsArray = new String[stops.size()];
-        for (int i = 0; i < stopsArray.length; i++){
+        for (int i = 0; i < stopsArray.length; i++) {
             stopsArray[i] = stops.get(i).toString();
         }
         return stopsArray;
     }
-    public ArrayList<Stop> getStopsByRouteID(String routeID){
+
+    public ArrayList<Stop> getStopsByRouteID(String routeID) {
         ArrayList<Stop> result = new ArrayList<Stop>();
-        for (int j = 0; j < stops.size(); j++){
+        for (int j = 0; j < stops.size(); j++) {
             Stop stop = stops.get(j);
             //Log.v("Debugging", "Number of routes of stop " + j + ": " + stop.routes.size());
-            if (stop.hasRouteByString(routeID)){
+            if (stop.hasRouteByString(routeID)) {
                 result.add(stop);
             }
         }
         return result;
     }
-    public ArrayList<Route> getRoutes(){
+
+    public ArrayList<Route> getRoutes() {
         return routes;
     }
-    public boolean hasRoutes(){
+
+    public boolean hasRoutes() {
         return routes.size() > 0;
     }
-    public String[] getRoutesAsArray(){
-        String[] routesArray = new String[routes.size()];
-        for (int i = 0; i < routesArray.length; i++){
+
+    public String[] getRoutesAsArray() {
+        String[] routesArray;
+        if (routes.size() == 0) {
+            routesArray = new String[1];
+            routesArray[0] = "No routes available";
+        } else {
+            routesArray = new String[routes.size()];
+        }
+        for (int i = 0; i < routesArray.length; i++) {
             routesArray[i] = routes.get(i).toString();
         }
         return routesArray;
     }
-    public Route getRouteByID(String id){
-        for (int j = 0; j < routes.size(); j++){
+
+    public Route getRouteByID(String id) {
+        for (int j = 0; j < routes.size(); j++) {
             Route route = routes.get(j);
-            if(route.routeID.equals(id)){
+            if (route.routeID.equals(id)) {
                 return route;
             }
         }
         return null;
     }
-    public Route getRouteByName(String name){
-        for (int j = 0; j < routes.size(); j++){
+
+    public Route getRouteByName(String name) {
+        for (int j = 0; j < routes.size(); j++) {
             Route route = routes.get(j);
-            if(route.longName.equals(name)){
+            if (route.longName.equals(name)) {
                 return route;
             }
         }
         return null;
     }
-    public ArrayList<Route> getRoutesByStopID(String stopID){
+
+    public ArrayList<Route> getRoutesByStopID(String stopID) {
         ArrayList<Route> result = new ArrayList<Route>();
-        for (int j = 0; j < routes.size(); j++){
+        for (int j = 0; j < routes.size(); j++) {
             Route route = routes.get(j);
-            if (route.hasStop(stopID)){
+            if (route.hasStop(stopID)) {
                 result.add(route);
             }
         }
         return result;
     }
-    public ArrayList<Bus> getBuses(){
+
+    public ArrayList<Bus> getBuses() {
         return buses;
     }
 
-    public void addStop(Stop stop){
+    public void addStop(Stop stop) {
         stops.add(stop);
         Log.v("Debugging", "Added " + stop.toString() + " to list of stops (" + stops.size() + ")");
     }
-    public void addRoute(Route route){
+
+    public void addRoute(Route route) {
         routes.add(route);
     }
-    public void addBus(Bus bus){
+
+    public void addBus(Bus bus) {
         buses.add(bus);
     }
 
-    public static void parseTimes(JSONObject versionJson, FileGrabber mFileGrabber) throws JSONException{
-        BusManager sharedManager = BusManager.getBusManager();
-        ArrayList<Stop> stops = sharedManager.getStops();
+    public Context getContext(){
+        return mContext;
+    }
+
+    public static void parseTimes(JSONObject versionJson, FileGrabber mFileGrabber) throws JSONException {
+        ArrayList<Stop> stops = sharedBusManager.getStops();
         Log.v("Debugging", "Looking for times for " + stops.size() + " stops.");
         JSONArray jVersion = versionJson.getJSONArray("versions");
         for (int j = 0; j < jVersion.length(); j++) {
@@ -132,7 +166,7 @@ public final class BusManager {
             Log.v("Debugging", "Looking for times for " + file);
             JSONObject timesJson = mFileGrabber.getJSON(timesURL + file, file);
             JSONObject routes = timesJson.getJSONObject(MainActivity.TAG_ROUTES);
-            Stop s = sharedManager.getStopByID(file.substring(0, file.indexOf(".")));
+            Stop s = sharedBusManager.getStopByID(file.substring(0, file.indexOf(".")));
             for (int i = 0; i < s.routes.size(); i++) {
                 if (routes.has(s.routes.get(i).routeID)) {
                     JSONObject routeTimes = routes.getJSONObject(s.routes.get(i).routeID);

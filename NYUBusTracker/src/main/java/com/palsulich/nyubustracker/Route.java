@@ -15,10 +15,11 @@ public class Route {
     String longName = "";
     String routeID = "";
     ArrayList<Stop> stops = null;
+    BusManager sharedManager;
     public Route(String mLongName, String mRouteID){
         longName = mLongName;
         routeID = mRouteID;
-        BusManager sharedManager = BusManager.getBusManager();
+        sharedManager = BusManager.getBusManager();
         stops = sharedManager.getStopsByRouteID(routeID);
         for (int j = 0; j < stops.size(); j++){
             stops.get(j).addRoute(this);
@@ -38,8 +39,15 @@ public class Route {
         return stops;
     }
     public String[] getStopsAsArray(){
-        String[] result = new String[stops.size()];
-        for(int j = 0; j < result.length; j++){
+        String[] result;
+        if(stops.size() == 0){
+            result = new String[1];
+            result[0] = sharedManager.getContext().getString(R.string.no_stops);
+        }
+        else{
+            result = new String[stops.size()];
+        }
+        for(int j = 0; j < stops.size(); j++){
             result[j] = stops.get(j).toString();
         }
         return result;
