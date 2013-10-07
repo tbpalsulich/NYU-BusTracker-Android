@@ -32,7 +32,11 @@ public class Route {
     }
 
     public boolean hasStop(String stop){
-        return stops.contains(stop);
+        for (int i = 0; i < stops.size(); i++){
+            if (stops.get(i).name.equals(stop)) return true;
+        }
+
+        return false;
     }
 
     public ArrayList<Stop> getStops(){
@@ -68,5 +72,10 @@ public class Route {
             sharedManager.addRoute(new Route(routeLongName, routeID));
             Log.v("JSONDebug", "Route name: " + routeLongName + " | ID:" + routeID + " | Number of stops: " + sharedManager.getRouteByID(routeID).getStops().size());
         }
+    }
+
+    public boolean isConnectedTo(String routeName){
+
+        return false;
     }
 }

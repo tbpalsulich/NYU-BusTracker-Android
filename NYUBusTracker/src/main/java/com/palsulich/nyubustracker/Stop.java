@@ -49,6 +49,9 @@ public class Stop {
         }
         return false;
     }
+    public ArrayList<Route> getRoutes(){
+        return routes;
+    }
     public void addRoute(Route route){
         routes.add(route);
     }

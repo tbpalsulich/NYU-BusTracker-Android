@@ -9,9 +9,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-/**
- * Created by tyler on 9/30/13.
- */
 public final class BusManager {
     private static String timesURL = "https://s3.amazonaws.com/nyubustimes/1.0/";
     static BusManager sharedBusManager = null;
@@ -82,10 +79,6 @@ public final class BusManager {
         return result;
     }
 
-    public ArrayList<Route> getRoutes() {
-        return routes;
-    }
-
     public boolean hasRoutes() {
         return routes.size() > 0;
     }
@@ -124,19 +117,25 @@ public final class BusManager {
         return null;
     }
 
-    public ArrayList<Route> getRoutesByStopID(String stopID) {
-        ArrayList<Route> result = new ArrayList<Route>();
-        for (int j = 0; j < routes.size(); j++) {
-            Route route = routes.get(j);
-            if (route.hasStop(stopID)) {
-                result.add(route);
+    public String[] getConnectedStops(Stop stop){
+        int resultSize = 0;
+        String temp[] = new String[64];
+        ArrayList<Route> stopRoutes = stop.getRoutes();
+        for (int i = 0; i < stopRoutes.size(); i++) {       // For every route servicing this stop:
+            Route route = stopRoutes.get(i);
+            String routeStops[] = route.getStopsAsArray();
+            for (int j = 0; j < routeStops.length; j++){    // add all of that route's stops.
+                String connectedStop = routeStops[j];
+                if (!connectedStop.equals(stop.name)){
+                    temp[resultSize++] = connectedStop;
+                }
             }
         }
+        String result[] = new String[resultSize];
+        for (int i = 0; i < resultSize; i++){
+            result[i] = temp[i];
+        }
         return result;
-    }
-
-    public ArrayList<Bus> getBuses() {
-        return buses;
     }
 
     public void addStop(Stop stop) {
