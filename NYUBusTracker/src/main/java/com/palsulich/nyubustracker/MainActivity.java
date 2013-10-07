@@ -89,7 +89,7 @@ public class MainActivity extends Activity {
                     }
                 });
             }
-        }, (60 - rightNow.get(Calendar.SECOND)) * 1000, 30000);
+        }, (60 - rightNow.get(Calendar.SECOND)) * 1000, 60000);
 
         final ListView listView = (ListView) findViewById(R.id.mainActivityList);
 
@@ -125,7 +125,7 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         super.onDestroy();
         myTimer.cancel();
     }
@@ -144,9 +144,18 @@ public class MainActivity extends Activity {
     }
 
     private void setFromStop(String stopName) {
-        fromStop = BusManager.getBusManager().getStopByName(stopName);
-        ((Button) findViewById(R.id.from_button)).setText("From: " + stopName);
-        if (toStop != null) setNextBusTime();
+        if (toStop != null && toStop.name.equals(stopName)) {
+            Stop temp = fromStop;
+            fromStop = toStop;
+            ((Button) findViewById(R.id.from_button)).setText("From: " + fromStop.name);
+            toStop = temp;
+            ((Button) findViewById(R.id.to_button)).setText("To: " + toStop.name);
+            setNextBusTime();
+        } else {
+            fromStop = BusManager.getBusManager().getStopByName(stopName);
+            ((Button) findViewById(R.id.from_button)).setText("From: " + stopName);
+            if (toStop != null) setNextBusTime();
+        }
     }
 
     private String getTimeOfWeek() {
@@ -188,7 +197,7 @@ public class MainActivity extends Activity {
                         " | currentMin: " + currentMin);*/
                 int hoursUntilBus = tempHour - currentHour;
                 int minutesUntilBus = tempMin - currentMin;
-                if (minutesUntilBus < 0){
+                if (minutesUntilBus < 0) {
                     hoursUntilBus--;
                     minutesUntilBus += 60;
                 }
@@ -207,7 +216,7 @@ public class MainActivity extends Activity {
                     hours = "Next bus is in " + closestHourToBus + " hours and ";
                 else if (closestHourToBus == 1)
                     hours = "Next bus is in " + closestHourToBus + " hour and ";
-                if (closestMinToBus> 1) minutes = closestMinToBus + " minutes.";
+                if (closestMinToBus > 1) minutes = closestMinToBus + " minutes.";
                 else if (closestMinToBus == 0) minutes = "";
             } else if (closestMinToBus > 0 && closestHourToBus == 0) {
                 hours = "";
@@ -220,8 +229,10 @@ public class MainActivity extends Activity {
                 minutes = "Next bus is right now!";
             }
             ((TextView) findViewById(R.id.times_button)).setText(time);
-            if (time.length() > 0) ((TextView) findViewById(R.id.next_bus)).setText(hours + minutes);
-            else ((TextView) findViewById(R.id.next_bus)).setText("I don't know when the next bus is!");
+            if (time.length() > 0)
+                ((TextView) findViewById(R.id.next_bus)).setText(hours + minutes);
+            else
+                ((TextView) findViewById(R.id.next_bus)).setText("I don't know when the next bus is!");
 
         } else {
             Context context = getApplicationContext();
@@ -272,15 +283,5 @@ public class MainActivity extends Activity {
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
     }
-
-    public void swapToAndFrom(View view) {
-        Stop temp = fromStop;
-        fromStop = toStop;
-        ((Button) findViewById(R.id.from_button)).setText("From: " + fromStop.name);
-        toStop = temp;
-        ((Button) findViewById(R.id.to_button)).setText("To: " + toStop.name);
-        setNextBusTime();
-    }
-
 
 }
