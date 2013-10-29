@@ -15,7 +15,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
         <activity
-            android:name="com.palsulich.nyubustracker.MainActivity"
+            android:name=".activities.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,15 +24,15 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.palsulich.nyubustracker.RouteActivity"
+            android:name=".activities.RouteActivity"
             android:label="@string/title_activity_route" >
         </activity>
         <activity
-            android:name="com.palsulich.nyubustracker.DayActivity"
+            android:name=".activities.DayActivity"
             android:label="@string/title_activity_day" >
         </activity>
         <activity
-            android:name="com.palsulich.nyubustracker.TimeActivity"
+            android:name=".activities.TimeActivity"
             android:label="@string/title_activity_time" >
         </activity>
     </application>

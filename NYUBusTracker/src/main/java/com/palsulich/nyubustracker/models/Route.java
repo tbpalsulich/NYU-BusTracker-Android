@@ -1,6 +1,10 @@
-package com.palsulich.nyubustracker;
+package com.palsulich.nyubustracker.models;
 
 import android.util.Log;
+
+import com.palsulich.nyubustracker.R;
+import com.palsulich.nyubustracker.activities.MainActivity;
+import com.palsulich.nyubustracker.helpers.BusManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,6 +33,13 @@ public class Route {
 
     public String toString(){
         return longName;
+    }
+    public String getLongName(){
+        return longName;
+    }
+
+    public String getID(){
+        return routeID;
     }
 
     public boolean hasStop(String stop){

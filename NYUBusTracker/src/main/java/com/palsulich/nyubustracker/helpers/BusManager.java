@@ -1,7 +1,12 @@
-package com.palsulich.nyubustracker;
+package com.palsulich.nyubustracker.helpers;
 
 import android.content.Context;
 import android.util.Log;
+
+import com.palsulich.nyubustracker.activities.MainActivity;
+import com.palsulich.nyubustracker.models.Route;
+import com.palsulich.nyubustracker.models.Stop;
+import com.palsulich.nyubustracker.models.Bus;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,14 +52,14 @@ public final class BusManager {
 
     public Stop getStopByName(String stopName) {
         for (int j = 0; j < stops.size(); j++) {
-            if (stops.get(j).name.equals(stopName)) return stops.get(j);
+            if (stops.get(j).getName().equals(stopName)) return stops.get(j);
         }
         return null;
     }
 
     public Stop getStopByID(String stopID) {
         for (int j = 0; j < stops.size(); j++) {
-            if (stops.get(j).id.equals(stopID)) return stops.get(j);
+            if (stops.get(j).getID().equals(stopID)) return stops.get(j);
         }
         return null;
     }
@@ -100,7 +105,7 @@ public final class BusManager {
     public Route getRouteByID(String id) {
         for (int j = 0; j < routes.size(); j++) {
             Route route = routes.get(j);
-            if (route.routeID.equals(id)) {
+            if (route.getID().equals(id)) {
                 return route;
             }
         }
@@ -110,7 +115,7 @@ public final class BusManager {
     public Route getRouteByName(String name) {
         for (int j = 0; j < routes.size(); j++) {
             Route route = routes.get(j);
-            if (route.longName.equals(name)) {
+            if (route.getLongName().equals(name)) {
                 return route;
             }
         }
@@ -126,7 +131,7 @@ public final class BusManager {
             String routeStops[] = route.getStopsAsArray();
             for (int j = 0; j < routeStops.length; j++){    // add all of that route's stops.
                 String connectedStop = routeStops[j];
-                if (!connectedStop.equals(stop.name)){
+                if (!connectedStop.equals(stop.getName())){
                     temp[resultSize++] = connectedStop;
                 }
             }
@@ -166,9 +171,9 @@ public final class BusManager {
             JSONObject timesJson = mFileGrabber.getJSON(timesURL + file, file);
             JSONObject routes = timesJson.getJSONObject(MainActivity.TAG_ROUTES);
             Stop s = sharedBusManager.getStopByID(file.substring(0, file.indexOf(".")));
-            for (int i = 0; i < s.routes.size(); i++) {
-                if (routes.has(s.routes.get(i).routeID)) {
-                    JSONObject routeTimes = routes.getJSONObject(s.routes.get(i).routeID);
+            for (int i = 0; i < s.getRoutes().size(); i++) {
+                if (routes.has(s.getRoutes().get(i).getID())) {
+                    JSONObject routeTimes = routes.getJSONObject(s.getRoutes().get(i).getID());
                     if (routeTimes.has(MainActivity.TAG_WEEKDAY)) {
                         JSONArray weekdayTimesJson = routeTimes.getJSONArray(MainActivity.TAG_WEEKDAY);
                         String[] weekdayTimes = new String[weekdayTimesJson.length()];

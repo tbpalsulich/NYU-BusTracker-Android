@@ -1,6 +1,9 @@
-package com.palsulich.nyubustracker;
+package com.palsulich.nyubustracker.models;
 
 import android.util.Log;
+
+import com.palsulich.nyubustracker.helpers.BusManager;
+import com.palsulich.nyubustracker.activities.MainActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;

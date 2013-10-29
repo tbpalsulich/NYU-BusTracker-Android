@@ -1,4 +1,4 @@
-package com.palsulich.nyubustracker;
+package com.palsulich.nyubustracker.helpers;
 
 import android.os.AsyncTask;
 import android.util.Log;

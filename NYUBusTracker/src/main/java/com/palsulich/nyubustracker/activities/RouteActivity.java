@@ -1,4 +1,4 @@
-package com.palsulich.nyubustracker;
+package com.palsulich.nyubustracker.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -8,6 +8,10 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import com.palsulich.nyubustracker.R;
+import com.palsulich.nyubustracker.helpers.BusManager;
+import com.palsulich.nyubustracker.models.Route;
 
 public class RouteActivity extends Activity {
 

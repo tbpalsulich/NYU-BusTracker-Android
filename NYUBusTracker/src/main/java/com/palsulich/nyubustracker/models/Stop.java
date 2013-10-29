@@ -1,6 +1,9 @@
-package com.palsulich.nyubustracker;
+package com.palsulich.nyubustracker.models;
 
 import android.util.Log;
+
+import com.palsulich.nyubustracker.activities.MainActivity;
+import com.palsulich.nyubustracker.helpers.BusManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,6 +39,10 @@ public class Stop {
         }
     }
 
+    public String getName(){
+        return name;
+    }
+
     public String toString(){
         return name;
     }
@@ -63,6 +70,10 @@ public class Stop {
     public void addTime(String route, String dayOfWeek, String[] mTimes){
         times.get(dayOfWeek).put(route, mTimes);
         Log.v("Debugging", "Adding " + mTimes.length + " times to " + name + "/" + route + " for " + dayOfWeek);
+    }
+
+    public HashMap<String, HashMap<String, String[]>> getTimes(){
+        return times;
     }
 
     public static void parseJSON(JSONObject stopsJson) throws JSONException{

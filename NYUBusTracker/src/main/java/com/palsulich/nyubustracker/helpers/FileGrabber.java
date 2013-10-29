@@ -1,4 +1,4 @@
-package com.palsulich.nyubustracker;
+package com.palsulich.nyubustracker.helpers;
 
 import android.util.Log;
 
@@ -26,6 +26,44 @@ public class FileGrabber {
         jParser = new JSONParser();
         cacheDir = mCacheDir;
         files = cacheDir.listFiles();
+    }
+
+    public String getFile(String fileName){
+        if(files != null){
+            for(int i = 0; i < files.length; i++){
+                if(files[i].isFile() && files[i].getName().equals(fileName)){
+                    try {
+                    String currentLine;
+                    StringBuilder builder = new StringBuilder();
+                    BufferedReader reader = new BufferedReader(new FileReader(files[i]));
+
+                    while ((currentLine = reader.readLine()) != null) {
+                        builder.append(currentLine);
+                    }
+                    return builder.toString();
+                    } catch (FileNotFoundException e){
+                        Log.e("JSON Parser", "File not found: " + files[i].toString());
+                    } catch (IOException e){
+                        Log.e("JSON Parser", "IO Exception: " + files[i].toString());
+                    }
+                }
+            }
+        }
+        return "";
+    }
+
+    public void put(String content, String fileName){
+        File file = new File(cacheDir, fileName);
+        try {
+            Log.v("JSONDebug", "Creating a new cache file.");
+            file.createNewFile();
+            FileWriter fw = new FileWriter(file);
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(content);
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public JSONObject getJSON(String url, String cacheFile){

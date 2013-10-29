@@ -1,4 +1,4 @@
-package com.palsulich.nyubustracker;
+package com.palsulich.nyubustracker.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -17,6 +17,13 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.palsulich.nyubustracker.R;
+import com.palsulich.nyubustracker.models.Route;
+import com.palsulich.nyubustracker.models.Stop;
+import com.palsulich.nyubustracker.helpers.BusManager;
+import com.palsulich.nyubustracker.helpers.FileGrabber;
+import com.palsulich.nyubustracker.models.Bus;
 
 import org.json.JSONException;
 
@@ -55,21 +62,24 @@ public class MainActivity extends Activity {
         return "";
     }
 
-    static final String TAG_DATA = "data";
-    static final String TAG_LONG_NAME = "long_name";
-    static final String TAG_LOCATION = "location";
-    static final String TAG_LAT = "lat";
-    static final String TAG_LNG = "lng";
-    static final String TAG_HEADING = "heading";
-    static final String TAG_STOP_NAME = "name";
-    static final String TAG_STOP_ID = "stop_id";
-    static final String TAG_ROUTES = "routes";
-    static final String TAG_ROUTE = "route";
-    static final String TAG_ROUTE_ID = "route_id";
-    static final String TAG_WEEKDAY = "Weekday";
-    static final String TAG_FRIDAY = "Friday";
-    static final String TAG_WEEKEND = "Weekend";
-    static final String TAG_VEHICLE_ID = "vehicle_id";
+    public static final String TAG_DATA = "data";
+    public static final String TAG_LONG_NAME = "long_name";
+    public static final String TAG_LOCATION = "location";
+    public static final String TAG_LAT = "lat";
+    public static final String TAG_LNG = "lng";
+    public static final String TAG_HEADING = "heading";
+    public static final String TAG_STOP_NAME = "name";
+    public static final String TAG_STOP_ID = "stop_id";
+    public static final String TAG_ROUTES = "routes";
+    public static final String TAG_ROUTE = "route";
+    public static final String TAG_ROUTE_ID = "route_id";
+    public static final String TAG_WEEKDAY = "Weekday";
+    public static final String TAG_FRIDAY = "Friday";
+    public static final String TAG_WEEKEND = "Weekend";
+    public static final String TAG_VEHICLE_ID = "vehicle_id";
+
+    private static final String FROM_STOP_FILE_NAME = "fromStop";
+    private static final String TO_STOP_FILE_NAME = "toStop";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,8 +104,8 @@ public class MainActivity extends Activity {
         final ListView listView = (ListView) findViewById(R.id.mainActivityList);
 
         final BusManager sharedManager = BusManager.getBusManager(getApplicationContext());
+        FileGrabber mFileGrabber = new FileGrabber(getCacheDir());
         if (!sharedManager.hasStops() && !sharedManager.hasRoutes()) {
-            FileGrabber mFileGrabber = new FileGrabber(getCacheDir());
             try {
                 Stop.parseJSON(mFileGrabber.getJSON(stopsURL, "stopsJSON"));
                 Route.parseJSON(mFileGrabber.getJSON(routesURL, "routesJSON"));
@@ -105,8 +115,8 @@ public class MainActivity extends Activity {
                 e.printStackTrace();
             }
         }
-        setFromStop("715 Broadway at Washington Square");
-        setToStop("80 Lafayette Street");
+        setFromStop(mFileGrabber.getFile(FROM_STOP_FILE_NAME));
+        setToStop(mFileGrabber.getFile(TO_STOP_FILE_NAME));
 
         ArrayAdapter<String> mAdapter =
                 new ArrayAdapter<String>(this,
@@ -127,7 +137,20 @@ public class MainActivity extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        cacheToAndFromStop();
         myTimer.cancel();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        cacheToAndFromStop();
+    }d
+
+    public void cacheToAndFromStop(){
+        FileGrabber mFileGrabber = new FileGrabber(getCacheDir());
+        mFileGrabber.put(toStop.getName(), TO_STOP_FILE_NAME);
+        mFileGrabber.put(fromStop.getName(), FROM_STOP_FILE_NAME);
     }
 
     @Override
@@ -138,18 +161,20 @@ public class MainActivity extends Activity {
     }
 
     private void setToStop(String stopName) {
+        if (stopName.equals("")) stopName = "80 Lafayette Street";
         toStop = BusManager.getBusManager().getStopByName(stopName);
         ((Button) findViewById(R.id.to_button)).setText("To: " + stopName);
         if (fromStop != null) setNextBusTime();
     }
 
     private void setFromStop(String stopName) {
-        if (toStop != null && toStop.name.equals(stopName)) {
+        if (stopName.equals("")) stopName = "715 Broadway at Washington Square";
+        if (toStop != null && toStop.getName().equals(stopName)) {
             Stop temp = fromStop;
             fromStop = toStop;
-            ((Button) findViewById(R.id.from_button)).setText("From: " + fromStop.name);
+            ((Button) findViewById(R.id.from_button)).setText("From: " + fromStop.getName());
             toStop = temp;
-            ((Button) findViewById(R.id.to_button)).setText("To: " + toStop.name);
+            ((Button) findViewById(R.id.to_button)).setText("To: " + toStop.getName());
             setNextBusTime();
         } else {
             fromStop = BusManager.getBusManager().getStopByName(stopName);
@@ -173,14 +198,14 @@ public class MainActivity extends Activity {
         ArrayList<Route> fromRoutes = fromStop.getRoutes();
         Route route = null;
         for (int i = 0; i < fromRoutes.size(); i++) {
-            if (fromRoutes.get(i).hasStop(toStop.name)) {
+            if (fromRoutes.get(i).hasStop(toStop.getName())) {
                 route = fromRoutes.get(i);
             }
         }
         if (route != null) {
             routeBetweenToAndFrom = route;
             String timeOfWeek = getTimeOfWeek();
-            String[] times = fromStop.times.get(timeOfWeek).get(route.longName);
+            String[] times = fromStop.getTimes().get(timeOfWeek).get(route.getLongName());
             int hour = 24;
             int min = 60;
             int closestHourToBus = 24;
@@ -274,7 +299,7 @@ public class MainActivity extends Activity {
     public void createTimesDialog(View view) {
         String timeOfWeek = getTimeOfWeek();
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        final String[] times = fromStop.times.get(timeOfWeek).get(routeBetweenToAndFrom.longName);
+        final String[] times = fromStop.getTimes().get(timeOfWeek).get(routeBetweenToAndFrom.getLongName());
         builder.setItems(times, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 // Nothing to do, ish.

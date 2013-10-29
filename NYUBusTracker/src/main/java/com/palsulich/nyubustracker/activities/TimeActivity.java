@@ -1,4 +1,4 @@
-package com.palsulich.nyubustracker;
+package com.palsulich.nyubustracker.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -7,6 +7,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import com.palsulich.nyubustracker.R;
+import com.palsulich.nyubustracker.helpers.BusManager;
+import com.palsulich.nyubustracker.models.Stop;
 
 public class TimeActivity extends Activity {
 
@@ -24,13 +28,13 @@ public class TimeActivity extends Activity {
             Log.v("Debugging", "Looking for times for " + routeName);
 
             Stop stop = sharedManager.getStopByName(stopName);
-            String[] times = stop.times.get(dayOfWeek).get(routeName);
+            String[] times = stop.getTimes().get(dayOfWeek).get(routeName);
             if (times == null) {
                 times = new String[1];
                 times[0] = getApplicationContext().getString(R.string.no_times);
                 Log.v("Debugging", "Number of times on " + dayOfWeek + ": 0");
             } else {
-                Log.v("Debugging", "Number of times on " + dayOfWeek + ": " + stop.times.get(dayOfWeek).get(routeName).length);
+                Log.v("Debugging", "Number of times on " + dayOfWeek + ": " + stop.getTimes().get(dayOfWeek).get(routeName).length);
             }
             ArrayAdapter<String> mAdapter =
                     new ArrayAdapter<String>(this,
