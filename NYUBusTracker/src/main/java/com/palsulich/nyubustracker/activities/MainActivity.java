@@ -145,7 +145,7 @@ public class MainActivity extends Activity {
     public void onPause() {
         super.onPause();
         cacheToAndFromStop();
-    }d
+    }
 
     public void cacheToAndFromStop(){
         FileGrabber mFileGrabber = new FileGrabber(getCacheDir());
