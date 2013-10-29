@@ -189,9 +189,10 @@ public class MainActivity extends Activity {
             int currentHour = rightNow.get(rightNow.HOUR_OF_DAY);
             int currentMin = rightNow.get(rightNow.MINUTE);
             for (int i = 0; i < times.length; i++) {
-                int am = (times[i].substring(times[i].indexOf(" ") + 1).equals("AM")) ? 0 : 12;
-                int tempHour = Integer.parseInt(times[i].substring(0, times[i].indexOf(":"))) + am;
-                int tempMin = Integer.parseInt(times[i].substring(times[i].indexOf(":") + 1, times[i].indexOf(" ")));
+                int am = (times[i].contains("AM")) ? 0 : 12;
+                int tempHour = Integer.parseInt(times[i].substring(0, times[i].indexOf(":")).trim());
+                if (am == 0 || tempHour != 12) tempHour += am;
+                int tempMin = Integer.parseInt(times[i].substring(times[i].indexOf(":") + 1, times[i].indexOf(" ")).trim());
 /*                Log.v("Times", "Route: " + route.longName + " | am: " + am +
                         " | hour: " + tempHour + " | min: " + tempMin + " | currentHour: " + currentHour +
                         " | currentMin: " + currentMin);*/
