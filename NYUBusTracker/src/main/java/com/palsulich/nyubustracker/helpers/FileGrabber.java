@@ -33,8 +33,8 @@ public class FileGrabber {
 
     private String stopsFileName = "stopsJSON";
     private String routesFileName = "routesJSON";
-    private String vehiclesFileName = "versionJSON";
-    private String versionFileName = "vehiclesJSON";
+    private String vehiclesFileName = "vehiclesJSON";
+    private String versionFileName = "versionJSON";
 
     private static final String FROM_STOP_FILE_NAME = "fromStop";
     private static final String TO_STOP_FILE_NAME = "toStop";

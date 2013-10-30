@@ -4,32 +4,29 @@ package com.palsulich.nyubustracker.models;
  * Created by tyler on 10/30/13.
  */
 public class Time {
-    int hour;
+    int hour;           // In 24 hour (military) format.
     int min;
     boolean AM;
 
-    public Time(int mHour, int mMin, boolean mAM){
-        hour = mHour;
-        min = mMin;
-        AM = mAM;
-        adjustForAM(AM);
-    }
-    public Time(String time){
-        boolean AM = time.contains("AM");
+    public Time(String time){           // Input a string like "8:04 PM".
+        AM = time.contains("AM");       // Automatically accounts for AM/PM with military time.
         hour = Integer.parseInt(time.substring(0, time.indexOf(":")).trim());
         min = Integer.parseInt(time.substring(time.indexOf(":") + 1, time.indexOf(" ")).trim());
-        adjustForAM(AM);
-    }
-
-    private void adjustForAM(boolean AM){
-        if (AM && hour == 12){
+        if (AM && hour == 12){      // It's 12:xx AM
             hour = 0;
         }
-        if (!AM && hour > 12){
+        if (!AM && hour != 12){     // Its x:xx PM, but not 12:xx PM.
             hour += 12;
         }
     }
 
+    public Time(int mHour, int mMin){       // Input values in normal time (e.g. (4, 15)
+        AM = mHour < 12;
+        hour = mHour;
+        min = mMin;
+    }
+
+    // Return a nice string saying the difference between this time and the argument.
     public String getTimeAsStringUntil(Time t){
         Time difference = this.getTimeAsTimeUntil(t);
         if (difference != null){
@@ -48,22 +45,51 @@ public class Time {
         else return "";
     }
 
-    private boolean isBefore(Time t){
-        if (this.hour < t.hour) return true;
-        if (this.hour == t.hour && this.min < t.min) return true;
-        return false;   // if (hour > t.hour)
+    // Return if this time is equal to or before Time t.
+    public boolean isBefore(Time t){
+        boolean result = false;
+        if (this.hour < t.hour) result = true;
+        if (this.hour == t.hour && this.min <= t.min) result = true;
+        return result;   // if (hour > t.hour)
     }
 
-    private Time getTimeAsTimeUntil(Time t){
-        if (t.isBefore(this)){
+    public boolean isAfter(Time t){
+        boolean result = false;
+        if (this.hour > t.hour) result = true;
+        if (this.hour == t.hour && this.min >= t.min) result = true;
+        return result;
+    }
+
+    // Return a Time object who represents the difference in time between the two Times.
+    public Time getTimeAsTimeUntil(Time t){
+        if (!t.isBefore(this)){
             int hourDifference = t.hour - this.hour;
             int minDifference = t.min - this.min;
-            return new Time(hourDifference, minDifference, true);
+            return new Time(hourDifference, minDifference);
         }
         else return null;
     }
 
     public String toString(){
-        return this.hour + ":" + 
+        return getHourInNormalTime() + ":" + getMinInNormalTime() + " " + getAMorPM();
+    }
+
+    private String getAMorPM(){
+        if (AM) return "AM";
+        else return "PM";
+    }
+
+    // Return this Time in 12-hour format.
+    private int getHourInNormalTime(){
+        if (hour == 0 && AM) return 12;
+        if (hour > 0 && AM)  return hour;
+        if (hour > 12 && !AM) return hour - 12;
+        if (hour <= 12 && !AM) return hour;
+        return hour;
+    }
+
+    private String getMinInNormalTime(){
+        if (min < 10) return "0" + min;
+        else return Integer.toString(min);
     }
 }

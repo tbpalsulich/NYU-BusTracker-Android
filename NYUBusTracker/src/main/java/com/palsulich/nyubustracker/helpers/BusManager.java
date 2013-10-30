@@ -4,9 +4,10 @@ import android.content.Context;
 import android.util.Log;
 
 import com.palsulich.nyubustracker.activities.MainActivity;
+import com.palsulich.nyubustracker.models.Bus;
 import com.palsulich.nyubustracker.models.Route;
 import com.palsulich.nyubustracker.models.Stop;
-import com.palsulich.nyubustracker.models.Bus;
+import com.palsulich.nyubustracker.models.Time;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -175,22 +176,22 @@ public final class BusManager {
                     JSONObject routeTimes = routes.getJSONObject(s.getRoutes().get(i).getID());
                     if (routeTimes.has(MainActivity.TAG_WEEKDAY)) {
                         JSONArray weekdayTimesJson = routeTimes.getJSONArray(MainActivity.TAG_WEEKDAY);
-                        String[] weekdayTimes = new String[weekdayTimesJson.length()];
+                        Time[] weekdayTimes = new Time[weekdayTimesJson.length()];
+                        Log.v("Debugging", "Found " + weekdayTimes.length + " weekday times.");
                         if (weekdayTimesJson != null) {
                             for (int k = 0; k < weekdayTimes.length; k++) {
-                                weekdayTimes[k] = weekdayTimesJson.getString(k);
+                                weekdayTimes[k] = new Time(weekdayTimesJson.getString(k));
                             }
                             String weekdayRoute = routeTimes.getString(MainActivity.TAG_ROUTE);
                             s.addTime(weekdayRoute.substring(weekdayRoute.indexOf("Route ") + "Route ".length()), "Weekday", weekdayTimes);
-
                         }
                     }
                     if (routeTimes.has(MainActivity.TAG_FRIDAY)) {
                         JSONArray fridayTimesJson = routeTimes.getJSONArray(MainActivity.TAG_FRIDAY);
-                        String[] fridayTimes = new String[fridayTimesJson.length()];
+                        Time[] fridayTimes = new Time[fridayTimesJson.length()];
                         if (fridayTimesJson != null) {
                             for (int k = 0; k < fridayTimes.length; k++) {
-                                fridayTimes[k] = fridayTimesJson.getString(k);
+                                fridayTimes[k] = new Time(fridayTimesJson.getString(k));
                             }
                             String fridayRoute = routeTimes.getString(MainActivity.TAG_ROUTE);
                             s.addTime(fridayRoute.substring(fridayRoute.indexOf("Route ") + "Route ".length()), "Friday", fridayTimes);
@@ -199,10 +200,10 @@ public final class BusManager {
                     }
                     if (routeTimes.has(MainActivity.TAG_WEEKEND)) {
                         JSONArray weekendTimesJson = routeTimes.getJSONArray(MainActivity.TAG_WEEKEND);
-                        String[] weekendTimes = new String[weekendTimesJson.length()];
+                        Time[] weekendTimes = new Time[weekendTimesJson.length()];
                         if (weekendTimesJson != null) {
                             for (int k = 0; k < weekendTimes.length; k++) {
-                                weekendTimes[k] = weekendTimesJson.getString(k);
+                                weekendTimes[k] = new Time(weekendTimesJson.getString(k));
                             }
                             String weekendRoute = routeTimes.getString(MainActivity.TAG_ROUTE);
                             s.addTime(weekendRoute.substring(weekendRoute.indexOf("Route ") + "Route ".length()), "Weekend", weekendTimes);

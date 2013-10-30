@@ -31,8 +31,8 @@ public class TimeActivity extends Activity {
             Stop stop = sharedManager.getStopByName(stopName);
             Time[] times = stop.getTimes().get(dayOfWeek).get(routeName);
             if (times == null) {
-                times = new String[1];
-                times[0] = getApplicationContext().getString(R.string.no_times);
+                times = new Time[1];
+                times[0] = new Time(0, 0);
                 Log.v("Debugging", "Number of times on " + dayOfWeek + ": 0");
             } else {
                 Log.v("Debugging", "Number of times on " + dayOfWeek + ": " + stop.getTimes().get(dayOfWeek).get(routeName).length);

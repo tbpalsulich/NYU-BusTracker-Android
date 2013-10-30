@@ -19,16 +19,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.palsulich.nyubustracker.R;
-import com.palsulich.nyubustracker.models.Route;
-import com.palsulich.nyubustracker.models.Stop;
 import com.palsulich.nyubustracker.helpers.BusManager;
 import com.palsulich.nyubustracker.helpers.FileGrabber;
 import com.palsulich.nyubustracker.models.Bus;
+import com.palsulich.nyubustracker.models.Route;
+import com.palsulich.nyubustracker.models.Stop;
+import com.palsulich.nyubustracker.models.Time;
 
 import org.json.JSONException;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
@@ -188,51 +187,25 @@ public class MainActivity extends Activity {
         if (route != null) {
             routeBetweenToAndFrom = route;
             String timeOfWeek = getTimeOfWeek();
-            String[] times = fromStop.getTimes().get(timeOfWeek).get(route.getLongName());
-            int closestHourToBus = 24;
-            int closestMinToBus = 60;
-            String time = "";
-            int currentHour = rightNow.get(rightNow.HOUR_OF_DAY);
-            int currentMin = rightNow.get(rightNow.MINUTE);
+            Time[] times = fromStop.getTimes().get(timeOfWeek).get(route.getLongName());
+            Time currentTime = new Time(rightNow.get(rightNow.HOUR_OF_DAY), rightNow.get(rightNow.MINUTE));
+            Time nextBusTime = times[0];
             for (int i = 0; i < times.length; i++) {
-                int am = (times[i].contains("AM")) ? 0 : 12;
-                int tempHour = Integer.parseInt(times[i].substring(0, times[i].indexOf(":")).trim());
-                if (am == 0 || tempHour != 12) tempHour += am;
-                int tempMin = Integer.parseInt(times[i].substring(times[i].indexOf(":") + 1, times[i].indexOf(" ")).trim());
-                int hoursUntilBus = tempHour - currentHour;
-                int minutesUntilBus = tempMin - currentMin;
-                if (minutesUntilBus < 0) {
-                    hoursUntilBus--;
-                    minutesUntilBus += 60;
-                }
-                if (hoursUntilBus >= 0 && hoursUntilBus <= closestHourToBus && minutesUntilBus < closestMinToBus) {
-                    closestHourToBus = hoursUntilBus;
-                    closestMinToBus = minutesUntilBus;
-                    time = times[i];
+                Time tempTime = times[i];
+                if (tempTime.isAfter(currentTime)){
+                    if (nextBusTime.isAfter(currentTime) && tempTime.isBefore(nextBusTime)){
+                        nextBusTime = tempTime;
+                    }
+                    else if (nextBusTime.isBefore(currentTime) && tempTime.isAfter(nextBusTime)){
+                        nextBusTime = tempTime;
+                    }
                 }
             }
-            String hours = "";
-            String minutes = "";
-            if (closestHourToBus > 0) {
-                if (closestHourToBus > 1)
-                    hours = "Next bus is in " + closestHourToBus + " hours and ";
-                else if (closestHourToBus == 1)
-                    hours = "Next bus is in " + closestHourToBus + " hour and ";
-                if (closestMinToBus > 1) minutes = closestMinToBus + " minutes.";
-                else if (closestMinToBus == 0) minutes = "";
-            } else if (closestMinToBus > 0 && closestHourToBus == 0) {
-                hours = "";
-                if (closestMinToBus > 1)
-                    minutes = "Next bus is in " + closestMinToBus + " minutes.";
-                else if (closestMinToBus == 1)
-                    minutes = "Next bus is in " + closestMinToBus + " minute.";
-            } else {
-                hours = "";
-                minutes = "Next bus is right now!";
-            }
-            ((TextView) findViewById(R.id.times_button)).setText(time);
-            if (time.length() > 0)
-                ((TextView) findViewById(R.id.next_bus)).setText(hours + minutes);
+            String timeOfNextBus = nextBusTime.toString();
+            String timeUntilNextBus = currentTime.getTimeAsStringUntil(nextBusTime);
+            ((TextView) findViewById(R.id.times_button)).setText(timeOfNextBus);
+            if (timeUntilNextBus.length() > 0)
+                ((TextView) findViewById(R.id.next_bus)).setText(timeUntilNextBus);
             else
                 ((TextView) findViewById(R.id.next_bus)).setText("I don't know when the next bus is!");
 
@@ -275,8 +248,12 @@ public class MainActivity extends Activity {
     public void createTimesDialog(View view) {
         String timeOfWeek = getTimeOfWeek();
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        final String[] times = fromStop.getTimes().get(timeOfWeek).get(routeBetweenToAndFrom.getLongName());
-        builder.setItems(times, new DialogInterface.OnClickListener() {
+        final Time[] times = fromStop.getTimes().get(timeOfWeek).get(routeBetweenToAndFrom.getLongName());
+        final String[] timesAsString = new String[times.length];
+        for (int i = 0; i < times.length; i++){
+            timesAsString[i] = times[i].toString();
+        }
+        builder.setItems(timesAsString, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 // Nothing to do, ish.
             }
