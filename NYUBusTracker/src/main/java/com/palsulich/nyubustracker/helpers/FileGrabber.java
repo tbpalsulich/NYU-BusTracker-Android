@@ -12,15 +12,51 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * Created by tyler on 10/4/13.
  */
 public class FileGrabber {
+    String charset = "UTF-8";
+    String agencies = "72";
+    String query = makeQuery("agencies", agencies, charset);
+
+    private String stopsURL = "http://api.transloc.com/1.2/stops.json?" + query;
+    private String routesURL = "http://api.transloc.com/1.2/routes.json?" + query;
+    private String segmentsURL = "http://api.transloc.com/1.2/segments.json?" + query;
+    private String vehiclesURL = "http://api.transloc.com/1.2/vehicles.json?" + query;
+    private String versionURL = "https://s3.amazonaws.com/nyubustimes/1.0/version.json";
+    private static String timesURL = "https://s3.amazonaws.com/nyubustimes/1.0/";
+
+
+    private String stopsFileName = "stopsJSON";
+    private String routesFileName = "routesJSON";
+    private String vehiclesFileName = "versionJSON";
+    private String versionFileName = "vehiclesJSON";
+
+    private static final String FROM_STOP_FILE_NAME = "fromStop";
+    private static final String TO_STOP_FILE_NAME = "toStop";
+
+
+    private String makeQuery(String param, String value, String charset) {
+        try {
+            return String.format(param + "=" + URLEncoder.encode(agencies, charset));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
     File cacheDir;
     // Creating JSON Parser instance
     JSONParser jParser;
     File[] files;
+
+
+
 
     public FileGrabber(File mCacheDir){
         jParser = new JSONParser();
@@ -28,7 +64,7 @@ public class FileGrabber {
         files = cacheDir.listFiles();
     }
 
-    public String getFile(String fileName){
+    private String getFile(String fileName){
         if(files != null){
             for(int i = 0; i < files.length; i++){
                 if(files[i].isFile() && files[i].getName().equals(fileName)){
@@ -52,7 +88,7 @@ public class FileGrabber {
         return "";
     }
 
-    public void put(String content, String fileName){
+    private void put(String content, String fileName){
         File file = new File(cacheDir, fileName);
         try {
             Log.v("JSONDebug", "Creating a new cache file.");
@@ -66,7 +102,7 @@ public class FileGrabber {
         }
     }
 
-    public JSONObject getJSON(String url, String cacheFile){
+    private JSONObject getJSON(String url, String cacheFile){
         if(files != null){
             for(int i = 0; i < files.length; i++){
                 if(files[i].isFile() && files[i].getName().equals(cacheFile)){
@@ -109,4 +145,42 @@ public class FileGrabber {
         }
         return jObj;
     }
+
+    public JSONObject getTimesFromFile(String file){
+        return getJSON(timesURL + file, file);
+
+    }
+
+    public JSONObject getStopJSON(){
+        return getJSON(stopsURL, stopsFileName);
+    }
+
+    public JSONObject getRouteJSON(){
+        return getJSON(routesURL, routesFileName);
+    }
+
+    public JSONObject getVersionJSON(){
+        return getJSON(versionURL, versionFileName);
+    }
+
+    public JSONObject getVehicleJSON(){
+        return getJSON(vehiclesURL, vehiclesFileName);
+    }
+
+    public String getFromStopFile(){
+        return getFile(FROM_STOP_FILE_NAME);
+    }
+
+    public void setFromStop(String stop){
+        put(stop, FROM_STOP_FILE_NAME);
+    }
+
+    public String getToStopFile(){
+        return getFile(TO_STOP_FILE_NAME);
+    }
+
+    public void setToStop(String stop){
+        put(stop, TO_STOP_FILE_NAME);
+    }
+
 }
