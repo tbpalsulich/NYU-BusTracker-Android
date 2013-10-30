@@ -15,7 +15,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public final class BusManager {
-    private static String timesURL = "https://s3.amazonaws.com/nyubustimes/1.0/";
     static BusManager sharedBusManager = null;
     private ArrayList<Stop> stops = null;
     private ArrayList<Route> routes = null;
@@ -168,7 +167,7 @@ public final class BusManager {
             JSONObject stopObject = jVersion.getJSONObject(j);
             String file = stopObject.getString("file");
             Log.v("Debugging", "Looking for times for " + file);
-            JSONObject timesJson = mFileGrabber.getJSON(timesURL + file, file);
+            JSONObject timesJson = mFileGrabber.getTimesFromFile(file);
             JSONObject routes = timesJson.getJSONObject(MainActivity.TAG_ROUTES);
             Stop s = sharedBusManager.getStopByID(file.substring(0, file.indexOf(".")));
             for (int i = 0; i < s.getRoutes().size(); i++) {

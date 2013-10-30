@@ -37,30 +37,13 @@ import java.util.TimerTask;
 
 public class MainActivity extends Activity {
 
-    String charset = "UTF-8";
-    String agencies = "72";
-    String query = makeQuery("agencies", agencies, charset);
+
 
     Stop fromStop;
     Stop toStop;
     Route routeBetweenToAndFrom;
 
     Timer myTimer;
-
-    private String stopsURL = "http://api.transloc.com/1.2/stops.json?" + query;
-    private String routesURL = "http://api.transloc.com/1.2/routes.json?" + query;
-    private String segmentsURL = "http://api.transloc.com/1.2/segments.json?" + query;
-    private String vehiclesURL = "http://api.transloc.com/1.2/vehicles.json?" + query;
-    private String versionURL = "https://s3.amazonaws.com/nyubustimes/1.0/version.json";
-
-    private String makeQuery(String param, String value, String charset) {
-        try {
-            return String.format(param + "=" + URLEncoder.encode(agencies, charset));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
 
     public static final String TAG_DATA = "data";
     public static final String TAG_LONG_NAME = "long_name";
@@ -78,8 +61,7 @@ public class MainActivity extends Activity {
     public static final String TAG_WEEKEND = "Weekend";
     public static final String TAG_VEHICLE_ID = "vehicle_id";
 
-    private static final String FROM_STOP_FILE_NAME = "fromStop";
-    private static final String TO_STOP_FILE_NAME = "toStop";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,16 +89,16 @@ public class MainActivity extends Activity {
         FileGrabber mFileGrabber = new FileGrabber(getCacheDir());
         if (!sharedManager.hasStops() && !sharedManager.hasRoutes()) {
             try {
-                Stop.parseJSON(mFileGrabber.getJSON(stopsURL, "stopsJSON"));
-                Route.parseJSON(mFileGrabber.getJSON(routesURL, "routesJSON"));
-                BusManager.parseTimes(mFileGrabber.getJSON(versionURL, "versionJSON"), mFileGrabber);
-                Bus.parseJSON(mFileGrabber.getJSON(vehiclesURL, "vehiclesJSON"));
+                Stop.parseJSON(mFileGrabber.getStopJSON());
+                Route.parseJSON(mFileGrabber.getRouteJSON());
+                BusManager.parseTimes(mFileGrabber.getVersionJSON(), mFileGrabber);
+                Bus.parseJSON(mFileGrabber.getVehicleJSON());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
-        setFromStop(mFileGrabber.getFile(FROM_STOP_FILE_NAME));
-        setToStop(mFileGrabber.getFile(TO_STOP_FILE_NAME));
+        setFromStop(mFileGrabber.getFromStopFile());
+        setToStop(mFileGrabber.getToStopFile());
 
         ArrayAdapter<String> mAdapter =
                 new ArrayAdapter<String>(this,
@@ -149,8 +131,9 @@ public class MainActivity extends Activity {
 
     public void cacheToAndFromStop(){
         FileGrabber mFileGrabber = new FileGrabber(getCacheDir());
-        mFileGrabber.put(toStop.getName(), TO_STOP_FILE_NAME);
-        mFileGrabber.put(fromStop.getName(), FROM_STOP_FILE_NAME);
+        mFileGrabber.setToStop(toStop.getName());
+        mFileGrabber.setFromStop(fromStop.getName());
+
     }
 
     @Override
