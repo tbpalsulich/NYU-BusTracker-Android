@@ -19,7 +19,7 @@ public class Stop {
     String name, lat, lng, id;
     String[] routesString;
     ArrayList<Route> routes = null;
-    HashMap<String, HashMap<String, String[]>> times = null;
+    HashMap<String, HashMap<String, Time[]>> times = null;
 
     public Stop(String mName, String mLat, String mLng, String mID, String[] mRoutes){
         name = mName;
@@ -27,10 +27,10 @@ public class Stop {
         lng = mLng;
         id = mID;
         routesString = mRoutes;
-        times = new HashMap<String, HashMap<String, String[]>>();
-        times.put("Weekday", new HashMap<String, String[]>());
-        times.put("Weekend", new HashMap<String, String[]>());
-        times.put("Friday", new HashMap<String, String[]>());
+        times = new HashMap<String, HashMap<String, Time[]>>();
+        times.put("Weekday", new HashMap<String, Time[]>());
+        times.put("Weekend", new HashMap<String,Time[]>());
+        times.put("Friday", new HashMap<String, Time[]>());
         routes = new ArrayList<Route>();
         BusManager sharedManager = BusManager.getBusManager();
         for (int j = 0; j < mRoutes.length; j++){
@@ -67,12 +67,12 @@ public class Stop {
         return id;
     }
 
-    public void addTime(String route, String dayOfWeek, String[] mTimes){
+    public void addTime(String route, String dayOfWeek, Time[] mTimes){
         times.get(dayOfWeek).put(route, mTimes);
         Log.v("Debugging", "Adding " + mTimes.length + " times to " + name + "/" + route + " for " + dayOfWeek);
     }
 
-    public HashMap<String, HashMap<String, String[]>> getTimes(){
+    public HashMap<String, HashMap<String, Time[]>> getTimes(){
         return times;
     }
 

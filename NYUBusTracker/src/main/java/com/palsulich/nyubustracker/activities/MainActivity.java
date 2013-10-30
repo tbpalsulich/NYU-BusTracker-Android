@@ -206,8 +206,6 @@ public class MainActivity extends Activity {
             routeBetweenToAndFrom = route;
             String timeOfWeek = getTimeOfWeek();
             String[] times = fromStop.getTimes().get(timeOfWeek).get(route.getLongName());
-            int hour = 24;
-            int min = 60;
             int closestHourToBus = 24;
             int closestMinToBus = 60;
             String time = "";
@@ -218,9 +216,6 @@ public class MainActivity extends Activity {
                 int tempHour = Integer.parseInt(times[i].substring(0, times[i].indexOf(":")).trim());
                 if (am == 0 || tempHour != 12) tempHour += am;
                 int tempMin = Integer.parseInt(times[i].substring(times[i].indexOf(":") + 1, times[i].indexOf(" ")).trim());
-/*                Log.v("Times", "Route: " + route.longName + " | am: " + am +
-                        " | hour: " + tempHour + " | min: " + tempMin + " | currentHour: " + currentHour +
-                        " | currentMin: " + currentMin);*/
                 int hoursUntilBus = tempHour - currentHour;
                 int minutesUntilBus = tempMin - currentMin;
                 if (minutesUntilBus < 0) {
@@ -228,8 +223,6 @@ public class MainActivity extends Activity {
                     minutesUntilBus += 60;
                 }
                 if (hoursUntilBus >= 0 && hoursUntilBus <= closestHourToBus && minutesUntilBus < closestMinToBus) {
-                    hour = tempHour;
-                    min = tempMin;
                     closestHourToBus = hoursUntilBus;
                     closestMinToBus = minutesUntilBus;
                     time = times[i];
@@ -248,7 +241,7 @@ public class MainActivity extends Activity {
                 hours = "";
                 if (closestMinToBus > 1)
                     minutes = "Next bus is in " + closestMinToBus + " minutes.";
-                else if (closestMinToBus == 0)
+                else if (closestMinToBus == 1)
                     minutes = "Next bus is in " + closestMinToBus + " minute.";
             } else {
                 hours = "";

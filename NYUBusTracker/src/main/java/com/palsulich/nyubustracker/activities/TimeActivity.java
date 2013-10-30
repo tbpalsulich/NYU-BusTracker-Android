@@ -11,6 +11,7 @@ import android.widget.ListView;
 import com.palsulich.nyubustracker.R;
 import com.palsulich.nyubustracker.helpers.BusManager;
 import com.palsulich.nyubustracker.models.Stop;
+import com.palsulich.nyubustracker.models.Time;
 
 public class TimeActivity extends Activity {
 
@@ -28,7 +29,7 @@ public class TimeActivity extends Activity {
             Log.v("Debugging", "Looking for times for " + routeName);
 
             Stop stop = sharedManager.getStopByName(stopName);
-            String[] times = stop.getTimes().get(dayOfWeek).get(routeName);
+            Time[] times = stop.getTimes().get(dayOfWeek).get(routeName);
             if (times == null) {
                 times = new String[1];
                 times[0] = getApplicationContext().getString(R.string.no_times);
@@ -36,8 +37,8 @@ public class TimeActivity extends Activity {
             } else {
                 Log.v("Debugging", "Number of times on " + dayOfWeek + ": " + stop.getTimes().get(dayOfWeek).get(routeName).length);
             }
-            ArrayAdapter<String> mAdapter =
-                    new ArrayAdapter<String>(this,
+            ArrayAdapter<Time> mAdapter =
+                    new ArrayAdapter<Time>(this,
                             android.R.layout.simple_list_item_1,
                             times);
             listView.setAdapter(mAdapter);
