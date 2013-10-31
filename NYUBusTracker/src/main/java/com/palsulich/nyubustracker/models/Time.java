@@ -1,5 +1,7 @@
 package com.palsulich.nyubustracker.models;
 
+import android.util.Log;
+
 /**
  * Created by tyler on 10/30/13.
  */
@@ -29,8 +31,9 @@ public class Time {
     // Return a nice string saying the difference between this time and the argument.
     public String getTimeAsStringUntil(Time t){
         Time difference = this.getTimeAsTimeUntil(t);
+        Log.v("Time Debugging", "Difference: " + difference.toString());
+        String result = "I don't know when the next bus is!";
         if (difference != null){
-            String result = "";
             if (difference.hour == 0 && difference.min == 0)
                 result = "Next bus is right now!";
             if (difference.hour == 0 && difference.min > 0)
@@ -39,10 +42,8 @@ public class Time {
                 result = "Next bus is in " + difference.hour + " hours.";
             if (difference.hour > 0 && difference.min > 0)
                 result = "Next bus is in " + difference.hour + " hours and " + difference.min + " minutes.";
-
-            return result;
         }
-        else return "";
+        return result;
     }
 
     // Return if this time is equal to or before Time t.
@@ -65,6 +66,10 @@ public class Time {
         if (!t.isBefore(this)){
             int hourDifference = t.hour - this.hour;
             int minDifference = t.min - this.min;
+            if (minDifference < 0){
+                hourDifference--;
+                minDifference += 60;
+            }
             return new Time(hourDifference, minDifference);
         }
         else return null;

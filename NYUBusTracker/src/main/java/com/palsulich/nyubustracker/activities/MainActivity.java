@@ -37,7 +37,6 @@ import java.util.TimerTask;
 public class MainActivity extends Activity {
 
 
-
     Stop fromStop;
     Stop toStop;
     Route routeBetweenToAndFrom;
@@ -59,7 +58,6 @@ public class MainActivity extends Activity {
     public static final String TAG_FRIDAY = "Friday";
     public static final String TAG_WEEKEND = "Weekend";
     public static final String TAG_VEHICLE_ID = "vehicle_id";
-
 
 
     @Override
@@ -128,7 +126,7 @@ public class MainActivity extends Activity {
         cacheToAndFromStop();
     }
 
-    public void cacheToAndFromStop(){
+    public void cacheToAndFromStop() {
         FileGrabber mFileGrabber = new FileGrabber(getCacheDir());
         mFileGrabber.setToStop(toStop.getName());
         mFileGrabber.setFromStop(fromStop.getName());
@@ -192,11 +190,10 @@ public class MainActivity extends Activity {
             Time nextBusTime = times[0];
             for (int i = 0; i < times.length; i++) {
                 Time tempTime = times[i];
-                if (tempTime.isAfter(currentTime)){
-                    if (nextBusTime.isAfter(currentTime) && tempTime.isBefore(nextBusTime)){
+                if (tempTime.isAfter(currentTime)) {
+                    if (nextBusTime.isAfter(currentTime) && tempTime.isBefore(nextBusTime)) {
                         nextBusTime = tempTime;
-                    }
-                    else if (nextBusTime.isBefore(currentTime) && tempTime.isAfter(nextBusTime)){
+                    } else if (nextBusTime.isBefore(currentTime) && tempTime.isAfter(nextBusTime)) {
                         nextBusTime = tempTime;
                     }
                 }
@@ -204,10 +201,7 @@ public class MainActivity extends Activity {
             String timeOfNextBus = nextBusTime.toString();
             String timeUntilNextBus = currentTime.getTimeAsStringUntil(nextBusTime);
             ((TextView) findViewById(R.id.times_button)).setText(timeOfNextBus);
-            if (timeUntilNextBus.length() > 0)
-                ((TextView) findViewById(R.id.next_bus)).setText(timeUntilNextBus);
-            else
-                ((TextView) findViewById(R.id.next_bus)).setText("I don't know when the next bus is!");
+            ((TextView) findViewById(R.id.next_bus)).setText(timeUntilNextBus);
 
         } else {
             Context context = getApplicationContext();
@@ -250,7 +244,7 @@ public class MainActivity extends Activity {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         final Time[] times = fromStop.getTimes().get(timeOfWeek).get(routeBetweenToAndFrom.getLongName());
         final String[] timesAsString = new String[times.length];
-        for (int i = 0; i < times.length; i++){
+        for (int i = 0; i < times.length; i++) {
             timesAsString[i] = times[i].toString();
         }
         builder.setItems(timesAsString, new DialogInterface.OnClickListener() {
