@@ -29,6 +29,7 @@ import com.palsulich.nyubustracker.models.Time;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Timer;
@@ -39,7 +40,8 @@ public class MainActivity extends Activity {
 
     Stop fromStop;
     Stop toStop;
-    Route routeBetweenToAndFrom;
+    ArrayList<Route> routesBetweenToAndFrom;
+    ArrayList<Time> timesBetweenStartAndEnd;
 
     Timer myTimer;
 
@@ -165,7 +167,7 @@ public class MainActivity extends Activity {
 
     private String getTimeOfWeek() {
         Calendar rightNow = Calendar.getInstance();
-        String dayOfWeek = rightNow.getDisplayName(rightNow.DAY_OF_WEEK, rightNow.LONG, Locale.getDefault());
+        String dayOfWeek = rightNow.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault());
         String timeOfWeek = "Weekday";
         if (dayOfWeek.equals("Saturday") || dayOfWeek.equals("Sunday")) timeOfWeek = "Weekend";
         else if (dayOfWeek.equals("Friday")) timeOfWeek = "Friday";
@@ -176,20 +178,23 @@ public class MainActivity extends Activity {
     private void setNextBusTime() {
         Calendar rightNow = Calendar.getInstance();
         ArrayList<Route> fromRoutes = fromStop.getRoutes();
-        Route route = null;
+        ArrayList<Route> routes = new ArrayList<Route>();
         for (int i = 0; i < fromRoutes.size(); i++) {
             if (fromRoutes.get(i).hasStop(toStop.getName())) {
-                route = fromRoutes.get(i);
+                Log.v("Route Debugging", "Adding a route!");
+                routes.add(fromRoutes.get(i));
             }
         }
-        if (route != null) {
-            routeBetweenToAndFrom = route;
-            String timeOfWeek = getTimeOfWeek();
-            Time[] times = fromStop.getTimes().get(timeOfWeek).get(route.getLongName());
+        if (routes.size() != 0) {
+            routesBetweenToAndFrom = routes;
+            timesBetweenStartAndEnd = new ArrayList<Time>();
+            for (int j = 0; j < routes.size(); j++) {
+                String timeOfWeek = getTimeOfWeek();
+                timesBetweenStartAndEnd.addAll(Arrays.asList(fromStop.getTimes().get(timeOfWeek).get(routes.get(j).getLongName())));
+            }
             Time currentTime = new Time(rightNow.get(rightNow.HOUR_OF_DAY), rightNow.get(rightNow.MINUTE));
-            Time nextBusTime = times[0];
-            for (int i = 0; i < times.length; i++) {
-                Time tempTime = times[i];
+            Time nextBusTime = timesBetweenStartAndEnd.get(0);
+            for (Time tempTime : timesBetweenStartAndEnd) {
                 if (tempTime.isAfter(currentTime)) {
                     if (nextBusTime.isAfter(currentTime) && tempTime.isBefore(nextBusTime)) {
                         nextBusTime = tempTime;
@@ -202,8 +207,9 @@ public class MainActivity extends Activity {
             String timeUntilNextBus = currentTime.getTimeAsStringUntil(nextBusTime);
             ((TextView) findViewById(R.id.times_button)).setText(timeOfNextBus);
             ((TextView) findViewById(R.id.next_bus)).setText(timeUntilNextBus);
+        } else
 
-        } else {
+        {
             Context context = getApplicationContext();
             CharSequence text = "That stop is unavailable!";
             int duration = Toast.LENGTH_SHORT;
@@ -211,6 +217,7 @@ public class MainActivity extends Activity {
             Toast toast = Toast.makeText(context, text, duration);
             toast.show();
         }
+
     }
 
     public void createToDialog(View view) {
@@ -240,9 +247,8 @@ public class MainActivity extends Activity {
     }
 
     public void createTimesDialog(View view) {
-        String timeOfWeek = getTimeOfWeek();
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        final Time[] times = fromStop.getTimes().get(timeOfWeek).get(routeBetweenToAndFrom.getLongName());
+        final Time[] times = timesBetweenStartAndEnd.toArray(new Time[1]);
         final String[] timesAsString = new String[times.length];
         for (int i = 0; i < times.length; i++) {
             timesAsString[i] = times[i].toString();
