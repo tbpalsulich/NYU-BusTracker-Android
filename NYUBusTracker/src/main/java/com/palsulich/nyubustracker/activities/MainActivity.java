@@ -67,20 +67,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Calendar rightNow = Calendar.getInstance();
-
-        myTimer = new Timer();
-        myTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        setNextBusTime();
-                    }
-                });
-            }
-        }, (60 - rightNow.get(Calendar.SECOND)) * 1000, 60000);
+        renewTimer();
 
         final ListView listView = (ListView) findViewById(R.id.mainActivityList);
 
@@ -115,6 +102,23 @@ public class MainActivity extends Activity {
         listView.setAdapter(mAdapter);
     }
 
+    private void renewTimer(){
+        Calendar rightNow = Calendar.getInstance();
+
+        myTimer = new Timer();
+        myTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setNextBusTime();
+                    }
+                });
+            }
+        }, (60 - rightNow.get(Calendar.SECOND)) * 1000, 60000);
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -126,6 +130,13 @@ public class MainActivity extends Activity {
     public void onPause() {
         super.onPause();
         cacheToAndFromStop();
+        myTimer.cancel();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        renewTimer();
     }
 
     public void cacheToAndFromStop() {
