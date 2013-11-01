@@ -6,9 +6,10 @@ import android.util.Log;
  * Created by tyler on 10/30/13.
  */
 public class Time {
-    int hour;           // In 24 hour (military) format.
-    int min;
-    boolean AM;
+    private int hour;           // In 24 hour (military) format.
+    private int min;
+    private boolean AM;
+    private String route;
 
     public Time(String time){           // Input a string like "8:04 PM".
         AM = time.contains("AM");       // Automatically accounts for AM/PM with military time.
@@ -26,6 +27,14 @@ public class Time {
         AM = mHour < 12;
         hour = mHour;
         min = mMin;
+    }
+
+    public void setRoute(String r){
+        route = r;
+    }
+
+    public String getViaRoute(){
+        return " via Route " + route;
     }
 
     // Return a nice string saying the difference between this time and the argument.

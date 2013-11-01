@@ -31,6 +31,7 @@ import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -102,7 +103,7 @@ public class MainActivity extends Activity {
         listView.setAdapter(mAdapter);
     }
 
-    private void renewTimer(){
+    private void renewTimer() {
         Calendar rightNow = Calendar.getInstance();
 
         myTimer = new Timer();
@@ -201,7 +202,14 @@ public class MainActivity extends Activity {
             timesBetweenStartAndEnd = new ArrayList<Time>();
             for (int j = 0; j < routes.size(); j++) {
                 String timeOfWeek = getTimeOfWeek();
-                timesBetweenStartAndEnd.addAll(Arrays.asList(fromStop.getTimes().get(timeOfWeek).get(routes.get(j).getLongName())));
+                // Get the Times at this stop for this route.
+                List<Time> times = Arrays.asList(fromStop.getTimes()
+                        .get(timeOfWeek)
+                        .get(routes.get(j).getLongName()));
+                for (Time t : times){
+                    t.setRoute(routes.get(j).getLongName());
+                }
+                timesBetweenStartAndEnd.addAll(times);
             }
             Time currentTime = new Time(rightNow.get(rightNow.HOUR_OF_DAY), rightNow.get(rightNow.MINUTE));
             Time nextBusTime = timesBetweenStartAndEnd.get(0);
@@ -216,10 +224,9 @@ public class MainActivity extends Activity {
             }
             String timeOfNextBus = nextBusTime.toString();
             String timeUntilNextBus = currentTime.getTimeAsStringUntil(nextBusTime);
-            ((TextView) findViewById(R.id.times_button)).setText(timeOfNextBus);
+            ((TextView) findViewById(R.id.times_button)).setText(timeOfNextBus + nextBusTime.getViaRoute());
             ((TextView) findViewById(R.id.next_bus)).setText(timeUntilNextBus);
         } else
-
         {
             Context context = getApplicationContext();
             CharSequence text = "That stop is unavailable!";
@@ -262,7 +269,7 @@ public class MainActivity extends Activity {
         final Time[] times = timesBetweenStartAndEnd.toArray(new Time[1]);
         final String[] timesAsString = new String[times.length];
         for (int i = 0; i < times.length; i++) {
-            timesAsString[i] = times[i].toString();
+            timesAsString[i] = times[i].toString() + times[i].getViaRoute();
         }
         builder.setItems(timesAsString, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
