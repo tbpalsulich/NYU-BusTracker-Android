@@ -23,5 +23,9 @@ android {
 }
 
 dependencies {
-	compile 'com.android.support:appcompat-v7:18.0.0'
+    dependencies {
+        compile 'com.google.android.gms:play-services:3.2.25'
+        compile 'com.android.support:support-v4:19.0.+'
+        compile 'com.android.support:appcompat-v7:19.0.+'
+    }
 }

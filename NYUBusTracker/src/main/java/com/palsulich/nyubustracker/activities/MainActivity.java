@@ -191,10 +191,10 @@ public class MainActivity extends Activity {
         Calendar rightNow = Calendar.getInstance();
         ArrayList<Route> fromRoutes = fromStop.getRoutes();
         ArrayList<Route> routes = new ArrayList<Route>();
-        for (int i = 0; i < fromRoutes.size(); i++) {
-            if (fromRoutes.get(i).hasStop(toStop.getName())) {
+        for (Route r : fromRoutes) {
+            if (r.hasStop(toStop.getName())) {
                 Log.v("Route Debugging", "Adding a route!");
-                routes.add(fromRoutes.get(i));
+                routes.add(r);
             }
         }
         if (routes.size() != 0) {
