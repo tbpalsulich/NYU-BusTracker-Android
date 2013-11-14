@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,6 +17,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.PolyUtil;
 import com.palsulich.nyubustracker.R;
 import com.palsulich.nyubustracker.helpers.BusManager;
 import com.palsulich.nyubustracker.helpers.FileGrabber;
@@ -26,7 +28,9 @@ import com.palsulich.nyubustracker.models.Route;
 import com.palsulich.nyubustracker.models.Stop;
 import com.palsulich.nyubustracker.models.Time;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,18 +105,26 @@ public class MainActivity extends Activity {
                 Route.parseJSON(mFileGrabber.getRouteJSON());
                 BusManager.parseTimes(mFileGrabber.getVersionJSON(), mFileGrabber);
                 Bus.parseJSON(mFileGrabber.getVehicleJSON());
+                parseSegments(mFileGrabber.getSegmentsJSON());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
+
         setFromStop(mFileGrabber.getFromStopFile());
         setToStop(mFileGrabber.getToStopFile());
 
-        ArrayAdapter<String> mAdapter =
+        for (Stop s : sharedManager.getStops()){
+            mMap.addMarker(new MarkerOptions()
+                    .position(s.getLocation())
+                    .title(s.getName()));
+        }
+
+/*        ArrayAdapter<String> mAdapter =
                 new ArrayAdapter<String>(this,
                         android.R.layout.simple_list_item_1,
                         sharedManager.getRoutesAsArray());
-/*        listView.setOnItemClickListener(new OnItemClickListener() {
+        listView.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String routeName = listView.getItemAtPosition(position).toString();
                 Log.v("Debugging", "Clicked on route:" + routeName);
@@ -122,6 +134,15 @@ public class MainActivity extends Activity {
             }
         });
         listView.setAdapter(mAdapter);*/
+    }
+
+    public void parseSegments(JSONObject segmentsJSON) throws JSONException{
+        JSONArray segments = segmentsJSON.getJSONArray("data");
+        for (int j = 0; j < segments.length(); j++){
+            mMap.addPolyline(
+                    new PolylineOptions()
+                    .addAll(PolyUtil.decode(segments.getString(j))));
+        }
     }
 
     private void renewTimer() {

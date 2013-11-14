@@ -35,6 +35,7 @@ public class FileGrabber {
     private String routesFileName = "routesJSON";
     private String vehiclesFileName = "vehiclesJSON";
     private String versionFileName = "versionJSON";
+    private String segmentsFileName = "segmentsJSON";
 
     private static final String FROM_STOP_FILE_NAME = "fromStop";
     private static final String TO_STOP_FILE_NAME = "toStop";
@@ -148,7 +149,10 @@ public class FileGrabber {
 
     public JSONObject getTimesFromFile(String file){
         return getJSON(timesURL + file, file);
+    }
 
+    public JSONObject getSegmentsJSON(){
+        return getJSON(segmentsURL, segmentsFileName);
     }
 
     public JSONObject getStopJSON(){

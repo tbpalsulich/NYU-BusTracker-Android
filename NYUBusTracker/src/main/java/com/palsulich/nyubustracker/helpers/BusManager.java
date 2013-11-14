@@ -3,6 +3,7 @@ package com.palsulich.nyubustracker.helpers;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.maps.android.PolyUtil;
 import com.palsulich.nyubustracker.activities.MainActivity;
 import com.palsulich.nyubustracker.models.Bus;
 import com.palsulich.nyubustracker.models.Route;

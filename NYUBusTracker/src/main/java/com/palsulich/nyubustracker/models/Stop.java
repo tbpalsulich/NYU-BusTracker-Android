@@ -2,6 +2,7 @@ package com.palsulich.nyubustracker.models;
 
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.palsulich.nyubustracker.activities.MainActivity;
 import com.palsulich.nyubustracker.helpers.BusManager;
 
@@ -16,15 +17,15 @@ import java.util.HashMap;
  * Created by tyler on 9/29/13.
  */
 public class Stop {
-    String name, lat, lng, id;
+    String name, id;
+    LatLng loc;
     String[] routesString;
     ArrayList<Route> routes = null;
     HashMap<String, HashMap<String, Time[]>> times = null;
 
     public Stop(String mName, String mLat, String mLng, String mID, String[] mRoutes){
         name = mName;
-        lat = mLat;
-        lng = mLng;
+        loc = new LatLng(Double.parseDouble(mLat), Double.parseDouble(mLng));
         id = mID;
         routesString = mRoutes;
         times = new HashMap<String, HashMap<String, Time[]>>();
@@ -37,6 +38,10 @@ public class Stop {
             Route r = sharedManager.getRouteByID(mRoutes[j]);
             if (r != null) r.addStop(this);
         }
+    }
+
+    public LatLng getLocation(){
+        return loc;
     }
 
     public String getName(){
