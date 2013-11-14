@@ -5,19 +5,19 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.LatLng;
 import com.palsulich.nyubustracker.R;
 import com.palsulich.nyubustracker.helpers.BusManager;
 import com.palsulich.nyubustracker.helpers.FileGrabber;
@@ -46,6 +46,8 @@ public class MainActivity extends Activity {
 
     Timer myTimer;
 
+    private GoogleMap mMap;
+
     public static final String TAG_DATA = "data";
     public static final String TAG_LONG_NAME = "long_name";
     public static final String TAG_LOCATION = "location";
@@ -62,6 +64,21 @@ public class MainActivity extends Activity {
     public static final String TAG_WEEKEND = "Weekend";
     public static final String TAG_VEHICLE_ID = "vehicle_id";
 
+    private static final LatLng BROADWAY = new LatLng(40.7291465, -73.9937559);
+
+
+    private void setUpMapIfNeeded() {
+        // Do a null check to confirm that we have not already instantiated the map.
+        if (mMap == null) {
+            mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
+                    .getMap();
+            // Check if we were successful in obtaining the map.
+            if (mMap != null) {
+                // The Map is verified. It is now safe to manipulate the map.
+
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +87,11 @@ public class MainActivity extends Activity {
 
         renewTimer();
 
-        final ListView listView = (ListView) findViewById(R.id.mainActivityList);
+        setUpMapIfNeeded();
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BROADWAY, 15));
+
+        //final ListView listView = (ListView) findViewById(R.id.mainActivityList);
 
         final BusManager sharedManager = BusManager.getBusManager(getApplicationContext());
         FileGrabber mFileGrabber = new FileGrabber(getCacheDir());
@@ -91,7 +112,7 @@ public class MainActivity extends Activity {
                 new ArrayAdapter<String>(this,
                         android.R.layout.simple_list_item_1,
                         sharedManager.getRoutesAsArray());
-        listView.setOnItemClickListener(new OnItemClickListener() {
+/*        listView.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String routeName = listView.getItemAtPosition(position).toString();
                 Log.v("Debugging", "Clicked on route:" + routeName);
@@ -100,7 +121,7 @@ public class MainActivity extends Activity {
                 startActivity(myIntent);
             }
         });
-        listView.setAdapter(mAdapter);
+        listView.setAdapter(mAdapter);*/
     }
 
     private void renewTimer() {
@@ -138,6 +159,7 @@ public class MainActivity extends Activity {
     public void onResume() {
         super.onResume();
         renewTimer();
+        setUpMapIfNeeded();
     }
 
     public void cacheToAndFromStop() {
