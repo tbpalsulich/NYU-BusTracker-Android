@@ -20,20 +20,26 @@ public class Route {
     String routeID = "";
     ArrayList<Stop> stops = null;
     BusManager sharedManager;
+
     public Route(String mLongName, String mRouteID){
         longName = mLongName;
         routeID = mRouteID;
         sharedManager = BusManager.getBusManager();
         stops = sharedManager.getStopsByRouteID(routeID);
-        for (int j = 0; j < stops.size(); j++){
-            stops.get(j).addRoute(this);
+        for (Stop s : stops){
+            s.addRoute(this);
         }
         Log.v("Debugging", longName + "'s number of stops:" + stops.size());
+    }
+
+    public Route(String mRouteID){
+        routeID = mRouteID;
     }
 
     public String toString(){
         return longName;
     }
+
     public String getLongName(){
         return longName;
     }
