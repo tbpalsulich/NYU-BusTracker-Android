@@ -20,6 +20,7 @@ public final class BusManager {
     private static ArrayList<Stop> stops = null;
     private static ArrayList<Route> routes = null;
     private static ArrayList<String> hideRoutes = null;
+    private static ArrayList<String> hideStops = null;
     private static ArrayList<Bus> buses = null;
     private static Context mContext = null;
 
@@ -41,6 +42,7 @@ public final class BusManager {
         stops = new ArrayList<Stop>();
         routes = new ArrayList<Route>();
         hideRoutes = new ArrayList<String>();
+        hideStops = new ArrayList<String>();
         buses = new ArrayList<Bus>();
     }
 
@@ -139,8 +141,10 @@ public final class BusManager {
     }
 
     public void addStop(Stop stop) {
-        stops.add(stop);
-        Log.v("Debugging", "Added " + stop.toString() + " to list of stops (" + stops.size() + ")");
+        if (!hideStops.contains(stop.getID())){
+            stops.add(stop);
+            Log.v("Debugging", "Added " + stop.toString() + " to list of stops (" + stops.size() + ")");
+        }
     }
 
     public void addRoute(Route route) {
@@ -166,6 +170,7 @@ public final class BusManager {
             String hideMeID = jHides.getString(j);
             Log.v("JSONDebug", "Hiding a route... " + hideMeID);
             Route r = sharedBusManager.getRouteByID(hideMeID);
+            hideRoutes.add(hideMeID);           // In case we "hide" the route before it exists.
             if (r != null){
                 routes.remove(r);
                 for (Stop s : stops){
@@ -175,8 +180,22 @@ public final class BusManager {
                     }
                 }
             }
-            else{
-                hideRoutes.add(hideMeID);
+        }
+
+        JSONArray jHideStops = versionJson.getJSONArray("hidestops");
+        for (int j = 0; j < jHideStops.length(); j++){
+            String hideMeID = jHideStops.getString(j);
+            Log.v("JSONDebug", "Hiding a stop... " + hideMeID);
+            Stop s = sharedBusManager.getStopByID(hideMeID);
+            hideStops.add(hideMeID);           // In case we "hide" the stop before it exists.
+            if (s != null){
+                stops.remove(s);
+                for (Route r : routes){
+                    if (r.hasStopByID(hideMeID)){
+                        r.getStops().remove(s);
+                        Log.v("JSONDebug", "Removing stop " + s.getID() + " from " + r.getLongName());
+                    }
+                }
             }
         }
 

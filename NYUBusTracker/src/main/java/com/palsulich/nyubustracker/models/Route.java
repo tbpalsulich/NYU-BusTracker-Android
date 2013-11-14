@@ -12,9 +12,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-/**
- * Created by tyler on 9/30/13.
- */
 public class Route {
     String longName = "";
     String routeID = "";
@@ -32,10 +29,6 @@ public class Route {
         Log.v("Debugging", longName + "'s number of stops:" + stops.size());
     }
 
-    public Route(String mRouteID){
-        routeID = mRouteID;
-    }
-
     public String toString(){
         return longName;
     }
@@ -49,10 +42,17 @@ public class Route {
     }
 
     public boolean hasStop(String stop){
-        for (int i = 0; i < stops.size(); i++){
-            if (stops.get(i).name.equals(stop)) return true;
+        for (Stop s : stops){
+            if (s.name.equals(stop)) return true;
         }
 
+        return false;
+    }
+
+    public boolean hasStopByID(String stopID){
+        for (Stop s : stops){
+            if (s.getID().equals(stopID)) return true;
+        }
         return false;
     }
 
@@ -68,8 +68,9 @@ public class Route {
         else{
             result = new String[stops.size()];
         }
-        for(int j = 0; j < stops.size(); j++){
-            result[j] = stops.get(j).toString();
+        int j = 0;
+        for(Stop s : stops){
+            result[j++] = s.toString();
         }
         return result;
     }

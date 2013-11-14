@@ -11,6 +11,12 @@ public class Time {
     private boolean AM;
     private String route;
 
+    public Time(){
+        hour = 0;
+        min = 0;
+        AM = false;
+    }
+
     public Time(String time){           // Input a string like "8:04 PM".
         AM = time.contains("AM");       // Automatically accounts for AM/PM with military time.
         hour = Integer.parseInt(time.substring(0, time.indexOf(":")).trim());
@@ -72,7 +78,7 @@ public class Time {
 
     // Return a Time object who represents the difference in time between the two Times.
     public Time getTimeAsTimeUntil(Time t){
-        if (!t.isBefore(this)){
+        if (t.isAfter(this)){
             int hourDifference = t.hour - this.hour;
             int minDifference = t.min - this.min;
             if (minDifference < 0){
@@ -81,7 +87,10 @@ public class Time {
             }
             return new Time(hourDifference, minDifference);
         }
-        else return null;
+        else{
+            Log.v("Time", t.toString() + " isn't after " + this.toString());
+            return new Time();
+        }
     }
 
     public String toString(){
