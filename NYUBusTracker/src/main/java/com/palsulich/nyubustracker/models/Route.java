@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.palsulich.nyubustracker.R;
 import com.palsulich.nyubustracker.helpers.BusManager;
 import com.palsulich.nyubustracker.helpers.FileGrabber;
 
@@ -75,7 +74,7 @@ public class Route {
         String[] result;
         if(stops.size() == 0){
             result = new String[1];
-            result[0] = sharedManager.getContext().getString(R.string.no_stops);
+            result[0] = "No stops available.";
         }
         else{
             result = new String[stops.size()];

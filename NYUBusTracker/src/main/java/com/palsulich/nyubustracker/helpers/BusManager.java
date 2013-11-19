@@ -1,6 +1,5 @@
 package com.palsulich.nyubustracker.helpers;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.google.maps.android.PolyUtil;
@@ -16,34 +15,18 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public final class BusManager {
-    private static BusManager sharedBusManager = null;
-    private static ArrayList<Stop> stops = null;
+    private static BusManager sharedBusManager = null;      // Singleton instance.
+    private static ArrayList<Stop> stops = null;            // Hold all known stops.
     private static ArrayList<Route> routes = null;
-    private static ArrayList<String> hideRoutes = null;
-    private static ArrayList<String> hideStops = null;
+    private static ArrayList<String> hideRoutes = null;     // Routes to not show the user.
+    private static ArrayList<String> hideStops = null;      // Stops to not show the user.
     private static ArrayList<Bus> buses = null;
-    private static Context mContext = null;
 
-    public static BusManager getBusManager(Context context) {
-        if (sharedBusManager == null) {
-            sharedBusManager = new BusManager(context);
-        }
-        return sharedBusManager;
-    }
     public static BusManager getBusManager() {
         if (sharedBusManager == null) {
-            sharedBusManager = new BusManager(mContext);
+            sharedBusManager = new BusManager();
         }
         return sharedBusManager;
-    }
-
-    private BusManager(Context context) {
-        mContext = context;
-        stops = new ArrayList<Stop>();
-        routes = new ArrayList<Route>();
-        hideRoutes = new ArrayList<String>();
-        hideStops = new ArrayList<String>();
-        buses = new ArrayList<Bus>();
     }
 
     public ArrayList<Stop> getStops() {
@@ -160,10 +143,6 @@ public final class BusManager {
 
     public void addBus(Bus bus) {
         buses.add(bus);
-    }
-
-    public Context getContext(){
-        return mContext;
     }
 
     public static void parseTimes(JSONObject versionJson, FileGrabber mFileGrabber) throws JSONException {

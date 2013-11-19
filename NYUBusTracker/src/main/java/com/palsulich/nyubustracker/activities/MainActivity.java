@@ -81,7 +81,7 @@ public class MainActivity extends Activity {
         //final ListView listView = (ListView) findViewById(R.id.mainActivityList);
 
         // Singleton BusManager to keep track of all stops, routes, etc.
-        final BusManager sharedManager = BusManager.getBusManager(getApplicationContext());
+        final BusManager sharedManager = BusManager.getBusManager();
 
         // mFileGrabber helps to manage cached files/pull new files from the network.
         FileGrabber mFileGrabber = new FileGrabber(getCacheDir());

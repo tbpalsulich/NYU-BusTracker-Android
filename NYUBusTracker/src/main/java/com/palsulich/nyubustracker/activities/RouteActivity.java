@@ -22,7 +22,7 @@ public class RouteActivity extends Activity {
 
         final ListView listView = (ListView) findViewById(R.id.route_list_view);
 
-        final BusManager sharedManager = BusManager.getBusManager(getApplicationContext());
+        final BusManager sharedManager = BusManager.getBusManager();
         if (sharedManager.hasStops() && sharedManager.hasRoutes()) {
             Intent intent = getIntent();
             String routeName = intent.getStringExtra("route_name");
