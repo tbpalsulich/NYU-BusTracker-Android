@@ -41,6 +41,9 @@ public final class BusManager {
         return stops.size() > 0;
     }
 
+    /*
+    Given the name of a stop (e.g. "715 Broadway"), getStopByName returns the Stop with that name.
+     */
     public Stop getStopByName(String stopName) {
         for (Stop s : stops) {
             if (s.getName().equals(stopName)) return s;
@@ -48,6 +51,9 @@ public final class BusManager {
         return null;
     }
 
+    /*
+    Given the ID of a stop, getStopByID returns the Stop with that ID.
+     */
     public Stop getStopByID(String stopID) {
         for (Stop s : stops) {
             if (s.getID().equals(stopID)) return s;
@@ -55,6 +61,9 @@ public final class BusManager {
         return null;
     }
 
+    /*
+    Returns an array of strings with the names of all stops.
+     */
     public String[] getStopsAsArray() {
         String[] stopsArray = new String[stops.size()];
         for (int i = 0; i < stopsArray.length; i++) {
@@ -63,6 +72,9 @@ public final class BusManager {
         return stopsArray;
     }
 
+    /*
+    Given a route ID, getStopsByRouteID returns an ArrayList of all Stops visited by that Route.
+     */
     public ArrayList<Stop> getStopsByRouteID(String routeID) {
         ArrayList<Stop> result = new ArrayList<Stop>();
         for (Stop stop : stops) {
@@ -92,6 +104,9 @@ public final class BusManager {
         return routesArray;
     }
 
+    /*
+    Given an ID (e.g. "81374"), returns the Route with that ID.
+     */
     public Route getRouteByID(String id) {
         for (Route route : routes) {
             if (route.getID().equals(id)) {
@@ -101,6 +116,9 @@ public final class BusManager {
         return null;
     }
 
+    /*
+    Given the name of a route (e.g. "E"), returns the Route with that name.
+     */
     public Route getRouteByName(String name) {
         for (Route route : routes) {
             if (route.getLongName().equals(name)) {
@@ -110,9 +128,13 @@ public final class BusManager {
         return null;
     }
 
+    /*
+    Given a Stop, getConnectedStops returns an array of Strings corresponding to every stop which has
+    some route between it and the given stop.
+     */
     public String[] getConnectedStops(Stop stop){
         int resultSize = 0;
-        String temp[] = new String[64];
+        String temp[] = new String[64];     // Shouldn't have more than 64 stops...
         ArrayList<Route> stopRoutes = stop.getRoutes();
         for (Route route : stopRoutes) {       // For every route servicing this stop:
             String routeStops[] = route.getStopsAsArray();
@@ -122,11 +144,14 @@ public final class BusManager {
                 }
             }
         }
-        String result[] = new String[resultSize];
+        String result[] = new String[resultSize];       // Only return an array of the proper size.
         System.arraycopy(temp, 0, result, 0, resultSize);
         return result;
     }
 
+    /*
+    addStop will add a Stop to our ArrayList of Stops, unless we're supposed to hide it.
+     */
     public void addStop(Stop stop) {
         if (!hideStops.contains(stop.getID())){
             stops.add(stop);
@@ -134,6 +159,9 @@ public final class BusManager {
         }
     }
 
+    /*
+    addRoute will add a Route to our ArrayList of Routes, unless we're supposed to hide it.
+     */
     public void addRoute(Route route) {
         if (!hideRoutes.contains(route.getID())){
             Log.v("JSONDebug", "Adding route: " + route.getID());
@@ -145,18 +173,27 @@ public final class BusManager {
         buses.add(bus);
     }
 
+    /*
+    Given a JSONObject of the version file and a fFileGrabber, parses all of the times.
+    Version also has a list of hideroutes, hidestops, combine, and opposite stops. We also handle
+    parsing those here, since we already have the file.
+    To parse all of the times, we get the stop name from the version file then make a new request
+    to our FileGrabber to get the times JSON object corresponding to that stop ID.
+    So, the sequence of events is: we're parsing version.json, we find a stop object (specified by an
+    ID), we request the JSON of times for that stop, and we parse those times.
+     */
     public static void parseTimes(JSONObject versionJson, FileGrabber mFileGrabber) throws JSONException {
         ArrayList<Stop> stops = sharedBusManager.getStops();
         Log.v("Debugging", "Looking for times for " + stops.size() + " stops.");
         JSONArray jHides = versionJson.getJSONArray("hideroutes");
-        for (int j = 0; j < jHides.length(); j++){
-            String hideMeID = jHides.getString(j);
+        for (int j = 0; j < jHides.length(); j++){      // For each element of our list of hideroutes.
+            String hideMeID = jHides.getString(j);      // ID of the route to hide.
             Log.v("JSONDebug", "Hiding a route... " + hideMeID);
             Route r = sharedBusManager.getRouteByID(hideMeID);
             hideRoutes.add(hideMeID);           // In case we "hide" the route before it exists.
             if (r != null){
-                routes.remove(r);
-                for (Stop s : stops){
+                routes.remove(r);       // If we already parsed this route, remove it.
+                for (Stop s : stops){   // But, we must update any stops that have this route.
                     if (s.hasRouteByString(hideMeID)){
                         s.getRoutes().remove(r);
                         Log.v("JSONDebug", "Removing route " + r.getID() + " from " + s.getName());
