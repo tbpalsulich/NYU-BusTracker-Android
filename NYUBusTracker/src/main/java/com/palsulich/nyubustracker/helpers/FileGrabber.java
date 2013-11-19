@@ -15,13 +15,26 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-/**
- * Created by tyler on 10/4/13.
- */
 public class FileGrabber {
     String charset = "UTF-8";
     String agencies = "72";
     String query = makeQuery("agencies", agencies, charset);
+
+    public static final String TAG_DATA = "data";
+    public static final String TAG_LONG_NAME = "long_name";
+    public static final String TAG_LOCATION = "location";
+    public static final String TAG_LAT = "lat";
+    public static final String TAG_LNG = "lng";
+    public static final String TAG_HEADING = "heading";
+    public static final String TAG_STOP_NAME = "name";
+    public static final String TAG_STOP_ID = "stop_id";
+    public static final String TAG_ROUTES = "routes";
+    public static final String TAG_ROUTE = "route";
+    public static final String TAG_ROUTE_ID = "route_id";
+    public static final String TAG_WEEKDAY = "Weekday";
+    public static final String TAG_FRIDAY = "Friday";
+    public static final String TAG_WEEKEND = "Weekend";
+    public static final String TAG_VEHICLE_ID = "vehicle_id";
 
     private String stopsURL = "http://api.transloc.com/1.2/stops.json?" + query;
     private String routesURL = "http://api.transloc.com/1.2/routes.json?" + query;

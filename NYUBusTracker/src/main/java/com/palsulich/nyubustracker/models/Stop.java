@@ -3,8 +3,8 @@ package com.palsulich.nyubustracker.models;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.palsulich.nyubustracker.activities.MainActivity;
 import com.palsulich.nyubustracker.helpers.BusManager;
+import com.palsulich.nyubustracker.helpers.FileGrabber;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,9 +13,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-/**
- * Created by tyler on 9/29/13.
- */
 public class Stop {
     String name, id;
     LatLng loc;
@@ -84,16 +81,16 @@ public class Stop {
     public static void parseJSON(JSONObject stopsJson) throws JSONException{
         JSONArray jStops = null;
         BusManager sharedManager = BusManager.getBusManager();
-        jStops = stopsJson.getJSONArray(MainActivity.TAG_DATA);
+        jStops = stopsJson.getJSONArray(FileGrabber.TAG_DATA);
         Log.v("JSONDebug", "Number of stops: " + jStops.length());
         for (int i = 0; i < jStops.length(); i++) {
             JSONObject stopObject = jStops.getJSONObject(i);
-            String stopID = stopObject.getString(MainActivity.TAG_STOP_ID);
-            String stopName = stopObject.getString(MainActivity.TAG_STOP_NAME);
-            JSONObject location = stopObject.getJSONObject(MainActivity.TAG_LOCATION);
-            String stopLat = location.getString(MainActivity.TAG_LAT);
-            String stopLng = location.getString(MainActivity.TAG_LNG);
-            JSONArray stopRoutes = stopObject.getJSONArray(MainActivity.TAG_ROUTES);
+            String stopID = stopObject.getString(FileGrabber.TAG_STOP_ID);
+            String stopName = stopObject.getString(FileGrabber.TAG_STOP_NAME);
+            JSONObject location = stopObject.getJSONObject(FileGrabber.TAG_LOCATION);
+            String stopLat = location.getString(FileGrabber.TAG_LAT);
+            String stopLng = location.getString(FileGrabber.TAG_LNG);
+            JSONArray stopRoutes = stopObject.getJSONArray(FileGrabber.TAG_ROUTES);
             String[] routes = new String[stopRoutes.length()];
             String routesString = "";
             for (int j = 0; j < stopRoutes.length(); j++) {

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.google.maps.android.PolyUtil;
-import com.palsulich.nyubustracker.activities.MainActivity;
 import com.palsulich.nyubustracker.models.Bus;
 import com.palsulich.nyubustracker.models.Route;
 import com.palsulich.nyubustracker.models.Stop;
@@ -210,43 +209,43 @@ public final class BusManager {
             String file = stopObject.getString("file");
             Log.v("Debugging", "Looking for times for " + file);
             JSONObject timesJson = mFileGrabber.getTimesFromFile(file);
-            JSONObject routes = timesJson.getJSONObject(MainActivity.TAG_ROUTES);
+            JSONObject routes = timesJson.getJSONObject(FileGrabber.TAG_ROUTES);
             Stop s = sharedBusManager.getStopByID(file.substring(0, file.indexOf(".")));
             for (int i = 0; i < s.getRoutes().size(); i++) {
                 if (routes.has(s.getRoutes().get(i).getID())) {
                     JSONObject routeTimes = routes.getJSONObject(s.getRoutes().get(i).getID());
-                    if (routeTimes.has(MainActivity.TAG_WEEKDAY)) {
-                        JSONArray weekdayTimesJson = routeTimes.getJSONArray(MainActivity.TAG_WEEKDAY);
+                    if (routeTimes.has(FileGrabber.TAG_WEEKDAY)) {
+                        JSONArray weekdayTimesJson = routeTimes.getJSONArray(FileGrabber.TAG_WEEKDAY);
                         Time[] weekdayTimes = new Time[weekdayTimesJson.length()];
                         Log.v("Debugging", "Found " + weekdayTimes.length + " weekday times.");
                         if (weekdayTimesJson != null) {
                             for (int k = 0; k < weekdayTimes.length; k++) {
                                 weekdayTimes[k] = new Time(weekdayTimesJson.getString(k));
                             }
-                            String weekdayRoute = routeTimes.getString(MainActivity.TAG_ROUTE);
+                            String weekdayRoute = routeTimes.getString(FileGrabber.TAG_ROUTE);
                             s.addTime(weekdayRoute.substring(weekdayRoute.indexOf("Route ") + "Route ".length()), "Weekday", weekdayTimes);
                         }
                     }
-                    if (routeTimes.has(MainActivity.TAG_FRIDAY)) {
-                        JSONArray fridayTimesJson = routeTimes.getJSONArray(MainActivity.TAG_FRIDAY);
+                    if (routeTimes.has(FileGrabber.TAG_FRIDAY)) {
+                        JSONArray fridayTimesJson = routeTimes.getJSONArray(FileGrabber.TAG_FRIDAY);
                         Time[] fridayTimes = new Time[fridayTimesJson.length()];
                         if (fridayTimesJson != null) {
                             for (int k = 0; k < fridayTimes.length; k++) {
                                 fridayTimes[k] = new Time(fridayTimesJson.getString(k));
                             }
-                            String fridayRoute = routeTimes.getString(MainActivity.TAG_ROUTE);
+                            String fridayRoute = routeTimes.getString(FileGrabber.TAG_ROUTE);
                             s.addTime(fridayRoute.substring(fridayRoute.indexOf("Route ") + "Route ".length()), "Friday", fridayTimes);
 
                         }
                     }
-                    if (routeTimes.has(MainActivity.TAG_WEEKEND)) {
-                        JSONArray weekendTimesJson = routeTimes.getJSONArray(MainActivity.TAG_WEEKEND);
+                    if (routeTimes.has(FileGrabber.TAG_WEEKEND)) {
+                        JSONArray weekendTimesJson = routeTimes.getJSONArray(FileGrabber.TAG_WEEKEND);
                         Time[] weekendTimes = new Time[weekendTimesJson.length()];
                         if (weekendTimesJson != null) {
                             for (int k = 0; k < weekendTimes.length; k++) {
                                 weekendTimes[k] = new Time(weekendTimesJson.getString(k));
                             }
-                            String weekendRoute = routeTimes.getString(MainActivity.TAG_ROUTE);
+                            String weekendRoute = routeTimes.getString(FileGrabber.TAG_ROUTE);
                             s.addTime(weekendRoute.substring(weekendRoute.indexOf("Route ") + "Route ".length()), "Weekend", weekendTimes);
 
                         }

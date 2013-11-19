@@ -2,9 +2,6 @@ package com.palsulich.nyubustracker.models;
 
 import android.util.Log;
 
-/**
- * Created by tyler on 10/30/13.
- */
 public class Time {
     private int hour;           // In 24 hour (military) format.
     private int min;

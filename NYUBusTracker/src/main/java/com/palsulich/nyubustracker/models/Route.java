@@ -5,8 +5,8 @@ import android.util.Log;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.palsulich.nyubustracker.R;
-import com.palsulich.nyubustracker.activities.MainActivity;
 import com.palsulich.nyubustracker.helpers.BusManager;
+import com.palsulich.nyubustracker.helpers.FileGrabber;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -94,11 +94,11 @@ public class Route {
     public static void parseJSON(JSONObject routesJson) throws JSONException{
         JSONArray jRoutes = null;
         BusManager sharedManager = BusManager.getBusManager();
-        jRoutes = routesJson.getJSONObject(MainActivity.TAG_DATA).getJSONArray("72");
+        jRoutes = routesJson.getJSONObject(FileGrabber.TAG_DATA).getJSONArray("72");
         for (int j = 0; j < jRoutes.length(); j++) {
             JSONObject routeObject = jRoutes.getJSONObject(j);
-            String routeLongName = routeObject.getString(MainActivity.TAG_LONG_NAME);
-            String routeID = routeObject.getString(MainActivity.TAG_ROUTE_ID);
+            String routeLongName = routeObject.getString(FileGrabber.TAG_LONG_NAME);
+            String routeID = routeObject.getString(FileGrabber.TAG_ROUTE_ID);
             sharedManager.addRoute(new Route(routeLongName, routeID));
             Log.v("JSONDebug", "Route name: " + routeLongName + " | ID:" + routeID + " | Number of stops: " + sharedManager.getRouteByID(routeID).getStops().size());
         }

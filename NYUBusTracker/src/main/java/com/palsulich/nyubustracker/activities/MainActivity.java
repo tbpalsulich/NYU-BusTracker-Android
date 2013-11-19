@@ -40,30 +40,14 @@ import java.util.TimerTask;
 public class MainActivity extends Activity {
 
 
-    Stop startStop;
-    Stop endStop;
-    ArrayList<Route> routesBetweenToAndFrom;
-    ArrayList<Time> timesBetweenStartAndEnd;
+    Stop startStop;     // Stop object to keep track of the start location of the desired route.
+    Stop endStop;       // Keep track of the desired end location.
+    ArrayList<Route> routesBetweenToAndFrom;        // List of all routes between start and end.
+    ArrayList<Time> timesBetweenStartAndEnd;        // List of all times between start and end.
 
-    Timer myTimer;
+    Timer myTimer;  // Timer used to refresh the "time until next bus" every minute, on the minute.
 
-    private GoogleMap mMap;
-
-    public static final String TAG_DATA = "data";
-    public static final String TAG_LONG_NAME = "long_name";
-    public static final String TAG_LOCATION = "location";
-    public static final String TAG_LAT = "lat";
-    public static final String TAG_LNG = "lng";
-    public static final String TAG_HEADING = "heading";
-    public static final String TAG_STOP_NAME = "name";
-    public static final String TAG_STOP_ID = "stop_id";
-    public static final String TAG_ROUTES = "routes";
-    public static final String TAG_ROUTE = "route";
-    public static final String TAG_ROUTE_ID = "route_id";
-    public static final String TAG_WEEKDAY = "Weekday";
-    public static final String TAG_FRIDAY = "Friday";
-    public static final String TAG_WEEKEND = "Weekend";
-    public static final String TAG_VEHICLE_ID = "vehicle_id";
+    private GoogleMap mMap;     // Map to display all stops, segments, and buses.
 
     private static final LatLng BROADWAY = new LatLng(40.7291465, -73.9937559);
 
@@ -86,18 +70,27 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        renewTimer();
+        renewTimer();       // Creates and starts the timer to refresh time until next bus.
 
-        setUpMapIfNeeded();
+        setUpMapIfNeeded(); // Instantiates mMap, if it needs to be.
 
+        // Default location of map is centered at 715 Broadway with zoom 15.
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BROADWAY, 15));
 
+        // List just for development use to display all
         //final ListView listView = (ListView) findViewById(R.id.mainActivityList);
 
+        // Singleton BusManager to keep track of all stops, routes, etc.
         final BusManager sharedManager = BusManager.getBusManager(getApplicationContext());
+
+        // mFileGrabber helps to manage cached files/pull new files from the network.
         FileGrabber mFileGrabber = new FileGrabber(getCacheDir());
+
+        // Only parse stops, routes, buses, times, and segments if we don't have them. Could be more robust.
         if (!sharedManager.hasStops() && !sharedManager.hasRoutes()) {
             try {
+                // The Class being created from the parsing *does* the parsing.
+                // mFileGrabber.get*JSON() returns a JSONObject.
                 Stop.parseJSON(mFileGrabber.getStopJSON());
                 Route.parseJSON(mFileGrabber.getRouteJSON());
                 BusManager.parseTimes(mFileGrabber.getVersionJSON(), mFileGrabber);
@@ -112,20 +105,25 @@ public class MainActivity extends Activity {
         setEndStop(mFileGrabber.getEndStopFile());
 
         for (Stop s : sharedManager.getStops()){
-            mMap.addMarker(new MarkerOptions()
+            mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
                     .position(s.getLocation())
                     .title(s.getName()));
         }
 
         for (Route r : sharedManager.getRoutes()){
-            PolylineOptions p = r.getSegment();
+            PolylineOptions p = r.getSegment();     // Adds the segments of every Route to the map.
             if (p != null) mMap.addPolyline(p);
             else Log.v("MapDebugging", "Segment was null for " + r.getID());
         }
     }
 
+    /*
+    renewTimer() creates a new timer that calls setNextBusTime() every minute on the minute.
+     */
     private void renewTimer() {
         Calendar rightNow = Calendar.getInstance();
+
+        if (myTimer != null) myTimer.cancel();
 
         myTimer = new Timer();
         myTimer.scheduleAtFixedRate(new TimerTask() {
@@ -144,8 +142,8 @@ public class MainActivity extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        cacheToAndStartStop();
-        myTimer.cancel();
+        cacheToAndStartStop();      // Remember user's preferences across lifetimes.
+        myTimer.cancel();           // Don't need a timer anymore -- must be recreated onResume.
     }
 
     @Override
@@ -164,7 +162,7 @@ public class MainActivity extends Activity {
 
     public void cacheToAndStartStop() {
         FileGrabber mFileGrabber = new FileGrabber(getCacheDir());
-        mFileGrabber.setEndStop(endStop.getName());
+        mFileGrabber.setEndStop(endStop.getName());         // Creates or updates cache file.
         mFileGrabber.setStartStop(startStop.getName());
 
     }
@@ -177,15 +175,19 @@ public class MainActivity extends Activity {
     }
 
     private void setEndStop(String stopName) {
-        if (stopName.equals("")) stopName = "80 Lafayette Street";
-        endStop = BusManager.getBusManager().getStopByName(stopName);
-        ((Button) findViewById(R.id.to_button)).setText("End: " + stopName);
-        if (startStop != null) setNextBusTime();
+        if (stopName.equals("")) stopName = "80 Lafayette Street";      // Default end stop.
+        Stop tempStop = BusManager.getBusManager().getStopByName(stopName);
+        if (tempStop != null) {     // Make sure we actually have a stop!
+            endStop = tempStop;
+            ((Button) findViewById(R.id.to_button)).setText("End: " + stopName);
+            if (startStop != null) setNextBusTime();    // Don't set the next bus if we don't have a valid route.
+        }
     }
 
     private void setStartStop(String stopName) {
-        if (stopName.equals("")) stopName = "715 Broadway at Washington Square";
-        if (endStop != null && endStop.getName().equals(stopName)) {
+        if (stopName.equals("")) stopName = "715 Broadway at Washington Square";    // Default start stop.
+        if (endStop != null && endStop.getName().equals(stopName)) {    // We have an end stop and its name is the same as stopName.
+            // Swap the start and end stops.
             Stop temp = startStop;
             startStop = endStop;
             ((Button) findViewById(R.id.from_button)).setText("Start: " + startStop.getName());
@@ -193,9 +195,26 @@ public class MainActivity extends Activity {
             ((Button) findViewById(R.id.to_button)).setText("End: " + endStop.getName());
             setNextBusTime();
         } else {
-            startStop = BusManager.getBusManager().getStopByName(stopName);
-            ((Button) findViewById(R.id.from_button)).setText("Start: " + stopName);
-            if (endStop != null) setNextBusTime();
+            // We have a new start. So, we must ensure the end is actually connected.
+            Stop tempStop = BusManager.getBusManager().getStopByName(stopName);
+            if (tempStop != null){      // Don't set Start to an invalid stop. Should never happen.
+                startStop = tempStop;
+                ((Button) findViewById(R.id.from_button)).setText("Start: " + stopName);
+                if (endStop != null){
+                    // Loop through all connected Routes.
+                    for (Route r : startStop.getRoutes()){
+                        // If the current endStop is connected, we don't have to change endStop.
+                        if (r.hasStop(endStop.getName())){
+                            setNextBusTime();
+                            return;
+                        }
+                    }
+                    // If we did not return above, the current endStop is not connected to the new
+                    // startStop. So, by default pick the first connected stop.
+                    endStop = startStop.getRoutes().get(0).getStops().get(0);
+                }
+
+            }
         }
     }
 
