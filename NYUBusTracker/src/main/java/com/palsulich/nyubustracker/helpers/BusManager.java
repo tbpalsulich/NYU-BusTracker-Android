@@ -51,6 +51,10 @@ public final class BusManager {
         return stops;
     }
 
+    public ArrayList<Route> getRoutes() {
+        return routes;
+    }
+
     public boolean hasStops() {
         return stops.size() > 0;
     }
@@ -253,4 +257,13 @@ public final class BusManager {
         }
     }
 
+    public static void parseSegments(JSONObject segmentsJSON) throws JSONException{
+        final BusManager sharedManager = BusManager.getBusManager();
+        JSONObject segments = segmentsJSON.getJSONObject("data");
+        // TODO: Ensure we're actually, properly, pulling and parsing the JSON.
+        for (Route r : sharedManager.getRoutes()){
+            Log.v("MapDebugging", "Adding a segment for route " + r.getID());
+            r.setSegment(PolyUtil.decode(segments.getString(r.getID())));
+        }
+    }
 }

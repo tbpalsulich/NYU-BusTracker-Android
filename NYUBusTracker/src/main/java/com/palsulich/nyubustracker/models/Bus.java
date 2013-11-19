@@ -2,6 +2,7 @@ package com.palsulich.nyubustracker.models;
 
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.palsulich.nyubustracker.helpers.BusManager;
 import com.palsulich.nyubustracker.activities.MainActivity;
 
@@ -9,22 +10,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * Created by tyler on 9/30/13.
- */
 public class Bus {
     String vehicleID = "";
-    String busLat = "";
-    String busLng = "";
+    LatLng loc;
     String heading = "";
     String route;
+
     public Bus(String mVehicleID){
         vehicleID = mVehicleID;
     }
 
     public Bus setLocation(String lat, String lng){
-        busLat = lat;
-        busLng = lng;
+        loc = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
         return this;
     }
     public Bus setHeading(String mHeading){
@@ -37,9 +34,8 @@ public class Bus {
     }
 
     public static void parseJSON(JSONObject vehiclesJson) throws JSONException{
-        JSONArray jVehicles = null;
         BusManager sharedManager = BusManager.getBusManager();
-        jVehicles = vehiclesJson.getJSONObject(MainActivity.TAG_DATA).getJSONArray("72");
+        JSONArray jVehicles = vehiclesJson.getJSONObject(MainActivity.TAG_DATA).getJSONArray("72");
         for (int j = 0; j < jVehicles.length(); j++) {
             JSONObject busObject = jVehicles.getJSONObject(j);
             JSONObject busLocation = busObject.getJSONObject(MainActivity.TAG_LOCATION);

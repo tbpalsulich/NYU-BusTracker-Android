@@ -19,7 +19,6 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.maps.android.PolyUtil;
 import com.palsulich.nyubustracker.R;
 import com.palsulich.nyubustracker.helpers.BusManager;
 import com.palsulich.nyubustracker.helpers.FileGrabber;
@@ -28,9 +27,7 @@ import com.palsulich.nyubustracker.models.Route;
 import com.palsulich.nyubustracker.models.Stop;
 import com.palsulich.nyubustracker.models.Time;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -105,7 +102,7 @@ public class MainActivity extends Activity {
                 Route.parseJSON(mFileGrabber.getRouteJSON());
                 BusManager.parseTimes(mFileGrabber.getVersionJSON(), mFileGrabber);
                 Bus.parseJSON(mFileGrabber.getVehicleJSON());
-                parseSegments(mFileGrabber.getSegmentsJSON());
+                BusManager.parseSegments(mFileGrabber.getSegmentsJSON());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -120,28 +117,10 @@ public class MainActivity extends Activity {
                     .title(s.getName()));
         }
 
-/*        ArrayAdapter<String> mAdapter =
-                new ArrayAdapter<String>(this,
-                        android.R.layout.simple_list_item_1,
-                        sharedManager.getRoutesAsArray());
-        listView.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String routeName = listView.getItemAtPosition(position).toString();
-                Log.v("Debugging", "Clicked on route:" + routeName);
-                Intent myIntent = new Intent(MainActivity.this, RouteActivity.class);
-                myIntent.putExtra("route_name", routeName);
-                startActivity(myIntent);
-            }
-        });
-        listView.setAdapter(mAdapter);*/
-    }
-
-    public void parseSegments(JSONObject segmentsJSON) throws JSONException{
-        JSONArray segments = segmentsJSON.getJSONArray("data");
-        for (int j = 0; j < segments.length(); j++){
-            mMap.addPolyline(
-                    new PolylineOptions()
-                    .addAll(PolyUtil.decode(segments.getString(j))));
+        for (Route r : sharedManager.getRoutes()){
+            PolylineOptions p = r.getSegment();
+            if (p != null) mMap.addPolyline(p);
+            else Log.v("MapDebugging", "Segment was null for " + r.getID());
         }
     }
 

@@ -2,6 +2,8 @@ package com.palsulich.nyubustracker.models;
 
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.palsulich.nyubustracker.R;
 import com.palsulich.nyubustracker.activities.MainActivity;
 import com.palsulich.nyubustracker.helpers.BusManager;
@@ -11,12 +13,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Route {
     String longName = "";
     String routeID = "";
     ArrayList<Stop> stops = null;
     BusManager sharedManager;
+    PolylineOptions segment;
 
     public Route(String mLongName, String mRouteID){
         longName = mLongName;
@@ -31,6 +35,14 @@ public class Route {
 
     public String toString(){
         return longName;
+    }
+
+    public void setSegment(List<LatLng> p){
+        segment = new PolylineOptions().addAll(p);
+    }
+
+    public PolylineOptions getSegment(){
+        return segment;
     }
 
     public String getLongName(){
