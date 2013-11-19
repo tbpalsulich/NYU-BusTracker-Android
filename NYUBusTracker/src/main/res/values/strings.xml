@@ -9,6 +9,5 @@
     <string name="no_stops">No stops available</string>
     <string name="no_routes">No routes available</string>
     <string name="no_times">No times available</string>
-    <string name="swap_to_and_from">Swap to and from</string>
 
 </resources>

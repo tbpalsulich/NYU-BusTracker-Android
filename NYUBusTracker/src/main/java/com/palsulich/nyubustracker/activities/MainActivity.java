@@ -40,8 +40,8 @@ import java.util.TimerTask;
 public class MainActivity extends Activity {
 
 
-    Stop fromStop;
-    Stop toStop;
+    Stop startStop;
+    Stop endStop;
     ArrayList<Route> routesBetweenToAndFrom;
     ArrayList<Time> timesBetweenStartAndEnd;
 
@@ -108,8 +108,8 @@ public class MainActivity extends Activity {
             }
         }
 
-        setFromStop(mFileGrabber.getFromStopFile());
-        setToStop(mFileGrabber.getToStopFile());
+        setStartStop(mFileGrabber.getStartStopFile());
+        setEndStop(mFileGrabber.getEndStopFile());
 
         for (Stop s : sharedManager.getStops()){
             mMap.addMarker(new MarkerOptions()
@@ -144,14 +144,14 @@ public class MainActivity extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        cacheToAndFromStop();
+        cacheToAndStartStop();
         myTimer.cancel();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        cacheToAndFromStop();
+        cacheToAndStartStop();
         myTimer.cancel();
     }
 
@@ -162,10 +162,10 @@ public class MainActivity extends Activity {
         setUpMapIfNeeded();
     }
 
-    public void cacheToAndFromStop() {
+    public void cacheToAndStartStop() {
         FileGrabber mFileGrabber = new FileGrabber(getCacheDir());
-        mFileGrabber.setToStop(toStop.getName());
-        mFileGrabber.setFromStop(fromStop.getName());
+        mFileGrabber.setEndStop(endStop.getName());
+        mFileGrabber.setStartStop(startStop.getName());
 
     }
 
@@ -176,26 +176,26 @@ public class MainActivity extends Activity {
         return true;
     }
 
-    private void setToStop(String stopName) {
+    private void setEndStop(String stopName) {
         if (stopName.equals("")) stopName = "80 Lafayette Street";
-        toStop = BusManager.getBusManager().getStopByName(stopName);
-        ((Button) findViewById(R.id.to_button)).setText("To: " + stopName);
-        if (fromStop != null) setNextBusTime();
+        endStop = BusManager.getBusManager().getStopByName(stopName);
+        ((Button) findViewById(R.id.to_button)).setText("End: " + stopName);
+        if (startStop != null) setNextBusTime();
     }
 
-    private void setFromStop(String stopName) {
+    private void setStartStop(String stopName) {
         if (stopName.equals("")) stopName = "715 Broadway at Washington Square";
-        if (toStop != null && toStop.getName().equals(stopName)) {
-            Stop temp = fromStop;
-            fromStop = toStop;
-            ((Button) findViewById(R.id.from_button)).setText("From: " + fromStop.getName());
-            toStop = temp;
-            ((Button) findViewById(R.id.to_button)).setText("To: " + toStop.getName());
+        if (endStop != null && endStop.getName().equals(stopName)) {
+            Stop temp = startStop;
+            startStop = endStop;
+            ((Button) findViewById(R.id.from_button)).setText("Start: " + startStop.getName());
+            endStop = temp;
+            ((Button) findViewById(R.id.to_button)).setText("End: " + endStop.getName());
             setNextBusTime();
         } else {
-            fromStop = BusManager.getBusManager().getStopByName(stopName);
-            ((Button) findViewById(R.id.from_button)).setText("From: " + stopName);
-            if (toStop != null) setNextBusTime();
+            startStop = BusManager.getBusManager().getStopByName(stopName);
+            ((Button) findViewById(R.id.from_button)).setText("Start: " + stopName);
+            if (endStop != null) setNextBusTime();
         }
     }
 
@@ -211,10 +211,10 @@ public class MainActivity extends Activity {
 
     private void setNextBusTime() {
         Calendar rightNow = Calendar.getInstance();
-        ArrayList<Route> fromRoutes = fromStop.getRoutes();
+        ArrayList<Route> fromRoutes = startStop.getRoutes();
         ArrayList<Route> routes = new ArrayList<Route>();
         for (Route r : fromRoutes) {
-            if (r.hasStop(toStop.getName())) {
+            if (r.hasStop(endStop.getName())) {
                 Log.v("Route Debugging", "Adding a route!");
                 routes.add(r);
             }
@@ -225,7 +225,7 @@ public class MainActivity extends Activity {
             for (int j = 0; j < routes.size(); j++) {
                 String timeOfWeek = getTimeOfWeek();
                 // Get the Times at this stop for this route.
-                List<Time> times = Arrays.asList(fromStop.getTimes()
+                List<Time> times = Arrays.asList(startStop.getTimes()
                         .get(timeOfWeek)
                         .get(routes.get(j).getLongName()));
                 for (Time t : times){
@@ -262,10 +262,10 @@ public class MainActivity extends Activity {
 
     public void createToDialog(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        final String[] connectedStops = BusManager.getBusManager().getConnectedStops(fromStop);
+        final String[] connectedStops = BusManager.getBusManager().getConnectedStops(startStop);
         builder.setItems(connectedStops, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                setToStop(connectedStops[which]);
+                setEndStop(connectedStops[which]);
             }
         });
         Dialog dialog = builder.create();
@@ -278,7 +278,7 @@ public class MainActivity extends Activity {
         final String[] stops = BusManager.getBusManager().getStopsAsArray();
         builder.setItems(stops, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                setFromStop(stops[which]);
+                setStartStop(stops[which]);
             }
         });
         Dialog dialog = builder.create();

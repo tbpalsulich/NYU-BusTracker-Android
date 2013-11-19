@@ -171,19 +171,19 @@ public class FileGrabber {
         return getJSON(vehiclesURL, vehiclesFileName);
     }
 
-    public String getFromStopFile(){
+    public String getStartStopFile(){
         return getFile(FROM_STOP_FILE_NAME);
     }
 
-    public void setFromStop(String stop){
+    public void setStartStop(String stop){
         put(stop, FROM_STOP_FILE_NAME);
     }
 
-    public String getToStopFile(){
+    public String getEndStopFile(){
         return getFile(TO_STOP_FILE_NAME);
     }
 
-    public void setToStop(String stop){
+    public void setEndStop(String stop){
         put(stop, TO_STOP_FILE_NAME);
     }
 
