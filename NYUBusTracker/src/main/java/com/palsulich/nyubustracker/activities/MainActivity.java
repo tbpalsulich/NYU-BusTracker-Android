@@ -55,8 +55,7 @@ public class MainActivity extends Activity {
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
-            mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
-                    .getMap();
+            mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
                 // The Map is verified. It is now safe to manipulate the map.
@@ -111,9 +110,11 @@ public class MainActivity extends Activity {
         }
 
         for (Route r : sharedManager.getRoutes()){
-            PolylineOptions p = r.getSegment();     // Adds the segments of every Route to the map.
-            if (p != null) mMap.addPolyline(p);
-            else Log.v("MapDebugging", "Segment was null for " + r.getID());
+            ArrayList<PolylineOptions> segments = r.getSegments();     // Adds the segments of every Route to the map.
+            for (PolylineOptions p : segments){
+                if (p != null) mMap.addPolyline(p);
+                else Log.v("MapDebugging", "Segment was null for " + r.getID());
+            }
         }
     }
 
@@ -241,18 +242,18 @@ public class MainActivity extends Activity {
         if (routes.size() != 0) {
             routesBetweenToAndFrom = routes;
             timesBetweenStartAndEnd = new ArrayList<Time>();
-            for (int j = 0; j < routes.size(); j++) {
+            for (Route r : routes) {
                 String timeOfWeek = getTimeOfWeek();
                 // Get the Times at this stop for this route.
                 List<Time> times = Arrays.asList(startStop.getTimes()
                         .get(timeOfWeek)
-                        .get(routes.get(j).getLongName()));
+                        .get(r.getLongName()));
                 for (Time t : times){
-                    t.setRoute(routes.get(j).getLongName());
+                    t.setRoute(r.getLongName());
                 }
                 timesBetweenStartAndEnd.addAll(times);
             }
-            Time currentTime = new Time(rightNow.get(rightNow.HOUR_OF_DAY), rightNow.get(rightNow.MINUTE));
+            Time currentTime = new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
             Time nextBusTime = timesBetweenStartAndEnd.get(0);
             for (Time tempTime : timesBetweenStartAndEnd) {
                 if (tempTime.isAfter(currentTime)) {
@@ -273,8 +274,10 @@ public class MainActivity extends Activity {
             CharSequence text = "That stop is unavailable!";
             int duration = Toast.LENGTH_SHORT;
 
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
+            if (context != null){
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+            }
         }
 
     }

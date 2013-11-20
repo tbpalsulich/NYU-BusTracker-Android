@@ -16,15 +16,19 @@ import java.net.URL;
 import java.util.concurrent.ExecutionException;
 
 public class JSONParser {
+    static InputStream is = null;
+    static JSONObject jObj = null;
+    static String json = "";
+
     private class Downloader extends AsyncTask<String, Integer, JSONObject>{
         @Override
         public JSONObject doInBackground(String... urls){
-            for(int i = 0; i < urls.length; i++){
+            for(String mURL : urls){
                 InputStream is = null;
                 // Making HTTP request
                 try {
-                    Log.v("JSONDebug", "Request URL" + urls[i]);
-                    is = new URL(urls[i]).openStream();
+                    Log.v("JSONDebug", "Request URL" + mURL);
+                    is = new URL(mURL).openStream();
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 } catch (ClientProtocolException e) {
@@ -37,9 +41,10 @@ public class JSONParser {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(
                             is, "iso-8859-1"), 8);
                     StringBuilder sb = new StringBuilder();
-                    String line = null;
+                    String line;
                     while ((line = reader.readLine()) != null) {
-                        sb.append(line + "\n");
+                        sb.append(line);
+                        sb.append("\n");
                     }
                     is.close();
                     json = sb.toString();
@@ -60,11 +65,6 @@ public class JSONParser {
         }
     }
 
-
-    static InputStream is = null;
-    static JSONObject jObj = null;
-    static String json = "";
-
     // constructor
     public JSONParser() {
 
@@ -72,8 +72,7 @@ public class JSONParser {
 
     public JSONObject getJSONFromUrl(String url) {
         try {
-            JSONObject mObj = new Downloader().execute(url).get();
-            return mObj;
+            return new Downloader().execute(url).get();
         }
         catch (InterruptedException e){
             e.printStackTrace();
@@ -81,6 +80,6 @@ public class JSONParser {
         catch (ExecutionException e){
             e.printStackTrace();
         }
-        return jObj;
+        return null;
     }
 }

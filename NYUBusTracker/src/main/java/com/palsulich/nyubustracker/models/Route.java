@@ -19,7 +19,8 @@ public class Route {
     String routeID = "";
     ArrayList<Stop> stops = null;
     BusManager sharedManager;
-    PolylineOptions segment;
+    ArrayList<String> segmentIDs;
+    ArrayList<PolylineOptions> segments;
 
     public Route(String mLongName, String mRouteID){
         longName = mLongName;
@@ -36,12 +37,16 @@ public class Route {
         return longName;
     }
 
-    public void setSegment(List<LatLng> p){
-        segment = new PolylineOptions().addAll(p);
+    public ArrayList<String> getSegmentIDs() {
+        return segmentIDs;
     }
 
-    public PolylineOptions getSegment(){
-        return segment;
+    public ArrayList<PolylineOptions> getSegments(){
+        return segments;
+    }
+
+    public void addSegment(List<LatLng> seg){
+        segments.add(new PolylineOptions().addAll(seg));
     }
 
     public String getLongName(){
@@ -91,20 +96,20 @@ public class Route {
     }
 
     public static void parseJSON(JSONObject routesJson) throws JSONException{
-        JSONArray jRoutes = null;
+        JSONArray jRoutes;
         BusManager sharedManager = BusManager.getBusManager();
         jRoutes = routesJson.getJSONObject(FileGrabber.TAG_DATA).getJSONArray("72");
         for (int j = 0; j < jRoutes.length(); j++) {
             JSONObject routeObject = jRoutes.getJSONObject(j);
             String routeLongName = routeObject.getString(FileGrabber.TAG_LONG_NAME);
             String routeID = routeObject.getString(FileGrabber.TAG_ROUTE_ID);
-            sharedManager.addRoute(new Route(routeLongName, routeID));
+            Route r = new Route(routeLongName, routeID);
+            JSONArray segments = routeObject.getJSONArray(FileGrabber.TAG_SEGMENTS);
+            for (int i = 0; i < segments.length(); i++){
+                r.getSegmentIDs().add(segments.getString(i));
+            }
+            sharedManager.addRoute(r);
             Log.v("JSONDebug", "Route name: " + routeLongName + " | ID:" + routeID + " | Number of stops: " + sharedManager.getRouteByID(routeID).getStops().size());
         }
-    }
-
-    public boolean isConnectedTo(String routeName){
-
-        return false;
     }
 }

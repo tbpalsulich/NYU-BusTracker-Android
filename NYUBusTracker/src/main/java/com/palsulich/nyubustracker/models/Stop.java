@@ -31,8 +31,8 @@ public class Stop {
         times.put("Friday", new HashMap<String, Time[]>());
         routes = new ArrayList<Route>();
         BusManager sharedManager = BusManager.getBusManager();
-        for (int j = 0; j < mRoutes.length; j++){
-            Route r = sharedManager.getRouteByID(mRoutes[j]);
+        for (String s : mRoutes){
+            Route r = sharedManager.getRouteByID(s);
             if (r != null) r.addStop(this);
         }
     }
@@ -50,8 +50,7 @@ public class Stop {
     }
 
     public boolean hasRouteByString(String routeID){
-        for (int j = 0; j < routesString.length; j++){
-            String route = routesString[j];
+        for (String route : routesString){
             if (route.equals(routeID)) {
                 return true;
             }
@@ -79,7 +78,7 @@ public class Stop {
     }
 
     public static void parseJSON(JSONObject stopsJson) throws JSONException{
-        JSONArray jStops = null;
+        JSONArray jStops;
         BusManager sharedManager = BusManager.getBusManager();
         jStops = stopsJson.getJSONArray(FileGrabber.TAG_DATA);
         Log.v("JSONDebug", "Number of stops: " + jStops.length());

@@ -16,9 +16,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 public class FileGrabber {
-    String charset = "UTF-8";
-    String agencies = "72";
-    String query = makeQuery("agencies", agencies, charset);
+    private static final String charset = "UTF-8";
+    private static final String agencies = "72";
+    private static final String query = makeQuery("agencies", agencies, charset);
 
     public static final String TAG_DATA = "data";
     public static final String TAG_LONG_NAME = "long_name";
@@ -35,28 +35,29 @@ public class FileGrabber {
     public static final String TAG_FRIDAY = "Friday";
     public static final String TAG_WEEKEND = "Weekend";
     public static final String TAG_VEHICLE_ID = "vehicle_id";
+    public static final String TAG_SEGMENTS = "segments";
 
-    private String stopsURL = "http://api.transloc.com/1.2/stops.json?" + query;
-    private String routesURL = "http://api.transloc.com/1.2/routes.json?" + query;
-    private String segmentsURL = "http://api.transloc.com/1.2/segments.json?" + query;
-    private String vehiclesURL = "http://api.transloc.com/1.2/vehicles.json?" + query;
-    private String versionURL = "https://s3.amazonaws.com/nyubustimes/1.0/version.json";
-    private static String timesURL = "https://s3.amazonaws.com/nyubustimes/1.0/";
+    private static final String stopsURL = "http://api.transloc.com/1.2/stops.json?" + query;
+    private static final String routesURL = "http://api.transloc.com/1.2/routes.json?" + query;
+    private static final String segmentsURL = "http://api.transloc.com/1.2/segments.json?" + query;
+    private static final String vehiclesURL = "http://api.transloc.com/1.2/vehicles.json?" + query;
+    private static final String versionURL = "https://s3.amazonaws.com/nyubustimes/1.0/version.json";
+    private static final String timesURL = "https://s3.amazonaws.com/nyubustimes/1.0/";
 
 
-    private String stopsFileName = "stopsJSON";
-    private String routesFileName = "routesJSON";
-    private String vehiclesFileName = "vehiclesJSON";
-    private String versionFileName = "versionJSON";
-    private String segmentsFileName = "segmentsJSON";
+    private static final String stopsFileName = "stopsJSON";
+    private static final String routesFileName = "routesJSON";
+    private static final String vehiclesFileName = "vehiclesJSON";
+    private static final String versionFileName = "versionJSON";
+    private static final String segmentsFileName = "segmentsJSON";
 
     private static final String FROM_STOP_FILE_NAME = "fromStop";
     private static final String TO_STOP_FILE_NAME = "toStop";
 
 
-    private String makeQuery(String param, String value, String charset) {
+    private static String makeQuery(String param, String value, String charset) {
         try {
-            return String.format(param + "=" + URLEncoder.encode(agencies, charset));
+            return String.format(param + "=" + URLEncoder.encode(value, charset));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -80,21 +81,21 @@ public class FileGrabber {
 
     private String getFile(String fileName){
         if(files != null){
-            for(int i = 0; i < files.length; i++){
-                if(files[i].isFile() && files[i].getName().equals(fileName)){
+            for(File f : files){
+                if(f.isFile() && f.getName().equals(fileName)){
                     try {
                     String currentLine;
                     StringBuilder builder = new StringBuilder();
-                    BufferedReader reader = new BufferedReader(new FileReader(files[i]));
+                    BufferedReader reader = new BufferedReader(new FileReader(f));
 
                     while ((currentLine = reader.readLine()) != null) {
                         builder.append(currentLine);
                     }
                     return builder.toString();
                     } catch (FileNotFoundException e){
-                        Log.e("JSON Parser", "File not found: " + files[i].toString());
+                        Log.e("JSON Parser", "File not found: " + f.toString());
                     } catch (IOException e){
-                        Log.e("JSON Parser", "IO Exception: " + files[i].toString());
+                        Log.e("JSON Parser", "IO Exception: " + f.toString());
                     }
                 }
             }
@@ -118,28 +119,27 @@ public class FileGrabber {
 
     private JSONObject getJSON(String url, String cacheFile){
         if(files != null){
-            for(int i = 0; i < files.length; i++){
-                if(files[i].isFile() && files[i].getName().equals(cacheFile)){
+            for(File f : files){
+                if(f.isFile() && f.getName().equals(cacheFile)){
                     Log.v("JSONDebug", "Loading file from cache.");
                     // try parse the string to a JSON object
                     JSONObject jObj = null;
                     try {
-                        String json = "";
                         String currentLine;
                         StringBuilder builder = new StringBuilder();
-                        BufferedReader reader = new BufferedReader(new FileReader(files[i]));
+                        BufferedReader reader = new BufferedReader(new FileReader(f));
 
                         while ((currentLine = reader.readLine()) != null) {
                             builder.append(currentLine);
                         }
                         jObj = new JSONObject(builder.toString());
                     } catch (JSONException e) {
-                        Log.e("JSON Parser", files[i].toString());
+                        Log.e("JSON Parser", f.toString());
                         Log.e("JSON Parser", "Error parsing data " + e.toString());
                     } catch (FileNotFoundException e){
-                        Log.e("JSON Parser", "File not found: " + files[i].toString());
+                        Log.e("JSON Parser", "File not found: " + f.toString());
                     } catch (IOException e){
-                        Log.e("JSON Parser", "IO Exception: " + files[i].toString());
+                        Log.e("JSON Parser", "IO Exception: " + f.toString());
                     }
                     return jObj;
                 }
