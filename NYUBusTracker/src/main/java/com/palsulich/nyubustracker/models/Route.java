@@ -23,6 +23,8 @@ public class Route {
     ArrayList<PolylineOptions> segments;
 
     public Route(String mLongName, String mRouteID){
+        segmentIDs = new ArrayList<String>();
+        segments = new ArrayList<PolylineOptions>();
         longName = mLongName;
         routeID = mRouteID;
         sharedManager = BusManager.getBusManager();
@@ -46,6 +48,7 @@ public class Route {
     }
 
     public void addSegment(List<LatLng> seg){
+        Log.v("MapDebugging", "Adding segment for route " + routeID);
         segments.add(new PolylineOptions().addAll(seg));
     }
 
@@ -105,8 +108,10 @@ public class Route {
             String routeID = routeObject.getString(FileGrabber.TAG_ROUTE_ID);
             Route r = new Route(routeLongName, routeID);
             JSONArray segments = routeObject.getJSONArray(FileGrabber.TAG_SEGMENTS);
+            Log.v("MapDebugging", "Found " + segments.length() + " segments for route " + routeID);
             for (int i = 0; i < segments.length(); i++){
-                r.getSegmentIDs().add(segments.getString(i));
+                Log.v("MapDebugging", "Constructor of Route adding segment " + segments.getJSONArray(i).getString(0) + " for " + routeID);
+                r.getSegmentIDs().add(segments.getJSONArray(i).getString(0));
             }
             sharedManager.addRoute(r);
             Log.v("JSONDebug", "Route name: " + routeLongName + " | ID:" + routeID + " | Number of stops: " + sharedManager.getRouteByID(routeID).getStops().size());

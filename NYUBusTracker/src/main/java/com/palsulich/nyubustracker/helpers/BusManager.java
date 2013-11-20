@@ -22,6 +22,14 @@ public final class BusManager {
     private static ArrayList<String> hideStops = null;      // Stops to not show the user.
     private static ArrayList<Bus> buses = null;
 
+    private BusManager(){
+        stops = new ArrayList<Stop>();
+        routes = new ArrayList<Route>();
+        hideRoutes = new ArrayList<String>();
+        hideStops = new ArrayList<String>();
+        buses = new ArrayList<Bus>();
+    }
+
     public static BusManager getBusManager() {
         if (sharedBusManager == null) {
             sharedBusManager = new BusManager();
@@ -38,7 +46,7 @@ public final class BusManager {
     }
 
     public boolean hasStops() {
-        return stops.size() > 0;
+        return stops != null && stops.size() > 0;
     }
 
     /*
@@ -87,7 +95,7 @@ public final class BusManager {
     }
 
     public boolean hasRoutes() {
-        return routes.size() > 0;
+        return routes != null && routes.size() > 0;
     }
 
     public String[] getRoutesAsArray() {
@@ -108,9 +116,11 @@ public final class BusManager {
     Given an ID (e.g. "81374"), returns the Route with that ID.
      */
     public Route getRouteByID(String id) {
-        for (Route route : routes) {
-            if (route.getID().equals(id)) {
-                return route;
+        if (routes != null){
+            for (Route route : routes) {
+                if (route.getID().equals(id)) {
+                    return route;
+                }
             }
         }
         return null;
@@ -153,7 +163,7 @@ public final class BusManager {
     addStop will add a Stop to our ArrayList of Stops, unless we're supposed to hide it.
      */
     public void addStop(Stop stop) {
-        if (!hideStops.contains(stop.getID())){
+        if (hideStops != null && !hideStops.contains(stop.getID())){
             stops.add(stop);
             Log.v("Debugging", "Added " + stop.toString() + " to list of stops (" + stops.size() + ")");
         }
@@ -276,8 +286,9 @@ public final class BusManager {
         final BusManager sharedManager = BusManager.getBusManager();
         JSONObject segments = segmentsJSON.getJSONObject("data");
         for (Route r : sharedManager.getRoutes()){
+            Log.v("MapDebugging", "Does this route (" + r.getID() + ") have segments?");
             for (String seg : r.getSegmentIDs()){
-                Log.v("MapDebugging", "Adding a segment for route " + r.getID());
+                Log.v("MapDebugging", "Yes. r.addSegment to route " + r.getID());
                 r.addSegment(PolyUtil.decode(segments.getString(seg)));
             }
         }
