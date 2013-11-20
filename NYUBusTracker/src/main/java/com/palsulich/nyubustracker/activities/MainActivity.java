@@ -102,20 +102,6 @@ public class MainActivity extends Activity {
 
         setStartStop(mFileGrabber.getStartStopFile());
         setEndStop(mFileGrabber.getEndStopFile());
-
-        for (Stop s : sharedManager.getStops()){
-            mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
-                    .position(s.getLocation())
-                    .title(s.getName()));
-        }
-
-        for (Route r : sharedManager.getRoutes()){
-            ArrayList<PolylineOptions> segments = r.getSegments();     // Adds the segments of every Route to the map.
-            for (PolylineOptions p : segments){
-                if (p != null) mMap.addPolyline(p);
-                else Log.v("MapDebugging", "Segment was null for " + r.getID());
-            }
-        }
     }
 
     /*
@@ -173,6 +159,23 @@ public class MainActivity extends Activity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    private void updateMapWithNewStartOrEnd(){
+        setUpMapIfNeeded();
+        mMap.clear();
+        for (Route r : routesBetweenToAndFrom){
+            for (Stop s : r.getStops()){
+                mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
+                        .position(s.getLocation())
+                        .title(s.getName()));
+            }
+            ArrayList<PolylineOptions> segments = r.getSegments();     // Adds the segments of every Route to the map.
+            for (PolylineOptions p : segments){
+                if (p != null) mMap.addPolyline(p);
+                else Log.v("MapDebugging", "Segment was null for " + r.getID());
+            }
+        }
     }
 
     private void setEndStop(String stopName) {
@@ -279,6 +282,8 @@ public class MainActivity extends Activity {
                 toast.show();
             }
         }
+
+        updateMapWithNewStartOrEnd();
 
     }
 
