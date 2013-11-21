@@ -49,6 +49,24 @@ public final class BusManager {
         return stops != null && stops.size() > 0;
     }
 
+    public ArrayList<Bus> getBuses(){
+        return buses;
+    }
+    /*
+    Given a bus ID, getBus returns either the existing Bus with that ID, or a new bus with that ID.
+    This is used to parse the Bus JSON over and over to update location (called from Bus.parseJSON()).
+     */
+    public Bus getBus(String busID){
+        for (Bus b : buses){
+            if (b.getID().equals(busID)){
+                return b;
+            }
+        }
+        Bus b = new Bus(busID);
+        buses.add(b);
+        return b;
+    }
+
     /*
     Given the name of a stop (e.g. "715 Broadway"), getStopByName returns the Stop with that name.
      */

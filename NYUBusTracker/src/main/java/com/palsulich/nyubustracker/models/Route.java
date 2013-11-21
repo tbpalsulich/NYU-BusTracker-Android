@@ -1,5 +1,6 @@
 package com.palsulich.nyubustracker.models;
 
+import android.graphics.Color;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -49,7 +50,7 @@ public class Route {
 
     public void addSegment(List<LatLng> seg){
         Log.v("MapDebugging", "Adding segment for route " + routeID);
-        segments.add(new PolylineOptions().addAll(seg));
+        segments.add(new PolylineOptions().addAll(seg).color(Color.rgb(107, 26, 161)));
     }
 
     public String getLongName(){

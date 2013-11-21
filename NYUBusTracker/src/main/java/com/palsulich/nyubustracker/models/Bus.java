@@ -24,6 +24,11 @@ public class Bus {
         loc = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
         return this;
     }
+
+    public LatLng getLocation(){
+        return loc;
+    }
+
     public Bus setHeading(String mHeading){
         heading = mHeading;
         return this;
@@ -33,6 +38,17 @@ public class Bus {
         return this;
     }
 
+    public String getRoute() {
+        return route;
+    }
+
+    public Float getHeading() {
+        return Float.parseFloat(heading);
+    }
+
+    public String getID(){
+        return vehicleID;
+    }
     public static void parseJSON(JSONObject vehiclesJson) throws JSONException{
         BusManager sharedManager = BusManager.getBusManager();
         JSONArray jVehicles = vehiclesJson.getJSONObject(FileGrabber.TAG_DATA).getJSONArray("72");
@@ -44,7 +60,11 @@ public class Bus {
             String busRoute = busObject.getString(FileGrabber.TAG_ROUTE_ID);
             String vehicleID = busObject.getString(FileGrabber.TAG_VEHICLE_ID);
             String busHeading = busObject.getString(FileGrabber.TAG_HEADING);
-            sharedManager.addBus(new Bus(vehicleID).setHeading(busHeading).setLocation(busLat, busLng).setRoute(busRoute));
+            // getBus will either return an existing bus, or create a new one for us. We'll have to parse the bus JSON often.
+            Bus b = sharedManager.getBus(vehicleID);
+            b.setHeading(busHeading).setLocation(busLat, busLng).setRoute(busRoute);
+            Log.v("BusLocations", "Parsing buses: bus id: " + vehicleID + " | bus' route: " + busRoute);
+
             Log.v("JSONDebug", "Bus ID: " + vehicleID + " | Heading: " + busHeading + " | (" + busLat + ", " + busLng + ")");
         }
     }

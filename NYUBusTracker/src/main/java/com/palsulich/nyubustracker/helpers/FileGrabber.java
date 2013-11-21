@@ -117,71 +117,74 @@ public class FileGrabber {
         }
     }
 
-    private JSONObject getJSON(String url, String cacheFile){
-        if(files != null){
-            for(File f : files){
-                if(f.isFile() && f.getName().equals(cacheFile)){
-                    Log.v("JSONDebug", "Loading file from cache.");
-                    // try parse the string to a JSON object
-                    JSONObject jObj = null;
-                    try {
-                        String currentLine;
-                        StringBuilder builder = new StringBuilder();
-                        BufferedReader reader = new BufferedReader(new FileReader(f));
+    private JSONObject getJSON(String url, String cacheFile, boolean dontCache){
+        if(!dontCache){
+            if(files != null){
+                for(File f : files){
+                    if(f.isFile() && f.getName().equals(cacheFile)){
+                        Log.v("JSONDebug", "Loading file from cache.");
+                        // try parse the string to a JSON object
+                        JSONObject jObj = null;
+                        try {
+                            String currentLine;
+                            StringBuilder builder = new StringBuilder();
+                            BufferedReader reader = new BufferedReader(new FileReader(f));
 
-                        while ((currentLine = reader.readLine()) != null) {
-                            builder.append(currentLine);
+                            while ((currentLine = reader.readLine()) != null) {
+                                builder.append(currentLine);
+                            }
+                            jObj = new JSONObject(builder.toString());
+                        } catch (JSONException e) {
+                            Log.e("JSON Parser", f.toString());
+                            Log.e("JSON Parser", "Error parsing data " + e.toString());
+                        } catch (FileNotFoundException e){
+                            Log.e("JSON Parser", "File not found: " + f.toString());
+                        } catch (IOException e){
+                            Log.e("JSON Parser", "IO Exception: " + f.toString());
                         }
-                        jObj = new JSONObject(builder.toString());
-                    } catch (JSONException e) {
-                        Log.e("JSON Parser", f.toString());
-                        Log.e("JSON Parser", "Error parsing data " + e.toString());
-                    } catch (FileNotFoundException e){
-                        Log.e("JSON Parser", "File not found: " + f.toString());
-                    } catch (IOException e){
-                        Log.e("JSON Parser", "IO Exception: " + f.toString());
+                        return jObj;
                     }
-                    return jObj;
                 }
             }
+            File file = new File(cacheDir, cacheFile);
+            JSONObject jObj = jParser.getJSONFromUrl(url);
+            try {
+                Log.v("JSONDebug", "Creating a new cache file.");
+                file.createNewFile();
+                FileWriter fw = new FileWriter(file);
+                BufferedWriter bw = new BufferedWriter(fw);
+                bw.write(jObj.toString());
+                bw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return jObj;
         }
-        File file = new File(cacheDir, cacheFile);
-        JSONObject jObj = jParser.getJSONFromUrl(url);
-        try {
-            Log.v("JSONDebug", "Creating a new cache file.");
-            file.createNewFile();
-            FileWriter fw = new FileWriter(file);
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.write(jObj.toString());
-            bw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return jObj;
+        else return jParser.getJSONFromUrl(url);
     }
 
     public JSONObject getTimesFromFile(String file){
-        return getJSON(timesURL + file, file);
+        return getJSON(timesURL + file, file, false);
     }
 
     public JSONObject getSegmentsJSON(){
-        return getJSON(segmentsURL, segmentsFileName);
+        return getJSON(segmentsURL, segmentsFileName, false);
     }
 
     public JSONObject getStopJSON(){
-        return getJSON(stopsURL, stopsFileName);
+        return getJSON(stopsURL, stopsFileName, false);
     }
 
     public JSONObject getRouteJSON(){
-        return getJSON(routesURL, routesFileName);
+        return getJSON(routesURL, routesFileName, false);
     }
 
     public JSONObject getVersionJSON(){
-        return getJSON(versionURL, versionFileName);
+        return getJSON(versionURL, versionFileName, false);
     }
 
     public JSONObject getVehicleJSON(){
-        return getJSON(vehiclesURL, vehiclesFileName);
+        return getJSON(vehiclesURL, vehiclesFileName, true);
     }
 
     public String getStartStopFile(){
