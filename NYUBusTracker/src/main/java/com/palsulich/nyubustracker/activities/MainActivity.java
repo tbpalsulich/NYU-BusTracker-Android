@@ -218,6 +218,7 @@ public class MainActivity extends Activity {
             m.remove();
         }
         busesOnMap = new ArrayList<Marker>();
+        if (clickableMapMarkers == null) clickableMapMarkers = new HashMap<String, Boolean>();
         for (Route r: routesBetweenToAndFrom){
             for (Bus b : sharedManager.getBuses()){
                 Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
