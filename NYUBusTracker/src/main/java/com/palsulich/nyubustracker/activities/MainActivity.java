@@ -36,10 +36,8 @@ import com.palsulich.nyubustracker.models.Time;
 import org.json.JSONException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -148,8 +146,10 @@ public class MainActivity extends Activity {
     private void renewBusRefreshTimer(){
         if (busRefreshTimer != null) busRefreshTimer.cancel();
 
+        updateMapWithNewBusLocations();
+
         busRefreshTimer = new Timer();
-        timeUntilTimer.scheduleAtFixedRate(new TimerTask() {
+        busRefreshTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 runOnUiThread(new Runnable() {
@@ -254,8 +254,8 @@ public class MainActivity extends Activity {
                 clickableMapMarkers.put(mMarker.getId(), true);
             }
             updateMapWithNewBusLocations();
-            ArrayList<PolylineOptions> segments = r.getSegments();     // Adds the segments of every Route to the map.
-            for (PolylineOptions p : segments){
+            // Adds the segments of every Route to the map.
+            for (PolylineOptions p : r.getSegments()){
                 if (p != null){
                     for (LatLng loc : p.getPoints()){
                         builder.include(loc);
@@ -307,24 +307,30 @@ public class MainActivity extends Activity {
             setNextBusTime();
             updateMapWithNewStartOrEnd();
         } else {
+            Log.v("Debugging", "setStartStop not swapping");
             // We have a new start. So, we must ensure the end is actually connected.
             Stop tempStop = BusManager.getBusManager().getStopByName(stopName);
             if (tempStop != null){      // Don't set Start to an invalid stop. Should never happen.
                 startStop = tempStop;
+                Log.v("Debugging", "New start stop: " + startStop.getName());
                 ((Button) findViewById(R.id.from_button)).setText("Start: " + stopName);
                 if (endStop != null){
-                    updateMapWithNewStartOrEnd();
                     // Loop through all connected Routes.
                     for (Route r : startStop.getRoutes()){
                         // If the current endStop is connected, we don't have to change endStop.
                         if (r.hasStop(endStop.getName())){
+                            Log.v("Debugging", "Found a connected end stop: " + endStop.getName() + " through " + r.getLongName());
                             setNextBusTime();
+                            updateMapWithNewStartOrEnd();
                             return;
                         }
                     }
+                    BusManager sharedManager = BusManager.getBusManager();
+                    ArrayList<Stop> connectedStops = startStop.getRoutes().get(0).getStops();
+                    Log.v("Debugging", "setStartStop picking default endStop: " + connectedStops.get(connectedStops.indexOf(startStop) + 1).getName());
                     // If we did not return above, the current endStop is not connected to the new
                     // startStop. So, by default pick the first connected stop.
-                    endStop = startStop.getRoutes().get(0).getStops().get(0);
+                    setEndStop(connectedStops.get(connectedStops.indexOf(startStop) + 1).getName());
                 }
 
             }
@@ -342,23 +348,27 @@ public class MainActivity extends Activity {
     }
 
     private void setNextBusTime() {
+        if (timeUntilTimer != null) timeUntilTimer.cancel();
+        if (busRefreshTimer != null) busRefreshTimer.cancel();
         Calendar rightNow = Calendar.getInstance();
         ArrayList<Route> fromRoutes = startStop.getRoutes();
         ArrayList<Route> routes = new ArrayList<Route>();
         for (Route r : fromRoutes) {
-            if (r.hasStop(endStop.getName())) {
-                Log.v("Route Debugging", "Adding a route!");
+            if (r.hasStop(endStop.getName()) && endStop.getTimes().get(getTimeOfWeek()).get(r.getLongName()) != null) {
+                Log.v("Route Debugging", "Adding a route between " + startStop.getName() + " and " + endStop.getName() + ": " + r.getLongName());
                 routes.add(r);
             }
         }
-        if (routes.size() != 0) {
+        if (routes.size() > 0) {
             ArrayList<Time> tempTimesBetweenStartAndEnd = new ArrayList<Time>();
             for (Route r : routes) {
                 String timeOfWeek = getTimeOfWeek();
                 // Get the Times at this stop for this route.
-                List<Time> times = Arrays.asList(startStop.getTimes()
-                        .get(timeOfWeek)
-                        .get(r.getLongName()));
+                ArrayList<Time> times = new ArrayList<Time>();
+                if (startStop.getTimes().get(timeOfWeek).get(r.getLongName()) == null) Log.v("Debugging", "Bingo: " + r.getLongName());
+                for (Time t : startStop.getTimes().get(timeOfWeek).get(r.getLongName())){
+                    times.add(t);
+                }
                 for (Time t : times){
                     t.setRoute(r.getLongName());
                 }
@@ -385,7 +395,7 @@ public class MainActivity extends Activity {
             }
             else{
                 Context context = getApplicationContext();
-                CharSequence text = "That stop is unavailable!";
+                CharSequence text = "That stop is unavailable!!";
                 int duration = Toast.LENGTH_SHORT;
 
                 if (context != null){
@@ -395,8 +405,11 @@ public class MainActivity extends Activity {
             }
         } else
         {
+            busRefreshTimer.cancel();
+            timeUntilTimer.cancel();
+
             Context context = getApplicationContext();
-            CharSequence text = "That stop is unavailable!";
+            CharSequence text = "That stop is unavailable today!";
             int duration = Toast.LENGTH_SHORT;
 
             if (context != null){
@@ -404,6 +417,9 @@ public class MainActivity extends Activity {
                 toast.show();
             }
         }
+
+        renewBusRefreshTimer();
+        renewTimeUntilTimer();
     }
 
     public void createToDialog(View view) {

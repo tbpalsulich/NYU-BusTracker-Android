@@ -33,7 +33,7 @@ public class Stop {
         BusManager sharedManager = BusManager.getBusManager();
         for (String s : mRoutes){
             Route r = sharedManager.getRouteByID(s);
-            if (r != null) r.addStop(this);
+            if (r != null && !r.getStops().contains(this)) r.addStop(this);
         }
     }
 

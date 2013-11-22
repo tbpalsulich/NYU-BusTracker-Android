@@ -36,6 +36,7 @@ public class FileGrabber {
     public static final String TAG_WEEKEND = "Weekend";
     public static final String TAG_VEHICLE_ID = "vehicle_id";
     public static final String TAG_SEGMENTS = "segments";
+    public static final String TAG_STOPS = "stops";
 
     private static final String stopsURL = "http://api.transloc.com/1.2/stops.json?" + query;
     private static final String routesURL = "http://api.transloc.com/1.2/routes.json?" + query;

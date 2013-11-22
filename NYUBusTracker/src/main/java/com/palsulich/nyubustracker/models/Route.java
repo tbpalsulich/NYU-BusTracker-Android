@@ -108,6 +108,10 @@ public class Route {
             String routeLongName = routeObject.getString(FileGrabber.TAG_LONG_NAME);
             String routeID = routeObject.getString(FileGrabber.TAG_ROUTE_ID);
             Route r = new Route(routeLongName, routeID);
+            JSONArray stops = routeObject.getJSONArray(FileGrabber.TAG_STOPS);
+            for (int i = 0; i < stops.length(); i++){
+                r.addStop(sharedManager.getStopByID(stops.getString(i)));
+            }
             JSONArray segments = routeObject.getJSONArray(FileGrabber.TAG_SEGMENTS);
             Log.v("MapDebugging", "Found " + segments.length() + " segments for route " + routeID);
             for (int i = 0; i < segments.length(); i++){

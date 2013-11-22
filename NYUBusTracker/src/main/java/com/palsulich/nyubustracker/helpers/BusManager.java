@@ -116,20 +116,6 @@ public final class BusManager {
         return routes != null && routes.size() > 0;
     }
 
-    public String[] getRoutesAsArray() {
-        String[] routesArray;
-        if (routes.size() == 0) {
-            routesArray = new String[1];
-            routesArray[0] = "No routes available";
-        } else {
-            routesArray = new String[routes.size()];
-        }
-        for (int i = 0; i < routesArray.length; i++) {
-            routesArray[i] = routes.get(i).toString();
-        }
-        return routesArray;
-    }
-
     /*
     Given an ID (e.g. "81374"), returns the Route with that ID.
      */

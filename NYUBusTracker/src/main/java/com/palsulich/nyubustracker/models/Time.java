@@ -60,17 +60,11 @@ public class Time {
 
     // Return if this time is equal to or before Time t.
     public boolean isBefore(Time t){
-        boolean result = false;
-        if (this.hour < t.hour) result = true;
-        if (this.hour == t.hour && this.min <= t.min) result = true;
-        return result;   // if (hour > t.hour)
+        return (this.hour < t.hour) || (this.hour == t.hour && this.min <= t.min);
     }
 
     public boolean isAfter(Time t){
-        boolean result = false;
-        if (this.hour > t.hour) result = true;
-        if (this.hour == t.hour && this.min >= t.min) result = true;
-        return result;
+        return (this.hour > t.hour) || (this.hour == t.hour && this.min >= t.min);
     }
 
     // Return a Time object who represents the difference in time between the two Times.
@@ -95,8 +89,7 @@ public class Time {
     }
 
     private String getAMorPM(){
-        if (AM) return "AM";
-        else return "PM";
+        return AM ? "AM" : "PM";
     }
 
     // Return this Time in 12-hour format.
