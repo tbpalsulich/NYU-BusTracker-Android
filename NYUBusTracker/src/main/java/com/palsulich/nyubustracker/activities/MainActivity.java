@@ -47,7 +47,7 @@ public class MainActivity extends Activity {
 
     Stop startStop;     // Stop object to keep track of the start location of the desired route.
     Stop endStop;       // Keep track of the desired end location.
-    ArrayList<Route> routesBetweenToAndFrom;        // List of all routes between start and end.
+    ArrayList<Route> routesBetweenStartAndEnd;        // List of all routes between start and end.
     ArrayList<Time> timesBetweenStartAndEnd;        // List of all times between start and end.
     HashMap<String, Boolean> clickableMapMarkers;   // Hash of all markers which are clickable (so we don't zoom in on buses).
     ArrayList<Marker> busesOnMap = new ArrayList<Marker>();
@@ -116,7 +116,7 @@ public class MainActivity extends Activity {
         setStartStop(mFileGrabber.getStartStopFile());
         setEndStop(mFileGrabber.getEndStopFile());
 
-        updateMapWithNewStartOrEnd();
+        if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
 
         renewBusRefreshTimer();
     }
@@ -126,7 +126,7 @@ public class MainActivity extends Activity {
      */
     private void renewTimeUntilTimer() {
         Calendar rightNow = Calendar.getInstance();
-
+        
         if (timeUntilTimer != null) timeUntilTimer.cancel();
 
         timeUntilTimer = new Timer();
@@ -136,7 +136,7 @@ public class MainActivity extends Activity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        setNextBusTime();
+                        if(startStop != null && endStop != null) setNextBusTime();
                     }
                 });
             }
@@ -145,8 +145,14 @@ public class MainActivity extends Activity {
 
     private void renewBusRefreshTimer(){
         if (busRefreshTimer != null) busRefreshTimer.cancel();
-
-        updateMapWithNewBusLocations();
+        try{
+            if (routesBetweenStartAndEnd != null){
+                Bus.parseJSON(mFileGrabber.getVehicleJSON());
+                updateMapWithNewBusLocations();
+            }
+        } catch (JSONException e){
+            e.printStackTrace();
+        }
 
         busRefreshTimer = new Timer();
         busRefreshTimer.scheduleAtFixedRate(new TimerTask() {
@@ -156,8 +162,10 @@ public class MainActivity extends Activity {
                     @Override
                     public void run() {
                         try{
-                            Bus.parseJSON(mFileGrabber.getVehicleJSON());
-                            updateMapWithNewBusLocations();
+                            if (routesBetweenStartAndEnd != null){
+                                Bus.parseJSON(mFileGrabber.getVehicleJSON());
+                                updateMapWithNewBusLocations();
+                            }
                         } catch (JSONException e){
                             e.printStackTrace();
                         }
@@ -219,7 +227,7 @@ public class MainActivity extends Activity {
         }
         busesOnMap = new ArrayList<Marker>();
         if (clickableMapMarkers == null) clickableMapMarkers = new HashMap<String, Boolean>();
-        for (Route r: routesBetweenToAndFrom){
+        for (Route r: routesBetweenStartAndEnd){
             for (Bus b : sharedManager.getBuses()){
                 Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
                 if (b.getRoute().equals(r.getID())){
@@ -245,7 +253,7 @@ public class MainActivity extends Activity {
         mMap.clear();
         clickableMapMarkers = new HashMap<String, Boolean>();
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        for (Route r : routesBetweenToAndFrom){
+        for (Route r : routesBetweenStartAndEnd){
             for (Stop s : r.getStops()){
                 Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
                         .position(s.getLocation())
@@ -287,11 +295,12 @@ public class MainActivity extends Activity {
         if (stopName.equals("")) stopName = "80 Lafayette Street";      // Default end stop.
         Stop tempStop = BusManager.getBusManager().getStopByName(stopName);
         if (tempStop != null) {     // Make sure we actually have a stop!
+            // Check there is a route between these stops.
             endStop = tempStop;
             ((Button) findViewById(R.id.to_button)).setText("End: " + stopName);
             if (startStop != null){
                 setNextBusTime();    // Don't set the next bus if we don't have a valid route.
-                updateMapWithNewStartOrEnd();
+                if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
             }
         }
     }
@@ -377,7 +386,7 @@ public class MainActivity extends Activity {
             }
             if (tempTimesBetweenStartAndEnd != null && tempTimesBetweenStartAndEnd.size() > 0){
                 timesBetweenStartAndEnd = tempTimesBetweenStartAndEnd;
-                routesBetweenToAndFrom = routes;
+                routesBetweenStartAndEnd = routes;
                 Time currentTime = new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
                 Time nextBusTime = timesBetweenStartAndEnd.get(0);
                 for (Time tempTime : timesBetweenStartAndEnd) {
@@ -406,8 +415,8 @@ public class MainActivity extends Activity {
             }
         } else
         {
-            busRefreshTimer.cancel();
-            timeUntilTimer.cancel();
+            if (busRefreshTimer != null) busRefreshTimer.cancel();
+            if (timeUntilTimer != null) timeUntilTimer.cancel();
 
             Context context = getApplicationContext();
             CharSequence text = "That stop is unavailable today!";
