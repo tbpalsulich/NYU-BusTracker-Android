@@ -78,9 +78,9 @@ public class Stop {
     }
 
     public static void parseJSON(JSONObject stopsJson) throws JSONException{
-        JSONArray jStops;
+        JSONArray jStops = new JSONArray();
         BusManager sharedManager = BusManager.getBusManager();
-        jStops = stopsJson.getJSONArray(FileGrabber.TAG_DATA);
+        if (stopsJson != null) jStops = stopsJson.getJSONArray(FileGrabber.TAG_DATA);
         Log.v("JSONDebug", "Number of stops: " + jStops.length());
         for (int i = 0; i < jStops.length(); i++) {
             JSONObject stopObject = jStops.getJSONObject(i);

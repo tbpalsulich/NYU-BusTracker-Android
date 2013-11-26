@@ -8,6 +8,8 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -104,11 +106,24 @@ public class MainActivity extends Activity {
             try {
                 // The Class being created from the parsing *does* the parsing.
                 // mFileGrabber.get*JSON() returns a JSONObject.
-                Stop.parseJSON(mFileGrabber.getStopJSON());
-                Route.parseJSON(mFileGrabber.getRouteJSON());
-                BusManager.parseTimes(mFileGrabber.getVersionJSON(), mFileGrabber);
-                Bus.parseJSON(mFileGrabber.getVehicleJSON());
-                BusManager.parseSegments(mFileGrabber.getSegmentsJSON());
+                ConnectivityManager connMgr = (ConnectivityManager)
+                        getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+                Stop.parseJSON(mFileGrabber.getStopJSON(networkInfo));
+                Route.parseJSON(mFileGrabber.getRouteJSON(networkInfo));
+                BusManager.parseTimes(mFileGrabber.getVersionJSON(networkInfo), mFileGrabber, networkInfo);
+                Bus.parseJSON(mFileGrabber.getVehicleJSON(networkInfo));
+                BusManager.parseSegments(mFileGrabber.getSegmentsJSON(networkInfo));
+                if (networkInfo == null || !networkInfo.isConnected()){
+                    Context context = getApplicationContext();
+                    CharSequence text = "Unable to connect to the network.";
+                    int duration = Toast.LENGTH_SHORT;
+
+                    if (context != null){
+                        Toast toast = Toast.makeText(context, text, duration);
+                        toast.show();
+                    }
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -148,7 +163,10 @@ public class MainActivity extends Activity {
         if (busRefreshTimer != null) busRefreshTimer.cancel();
         try{
             if (routesBetweenStartAndEnd != null){
-                Bus.parseJSON(mFileGrabber.getVehicleJSON());
+                ConnectivityManager connMgr = (ConnectivityManager)
+                        getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+                Bus.parseJSON(mFileGrabber.getVehicleJSON(networkInfo));
                 updateMapWithNewBusLocations();
             }
         } catch (JSONException e){
@@ -164,7 +182,10 @@ public class MainActivity extends Activity {
                     public void run() {
                         try{
                             if (routesBetweenStartAndEnd != null){
-                                Bus.parseJSON(mFileGrabber.getVehicleJSON());
+                                ConnectivityManager connMgr = (ConnectivityManager)
+                                        getSystemService(Context.CONNECTIVITY_SERVICE);
+                                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+                                Bus.parseJSON(mFileGrabber.getVehicleJSON(networkInfo));
                                 updateMapWithNewBusLocations();
                             }
                         } catch (JSONException e){
@@ -202,8 +223,8 @@ public class MainActivity extends Activity {
 
     public void cacheToAndStartStop() {
         FileGrabber mFileGrabber = new FileGrabber(getCacheDir());
-        mFileGrabber.setEndStop(endStop.getName());         // Creates or updates cache file.
-        mFileGrabber.setStartStop(startStop.getName());
+        if (endStop != null) mFileGrabber.setEndStop(endStop.getName());         // Creates or updates cache file.
+        if (startStop != null) mFileGrabber.setStartStop(startStop.getName());
 
     }
 
@@ -249,11 +270,11 @@ public class MainActivity extends Activity {
     }
 
     private void updateMapWithNewStartOrEnd(){
-        BusManager sharedManager = BusManager.getBusManager();
         setUpMapIfNeeded();
         mMap.clear();
         clickableMapMarkers = new HashMap<String, Boolean>();
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        boolean validBuilder = false;
         for (Route r : routesBetweenStartAndEnd){
             for (Stop s : r.getStops()){
                 Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
@@ -268,6 +289,7 @@ public class MainActivity extends Activity {
             for (PolylineOptions p : r.getSegments()){
                 if (p != null){
                     for (LatLng loc : p.getPoints()){
+                        validBuilder = true;
                         builder.include(loc);
                     }
                     p.color(getResources().getColor(R.color.purple));
@@ -276,21 +298,21 @@ public class MainActivity extends Activity {
                 else Log.v("MapDebugging", "Segment was null for " + r.getID());
             }
         }
-
-        LatLngBounds bounds = builder.build();
-        try{
-            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 30));
-        } catch(IllegalStateException e) {
-            e.printStackTrace();
-            mMap.moveCamera(
-                    CameraUpdateFactory
-                            .newLatLngBounds(
-                                    bounds,
-                                    this.getResources().getDisplayMetrics().widthPixels,
-                                    this.getResources().getDisplayMetrics().heightPixels,
-                                    200));
+        if (validBuilder){
+            LatLngBounds bounds = builder.build();
+            try{
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 30));
+            } catch(IllegalStateException e) {
+                e.printStackTrace();
+                mMap.moveCamera(
+                        CameraUpdateFactory
+                                .newLatLngBounds(
+                                        bounds,
+                                        this.getResources().getDisplayMetrics().widthPixels,
+                                        this.getResources().getDisplayMetrics().heightPixels,
+                                        200));
+            }
         }
-
     }
 
     private void setEndStop(String stopName) {

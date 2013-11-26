@@ -1,5 +1,6 @@
 package com.palsulich.nyubustracker.helpers;
 
+import android.net.NetworkInfo;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -118,7 +119,7 @@ public class FileGrabber {
         }
     }
 
-    private JSONObject getJSON(String url, String cacheFile, boolean dontCache){
+    private JSONObject getJSON(String url, String cacheFile, boolean dontCache, NetworkInfo networkInfo){
         if(!dontCache){
             if(files != null){
                 for(File f : files){
@@ -147,49 +148,55 @@ public class FileGrabber {
                     }
                 }
             }
-            File file = new File(cacheDir, cacheFile);
-            JSONObject jObj = jParser.getJSONFromUrl(url);
-            try {
-                Log.v("JSONDebug", "Creating a new cache file.");
-                file.createNewFile();
-                FileWriter fw = new FileWriter(file);
-                BufferedWriter bw = new BufferedWriter(fw);
-                bw.write(jObj.toString());
-                bw.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            if(networkInfo != null && networkInfo.isConnected()){
+                File file = new File(cacheDir, cacheFile);
+                JSONObject jObj = jParser.getJSONFromUrl(url);
+                try {
+                    Log.v("JSONDebug", "Creating a new cache file.");
+                    file.createNewFile();
+                    FileWriter fw = new FileWriter(file);
+                    BufferedWriter bw = new BufferedWriter(fw);
+                    bw.write(jObj.toString());
+                    bw.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return jObj;
             }
-            return jObj;
         }
-        else return jParser.getJSONFromUrl(url);
+        else if (networkInfo != null && networkInfo.isConnected())
+            return jParser.getJSONFromUrl(url);
+        return null;
     }
 
-    public JSONObject getTimesFromFile(String file){
-        return getJSON(timesURL + file, file, false);
+    public JSONObject getTimesFromFile(String file, NetworkInfo networkInfo){
+        return getJSON(timesURL + file, file, false, networkInfo);
     }
 
-    public JSONObject getSegmentsJSON(){
-        return getJSON(segmentsURL, segmentsFileName, false);
+    public JSONObject getSegmentsJSON(NetworkInfo networkInfo){
+        return getJSON(segmentsURL, segmentsFileName, false, networkInfo);
     }
 
-    public JSONObject getStopJSON(){
-        return getJSON(stopsURL, stopsFileName, false);
+    public JSONObject getStopJSON(NetworkInfo networkInfo){
+        return getJSON(stopsURL, stopsFileName, false, networkInfo);
     }
 
-    public JSONObject getRouteJSON(){
-        return getJSON(routesURL, routesFileName, false);
+    public JSONObject getRouteJSON(NetworkInfo networkInfo){
+        return getJSON(routesURL, routesFileName, false, networkInfo);
     }
 
-    public JSONObject getVersionJSON(){
-        return getJSON(versionURL, versionFileName, false);
+    public JSONObject getVersionJSON(NetworkInfo networkInfo){
+        return getJSON(versionURL, versionFileName, false, networkInfo);
     }
 
-    public JSONObject getVehicleJSON(){
-        return getJSON(vehiclesURL, vehiclesFileName, true);
+    public JSONObject getVehicleJSON(NetworkInfo networkInfo){
+        return getJSON(vehiclesURL, vehiclesFileName, true, networkInfo);
     }
 
     public String getStartStopFile(){
-        return getFile(FROM_STOP_FILE_NAME);
+        String result = getFile(FROM_STOP_FILE_NAME);
+        if (result.equals("")) return "715 Broadway at Washington Square";
+        else return result;
     }
 
     public void setStartStop(String stop){
@@ -197,7 +204,9 @@ public class FileGrabber {
     }
 
     public String getEndStopFile(){
-        return getFile(TO_STOP_FILE_NAME);
+        String result = getFile(TO_STOP_FILE_NAME);
+        if (result.equals("")) return "80 Lafayette Street";
+        else return result;
     }
 
     public void setEndStop(String stop){

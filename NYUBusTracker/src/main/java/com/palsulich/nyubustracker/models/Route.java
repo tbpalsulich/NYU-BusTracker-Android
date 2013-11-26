@@ -99,9 +99,9 @@ public class Route {
     }
 
     public static void parseJSON(JSONObject routesJson) throws JSONException{
-        JSONArray jRoutes;
+        JSONArray jRoutes = new JSONArray();
         BusManager sharedManager = BusManager.getBusManager();
-        jRoutes = routesJson.getJSONObject(FileGrabber.TAG_DATA).getJSONArray("72");
+        if (routesJson != null) jRoutes = routesJson.getJSONObject(FileGrabber.TAG_DATA).getJSONArray("72");
         for (int j = 0; j < jRoutes.length(); j++) {
             JSONObject routeObject = jRoutes.getJSONObject(j);
             String routeLongName = routeObject.getString(FileGrabber.TAG_LONG_NAME);

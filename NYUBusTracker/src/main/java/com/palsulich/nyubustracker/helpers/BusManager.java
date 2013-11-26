@@ -1,5 +1,6 @@
 package com.palsulich.nyubustracker.helpers;
 
+import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.google.maps.android.PolyUtil;
@@ -196,10 +197,11 @@ public final class BusManager {
     So, the sequence of events is: we're parsing version.json, we find a stop object (specified by an
     ID), we request the JSON of times for that stop, and we parse those times.
      */
-    public static void parseTimes(JSONObject versionJson, FileGrabber mFileGrabber) throws JSONException {
+    public static void parseTimes(JSONObject versionJson, FileGrabber mFileGrabber, NetworkInfo networkInfo) throws JSONException {
         ArrayList<Stop> stops = sharedBusManager.getStops();
         Log.v("Debugging", "Looking for times for " + stops.size() + " stops.");
-        JSONArray jHides = versionJson.getJSONArray("hideroutes");
+        JSONArray jHides = new JSONArray();
+        if (versionJson != null) jHides = versionJson.getJSONArray("hideroutes");
         for (int j = 0; j < jHides.length(); j++){      // For each element of our list of hideroutes.
             String hideMeID = jHides.getString(j);      // ID of the route to hide.
             Log.v("JSONDebug", "Hiding a route... " + hideMeID);
@@ -216,7 +218,8 @@ public final class BusManager {
             }
         }
 
-        JSONArray jHideStops = versionJson.getJSONArray("hidestops");
+        JSONArray jHideStops = new JSONArray();
+        if (versionJson != null) jHideStops = versionJson.getJSONArray("hidestops");
         for (int j = 0; j < jHideStops.length(); j++){
             String hideMeID = jHideStops.getString(j);
             Log.v("JSONDebug", "Hiding a stop... " + hideMeID);
@@ -233,12 +236,13 @@ public final class BusManager {
             }
         }
 
-        JSONArray jVersion = versionJson.getJSONArray("versions");
+        JSONArray jVersion = new JSONArray();
+        if(versionJson != null) jVersion = versionJson.getJSONArray("versions");
         for (int j = 0; j < jVersion.length(); j++) {
             JSONObject stopObject = jVersion.getJSONObject(j);
             String file = stopObject.getString("file");
             Log.v("Debugging", "Looking for times for " + file);
-            JSONObject timesJson = mFileGrabber.getTimesFromFile(file);
+            JSONObject timesJson = mFileGrabber.getTimesFromFile(file, networkInfo);
             JSONObject routes = timesJson.getJSONObject(FileGrabber.TAG_ROUTES);
             Stop s = sharedBusManager.getStopByID(file.substring(0, file.indexOf(".")));
             for (int i = 0; i < s.getRoutes().size(); i++) {
@@ -288,7 +292,8 @@ public final class BusManager {
 
     public static void parseSegments(JSONObject segmentsJSON) throws JSONException{
         final BusManager sharedManager = BusManager.getBusManager();
-        JSONObject segments = segmentsJSON.getJSONObject("data");
+        JSONObject segments = new JSONObject();
+        if (segmentsJSON != null) segmentsJSON.getJSONObject("data");
         for (Route r : sharedManager.getRoutes()){
             Log.v("MapDebugging", "Does this route (" + r.getID() + ") have segments?");
             for (String seg : r.getSegmentIDs()){

@@ -52,7 +52,10 @@ public class Bus {
     }
     public static void parseJSON(JSONObject vehiclesJson) throws JSONException{
         BusManager sharedManager = BusManager.getBusManager();
-        JSONArray jVehicles = vehiclesJson.getJSONObject(FileGrabber.TAG_DATA).getJSONArray("72");
+        JSONObject jVehiclesData = null;
+        if(vehiclesJson != null) jVehiclesData = vehiclesJson.getJSONObject(FileGrabber.TAG_DATA);
+        JSONArray jVehicles = new JSONArray();
+        if (jVehiclesData != null) jVehicles = jVehiclesData.getJSONArray("72");
         for (int j = 0; j < jVehicles.length(); j++) {
             JSONObject busObject = jVehicles.getJSONObject(j);
             JSONObject busLocation = busObject.getJSONObject(FileGrabber.TAG_LOCATION);

@@ -71,6 +71,7 @@ public class JSONParser {
     }
 
     public JSONObject getJSONFromUrl(String url) {
+
         try {
             return new Downloader().execute(url).get();
         }
