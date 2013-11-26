@@ -30,7 +30,8 @@ public class Bus {
     }
 
     public Bus setHeading(String mHeading){
-        heading = mHeading;
+        if (heading.equals("null")) heading = "0";
+        else heading = mHeading;
         return this;
     }
     public Bus setRoute(String mRoute){

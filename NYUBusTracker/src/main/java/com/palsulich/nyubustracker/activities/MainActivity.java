@@ -69,6 +69,7 @@ public class MainActivity extends Activity {
             if (mMap != null) {
                 // The Map is verified. It is now safe to manipulate the map.
                 mMap.getUiSettings().setRotateGesturesEnabled(false);
+                mMap.getUiSettings().setZoomControlsEnabled(false);
 
             }
         }
@@ -126,7 +127,7 @@ public class MainActivity extends Activity {
      */
     private void renewTimeUntilTimer() {
         Calendar rightNow = Calendar.getInstance();
-        
+
         if (timeUntilTimer != null) timeUntilTimer.cancel();
 
         timeUntilTimer = new Timer();
@@ -269,6 +270,7 @@ public class MainActivity extends Activity {
                     for (LatLng loc : p.getPoints()){
                         builder.include(loc);
                     }
+                    p.color(getResources().getColor(R.color.purple));
                     mMap.addPolyline(p);
                 }
                 else Log.v("MapDebugging", "Segment was null for " + r.getID());
@@ -297,7 +299,7 @@ public class MainActivity extends Activity {
         if (tempStop != null) {     // Make sure we actually have a stop!
             // Check there is a route between these stops.
             endStop = tempStop;
-            ((Button) findViewById(R.id.to_button)).setText("End: " + stopName);
+            ((Button) findViewById(R.id.to_button)).setText(stopName);
             if (startStop != null){
                 setNextBusTime();    // Don't set the next bus if we don't have a valid route.
                 if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
@@ -311,9 +313,9 @@ public class MainActivity extends Activity {
             // Swap the start and end stops.
             Stop temp = startStop;
             startStop = endStop;
-            ((Button) findViewById(R.id.from_button)).setText("Start: " + startStop.getName());
+            ((Button) findViewById(R.id.from_button)).setText(startStop.getName());
             endStop = temp;
-            ((Button) findViewById(R.id.to_button)).setText("End: " + endStop.getName());
+            ((Button) findViewById(R.id.to_button)).setText(endStop.getName());
             setNextBusTime();
             updateMapWithNewStartOrEnd();
         } else {
@@ -323,7 +325,7 @@ public class MainActivity extends Activity {
             if (tempStop != null){      // Don't set Start to an invalid stop. Should never happen.
                 startStop = tempStop;
                 Log.v("Debugging", "New start stop: " + startStop.getName());
-                ((Button) findViewById(R.id.from_button)).setText("Start: " + stopName);
+                ((Button) findViewById(R.id.from_button)).setText(stopName);
                 if (endStop != null){
                     // Loop through all connected Routes.
                     for (Route r : startStop.getRoutes()){
@@ -340,7 +342,7 @@ public class MainActivity extends Activity {
                     Log.v("Debugging", "setStartStop picking default endStop: " + connectedStops.get(connectedStops.indexOf(startStop) + 1).getName());
                     // If we did not return above, the current endStop is not connected to the new
                     // startStop. So, by default pick the first connected stop.
-                    setEndStop(connectedStops.get(connectedStops.indexOf(startStop) + 1).getName());
+                    setEndStop(connectedStops.get(connectedStops.indexOf(startStop) - 1).getName());
                 }
 
             }
