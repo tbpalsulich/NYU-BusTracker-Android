@@ -11,7 +11,6 @@ import android.graphics.Matrix;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -38,7 +37,6 @@ import com.palsulich.nyubustracker.models.Time;
 import org.json.JSONException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
@@ -46,8 +44,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends Activity {
-
-
     Stop startStop;     // Stop object to keep track of the start location of the desired route.
     Stop endStop;       // Keep track of the desired end location.
     ArrayList<Route> routesBetweenStartAndEnd;        // List of all routes between start and end.
@@ -82,7 +78,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.v("General Debugging", "onCreate!");
+        //Log.v("General Debugging", "onCreate!");
         setContentView(R.layout.activity_main);
 
         mFileGrabber = new FileGrabber(getCacheDir());
@@ -203,7 +199,7 @@ public class MainActivity extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.v("General Debugging", "onDestroy!");
+        //Log.v("General Debugging", "onDestroy!");
         cacheToAndStartStop();      // Remember user's preferences across lifetimes.
         timeUntilTimer.cancel();           // Don't need a timer anymore -- must be recreated onResume.
         busRefreshTimer.cancel();
@@ -212,7 +208,7 @@ public class MainActivity extends Activity {
     @Override
     public void onPause() {
         super.onPause();
-        Log.v("General Debugging", "onPause!");
+        //Log.v("General Debugging", "onPause!");
         cacheToAndStartStop();
         timeUntilTimer.cancel();
         busRefreshTimer.cancel();
@@ -221,7 +217,7 @@ public class MainActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-        Log.v("General Debugging", "onResume!");
+        //Log.v("General Debugging", "onResume!");
         setNextBusTime();
         renewTimeUntilTimer();
         renewBusRefreshTimer();
@@ -258,7 +254,7 @@ public class MainActivity extends Activity {
         if (clickableMapMarkers == null) clickableMapMarkers = new HashMap<String, Boolean>();
         for (Route r: routesBetweenStartAndEnd){
             for (Bus b : sharedManager.getBuses()){
-                Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
+                //Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
                 if (b.getRoute().equals(r.getID())){
                     Marker mMarker = mMap.addMarker(new MarkerOptions()
                             .position(b.getLocation())
@@ -283,7 +279,7 @@ public class MainActivity extends Activity {
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         boolean validBuilder = false;
         for (Route r : routesBetweenStartAndEnd){
-            Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
+            //Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
             for (Stop s : r.getStops()){
                 Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
                         .position(s.getLocation())
@@ -295,7 +291,7 @@ public class MainActivity extends Activity {
             updateMapWithNewBusLocations();
             // Adds the segments of every Route to the map.
             for (PolylineOptions p : r.getSegments()){
-                Log.v("MapDebugging", "Trying to add a segment to the map.");
+                //Log.v("MapDebugging", "Trying to add a segment to the map.");
                 if (p != null){
                     for (LatLng loc : p.getPoints()){
                         validBuilder = true;
@@ -304,7 +300,7 @@ public class MainActivity extends Activity {
                     p.color(getResources().getColor(R.color.purple));
                     mMap.addPolyline(p);
                 }
-                else Log.v("MapDebugging", "Segment was null for " + r.getID());
+                //else Log.v("MapDebugging", "Segment was null for " + r.getID());
             }
         }
         if (validBuilder){
@@ -348,26 +344,26 @@ public class MainActivity extends Activity {
             setNextBusTime();
             updateMapWithNewStartOrEnd();
         } else {
-            Log.v("Debugging", "setStartStop not swapping");
+            //Log.v("Debugging", "setStartStop not swapping");
             // We have a new start. So, we must ensure the end is actually connected.
             Stop tempStop = BusManager.getBusManager().getStopByName(stopName);
             if (tempStop != null){      // Don't set Start to an invalid stop. Should never happen.
                 startStop = tempStop;
-                Log.v("Debugging", "New start stop: " + startStop.getName());
+                //Log.v("Debugging", "New start stop: " + startStop.getName());
                 ((Button) findViewById(R.id.from_button)).setText(stopName);
                 if (endStop != null){
                     // Loop through all connected Routes.
                     for (Route r : startStop.getRoutes()){
                         // If the current endStop is connected, we don't have to change endStop.
                         if (r.hasStop(endStop.getName())){
-                            Log.v("Debugging", "Found a connected end stop: " + endStop.getName() + " through " + r.getLongName());
+                            //Log.v("Debugging", "Found a connected end stop: " + endStop.getName() + " through " + r.getLongName());
                             setNextBusTime();
                             updateMapWithNewStartOrEnd();
                             return;
                         }
                     }
                     ArrayList<Stop> connectedStops = startStop.getRoutes().get(0).getStops();
-                    Log.v("Debugging", "setStartStop picking default endStop: " + connectedStops.get(connectedStops.indexOf(startStop) + 1).getName());
+                    //Log.v("Debugging", "setStartStop picking default endStop: " + connectedStops.get(connectedStops.indexOf(startStop) + 1).getName());
                     // If we did not return above, the current endStop is not connected to the new
                     // startStop. So, by default pick the first connected stop.
                     setEndStop(connectedStops.get(connectedStops.indexOf(startStop) - 1).getName());
@@ -395,7 +391,7 @@ public class MainActivity extends Activity {
         ArrayList<Route> routes = new ArrayList<Route>();               // All the routes connecting the two.
         for (Route r : fromRoutes) {
             if (r.hasStop(endStop.getName()) && endStop.getTimes().get(getTimeOfWeek()).get(r.getLongName()) != null) {
-                Log.v("Route Debugging", "Adding a route between " + startStop.getName() + " and " + endStop.getName() + ": " + r.getLongName());
+                //Log.v("Route Debugging", "Adding a route between " + startStop.getName() + " and " + endStop.getName() + ": " + r.getLongName());
                 routes.add(r);
             }
         }
@@ -405,12 +401,18 @@ public class MainActivity extends Activity {
                 String timeOfWeek = getTimeOfWeek();
                 // Get the Times at this stop for this route.
                 ArrayList<Time> times = new ArrayList<Time>();
-                if (startStop.getTimes().get(timeOfWeek).get(r.getLongName()) == null) Log.v("Debugging", "Bingo: " + r.getLongName());
-                times.addAll(Arrays.asList(startStop.getTimes().get(timeOfWeek).get(r.getLongName())));
-                for (Time t : times){
-                    t.setRoute(r.getLongName());
+                if (startStop.getTimes().get(timeOfWeek).get(r.getLongName()) == null){
+                    //Log.v("Debugging", "Times today for this route is null: " + r.getLongName());
                 }
-                tempTimesBetweenStartAndEnd.addAll(times);
+                else{
+                    for (Time t : startStop.getTimes().get(timeOfWeek).get(r.getLongName())){
+                        times.add(t);
+                    }
+                    for (Time t : times){
+                        t.setRoute(r.getLongName());
+                    }
+                    tempTimesBetweenStartAndEnd.addAll(times);
+                }
             }
             if (tempTimesBetweenStartAndEnd.size() > 0){
                 timesBetweenStartAndEnd = tempTimesBetweenStartAndEnd;
@@ -418,15 +420,11 @@ public class MainActivity extends Activity {
                 Time currentTime = new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
                 Time nextBusTime = timesBetweenStartAndEnd.get(0);
                 for (Time tempTime : timesBetweenStartAndEnd) {
-                    Log.v("Time Debugging", "Temp time: " + tempTime.toString());
                     if (tempTime.isAfter(currentTime)) {
-                        Log.v("Time Debugging", "TempTime is after the current time");
                         if (tempTime.isAfter(currentTime) && tempTime.isBefore(nextBusTime)) {
-                            Log.v("Time Debugging", "New nextBusTime: " + tempTime.toString());
                             nextBusTime = tempTime;
                         }
                         else if (tempTime.isAfter(currentTime) && nextBusTime.isStrictlyBefore(currentTime)){
-                            Log.v("Time Debugging", "New nextBusTime by T.K.O.: " + tempTime.toString());
                             nextBusTime = tempTime;
                         }
                     }

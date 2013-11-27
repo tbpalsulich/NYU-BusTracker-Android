@@ -60,17 +60,17 @@ public class Time {
 
     // Return if this time is equal to or before Time t.
     public boolean isBefore(Time t){
-        Log.v("Time Debugging", this.toString() + " is before " + t.toString() + ": " + ((this.hour < t.hour) || (this.hour == t.hour && this.min <= t.min)));
+        //Log.v("Time Debugging", this.toString() + " is before " + t.toString() + ": " + ((this.hour < t.hour) || (this.hour == t.hour && this.min <= t.min)));
         return (this.hour < t.hour) || (this.hour == t.hour && this.min <= t.min);
     }
 
     public boolean isStrictlyBefore(Time t){
-        Log.v("Time Debugging", this.toString() + " is strictly before " + t.toString() + ": " + ((this.hour < t.hour) || (this.hour == t.hour && this.min < t.min)));
+        //Log.v("Time Debugging", this.toString() + " is strictly before " + t.toString() + ": " + ((this.hour < t.hour) || (this.hour == t.hour && this.min < t.min)));
         return (this.hour < t.hour) || (this.hour == t.hour && this.min < t.min);
     }
 
     public boolean isAfter(Time t){
-        Log.v("Time Debugging", this.toString() + " is after " + t.toString() + ": " + ((this.hour > t.hour) || (this.hour == t.hour && this.min >= t.min)));
+        //Log.v("Time Debugging", this.toString() + " is after " + t.toString() + ": " + ((this.hour > t.hour) || (this.hour == t.hour && this.min >= t.min)));
         return (this.hour > t.hour) || (this.hour == t.hour && this.min >= t.min);
     }
 

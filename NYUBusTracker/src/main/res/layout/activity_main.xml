@@ -25,7 +25,7 @@
     <ImageView
         android:layout_below="@id/from_button"
         android:id="@+id/from_divider"
-        style="@style/Separator"/>
+        style="@style/Separator" />
 
     <TextView
         android:layout_width="match_parent"
