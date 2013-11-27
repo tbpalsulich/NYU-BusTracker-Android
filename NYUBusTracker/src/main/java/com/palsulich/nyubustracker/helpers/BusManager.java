@@ -186,10 +186,6 @@ public final class BusManager {
         }
     }
 
-    public void addBus(Bus bus) {
-        buses.add(bus);
-    }
-
     /*
     Given a JSONObject of the version file and a fFileGrabber, parses all of the times.
     Version also has a list of hideroutes, hidestops, combine, and opposite stops. We also handle

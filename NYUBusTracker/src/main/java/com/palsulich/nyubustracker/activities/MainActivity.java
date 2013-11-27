@@ -38,6 +38,7 @@ import com.palsulich.nyubustracker.models.Time;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
@@ -80,6 +81,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.v("General Debugging", "onCreate!");
         setContentView(R.layout.activity_main);
 
         mFileGrabber = new FileGrabber(getCacheDir());
@@ -200,6 +203,7 @@ public class MainActivity extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.v("General Debugging", "onDestroy!");
         cacheToAndStartStop();      // Remember user's preferences across lifetimes.
         timeUntilTimer.cancel();           // Don't need a timer anymore -- must be recreated onResume.
         busRefreshTimer.cancel();
@@ -208,6 +212,7 @@ public class MainActivity extends Activity {
     @Override
     public void onPause() {
         super.onPause();
+        Log.v("General Debugging", "onPause!");
         cacheToAndStartStop();
         timeUntilTimer.cancel();
         busRefreshTimer.cancel();
@@ -216,6 +221,8 @@ public class MainActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
+        Log.v("General Debugging", "onResume!");
+        setNextBusTime();
         renewTimeUntilTimer();
         renewBusRefreshTimer();
         setUpMapIfNeeded();
@@ -318,7 +325,6 @@ public class MainActivity extends Activity {
     }
 
     private void setEndStop(String stopName) {
-        if (stopName.equals("")) stopName = "80 Lafayette Street";      // Default end stop.
         Stop tempStop = BusManager.getBusManager().getStopByName(stopName);
         if (tempStop != null) {     // Make sure we actually have a stop!
             // Check there is a route between these stops.
@@ -332,7 +338,6 @@ public class MainActivity extends Activity {
     }
 
     private void setStartStop(String stopName) {
-        if (stopName.equals("")) stopName = "715 Broadway at Washington Square";    // Default start stop.
         if (endStop != null && endStop.getName().equals(stopName)) {    // We have an end stop and its name is the same as stopName.
             // Swap the start and end stops.
             Stop temp = startStop;
@@ -361,7 +366,6 @@ public class MainActivity extends Activity {
                             return;
                         }
                     }
-                    BusManager sharedManager = BusManager.getBusManager();
                     ArrayList<Stop> connectedStops = startStop.getRoutes().get(0).getStops();
                     Log.v("Debugging", "setStartStop picking default endStop: " + connectedStops.get(connectedStops.indexOf(startStop) + 1).getName());
                     // If we did not return above, the current endStop is not connected to the new
@@ -384,11 +388,11 @@ public class MainActivity extends Activity {
     }
 
     private void setNextBusTime() {
-        if (timeUntilTimer != null) timeUntilTimer.cancel();
+        if (timeUntilTimer != null) timeUntilTimer.cancel();        // Don't want to be interrupted in the middle of this.
         if (busRefreshTimer != null) busRefreshTimer.cancel();
         Calendar rightNow = Calendar.getInstance();
-        ArrayList<Route> fromRoutes = startStop.getRoutes();
-        ArrayList<Route> routes = new ArrayList<Route>();
+        ArrayList<Route> fromRoutes = startStop.getRoutes();        // All the routes leaving the start stop.
+        ArrayList<Route> routes = new ArrayList<Route>();               // All the routes connecting the two.
         for (Route r : fromRoutes) {
             if (r.hasStop(endStop.getName()) && endStop.getTimes().get(getTimeOfWeek()).get(r.getLongName()) != null) {
                 Log.v("Route Debugging", "Adding a route between " + startStop.getName() + " and " + endStop.getName() + ": " + r.getLongName());
@@ -402,15 +406,13 @@ public class MainActivity extends Activity {
                 // Get the Times at this stop for this route.
                 ArrayList<Time> times = new ArrayList<Time>();
                 if (startStop.getTimes().get(timeOfWeek).get(r.getLongName()) == null) Log.v("Debugging", "Bingo: " + r.getLongName());
-                for (Time t : startStop.getTimes().get(timeOfWeek).get(r.getLongName())){
-                    times.add(t);
-                }
+                times.addAll(Arrays.asList(startStop.getTimes().get(timeOfWeek).get(r.getLongName())));
                 for (Time t : times){
                     t.setRoute(r.getLongName());
                 }
                 tempTimesBetweenStartAndEnd.addAll(times);
             }
-            if (tempTimesBetweenStartAndEnd != null && tempTimesBetweenStartAndEnd.size() > 0){
+            if (tempTimesBetweenStartAndEnd.size() > 0){
                 timesBetweenStartAndEnd = tempTimesBetweenStartAndEnd;
                 routesBetweenStartAndEnd = routes;
                 Time currentTime = new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));

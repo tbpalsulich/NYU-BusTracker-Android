@@ -108,7 +108,7 @@ public class FileGrabber {
     private void put(String content, String fileName){
         File file = new File(cacheDir, fileName);
         try {
-            Log.v("JSONDebug", "Creating a new cache file.");
+            Log.v("JSONDebug", "Creating/putting a new cache file (" + fileName + ").");
             file.createNewFile();
             FileWriter fw = new FileWriter(file);
             BufferedWriter bw = new BufferedWriter(fw);
@@ -152,7 +152,7 @@ public class FileGrabber {
                 File file = new File(cacheDir, cacheFile);
                 JSONObject jObj = jParser.getJSONFromUrl(url);
                 try {
-                    Log.v("JSONDebug", "Creating a new cache file.");
+                    Log.v("JSONDebug", "Creating a new cache file (" + cacheFile + ").");
                     file.createNewFile();
                     FileWriter fw = new FileWriter(file);
                     BufferedWriter bw = new BufferedWriter(fw);
