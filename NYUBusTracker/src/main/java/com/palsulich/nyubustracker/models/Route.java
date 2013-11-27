@@ -22,7 +22,7 @@ public class Route {
     ArrayList<String> segmentIDs;
     ArrayList<PolylineOptions> segments;
 
-    public Route(String mLongName, String mRouteID){
+    private Route(String mLongName, String mRouteID){
         segmentIDs = new ArrayList<String>();
         segments = new ArrayList<PolylineOptions>();
         longName = mLongName;
@@ -95,7 +95,7 @@ public class Route {
     }
 
     public void addStop(Stop stop){
-        stops.add(stop);
+        if(!stops.contains(stop)) stops.add(stop);
     }
 
     public static void parseJSON(JSONObject routesJson) throws JSONException{
@@ -114,7 +114,7 @@ public class Route {
             JSONArray segments = routeObject.getJSONArray(FileGrabber.TAG_SEGMENTS);
             Log.v("MapDebugging", "Found " + segments.length() + " segments for route " + routeID);
             for (int i = 0; i < segments.length(); i++){
-                Log.v("MapDebugging", "Constructor of Route adding segment " + segments.getJSONArray(i).getString(0) + " for " + routeID);
+                Log.v("MapDebugging", "parseJSON of Route adding segment ID " + segments.getJSONArray(i).getString(0) + " for " + routeID + "(" + r.getSegmentIDs().size() + " total)");
                 r.getSegmentIDs().add(segments.getJSONArray(i).getString(0));
             }
             sharedManager.addRoute(r);

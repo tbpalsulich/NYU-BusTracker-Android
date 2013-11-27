@@ -119,12 +119,12 @@ public class FileGrabber {
         }
     }
 
-    private JSONObject getJSON(String url, String cacheFile, boolean dontCache, NetworkInfo networkInfo){
-        if(!dontCache){
+    private JSONObject getJSON(String url, String cacheFile, boolean doNotCache, NetworkInfo networkInfo){
+        if(!doNotCache){
             if(files != null){
                 for(File f : files){
                     if(f.isFile() && f.getName().equals(cacheFile)){
-                        Log.v("JSONDebug", "Loading file from cache.");
+                        Log.v("JSONDebug", "Loading file " + cacheFile + " from cache.");
                         // try parse the string to a JSON object
                         JSONObject jObj = null;
                         try {

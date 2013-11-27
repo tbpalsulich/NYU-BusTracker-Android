@@ -276,6 +276,7 @@ public class MainActivity extends Activity {
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         boolean validBuilder = false;
         for (Route r : routesBetweenStartAndEnd){
+            Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
             for (Stop s : r.getStops()){
                 Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
                         .position(s.getLocation())
@@ -287,6 +288,7 @@ public class MainActivity extends Activity {
             updateMapWithNewBusLocations();
             // Adds the segments of every Route to the map.
             for (PolylineOptions p : r.getSegments()){
+                Log.v("MapDebugging", "Trying to add a segment to the map.");
                 if (p != null){
                     for (LatLng loc : p.getPoints()){
                         validBuilder = true;

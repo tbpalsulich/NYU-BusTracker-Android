@@ -152,10 +152,12 @@ public final class BusManager {
         String temp[] = new String[64];     // Shouldn't have more than 64 stops...
         ArrayList<Route> stopRoutes = stop.getRoutes();
         for (Route route : stopRoutes) {       // For every route servicing this stop:
+            Log.v("Route Debugging", route.toString() + " services this stop.");
             String routeStops[] = route.getStopsAsArray();
             for (String connectedStop : routeStops){    // add all of that route's stops.
                 if (!connectedStop.equals(stop.getName())){
                     temp[resultSize++] = connectedStop;
+                    Log.v("Route Debugging", "   " + connectedStop + " is connected to " + stop.getName());
                 }
             }
         }
@@ -293,7 +295,7 @@ public final class BusManager {
     public static void parseSegments(JSONObject segmentsJSON) throws JSONException{
         final BusManager sharedManager = BusManager.getBusManager();
         JSONObject segments = new JSONObject();
-        if (segmentsJSON != null) segmentsJSON.getJSONObject("data");
+        if (segmentsJSON != null) segments = segmentsJSON.getJSONObject("data");
         for (Route r : sharedManager.getRoutes()){
             Log.v("MapDebugging", "Does this route (" + r.getID() + ") have segments?");
             for (String seg : r.getSegmentIDs()){
