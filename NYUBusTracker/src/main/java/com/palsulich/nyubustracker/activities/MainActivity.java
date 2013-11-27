@@ -319,7 +319,7 @@ public class MainActivity extends Activity {
                                         bounds,
                                         this.getResources().getDisplayMetrics().widthPixels,
                                         this.getResources().getDisplayMetrics().heightPixels,
-                                        200));
+                                        150));
             }
         }
     }
@@ -418,10 +418,15 @@ public class MainActivity extends Activity {
                 Time currentTime = new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
                 Time nextBusTime = timesBetweenStartAndEnd.get(0);
                 for (Time tempTime : timesBetweenStartAndEnd) {
+                    Log.v("Time Debugging", "Temp time: " + tempTime.toString());
                     if (tempTime.isAfter(currentTime)) {
-                        if (nextBusTime.isAfter(currentTime) && tempTime.isBefore(nextBusTime)) {
+                        Log.v("Time Debugging", "TempTime is after the current time");
+                        if (tempTime.isAfter(currentTime) && tempTime.isBefore(nextBusTime)) {
+                            Log.v("Time Debugging", "New nextBusTime: " + tempTime.toString());
                             nextBusTime = tempTime;
-                        } else if (nextBusTime.isBefore(currentTime) && tempTime.isAfter(nextBusTime)) {
+                        }
+                        else if (tempTime.isAfter(currentTime) && nextBusTime.isStrictlyBefore(currentTime)){
+                            Log.v("Time Debugging", "New nextBusTime by T.K.O.: " + tempTime.toString());
                             nextBusTime = tempTime;
                         }
                     }

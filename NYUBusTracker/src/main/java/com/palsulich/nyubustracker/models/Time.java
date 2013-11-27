@@ -43,7 +43,7 @@ public class Time {
     // Return a nice string saying the difference between this time and the argument.
     public String getTimeAsStringUntil(Time t){
         Time difference = this.getTimeAsTimeUntil(t);
-        Log.v("Time Debugging", "Difference: " + difference.toString());
+        Log.v("Time Debugging", "Difference: " + difference.hour + ":" + difference.min);
         String result = "I don't know when the next bus is!";
         if (difference != null){
             if (difference.hour == 0 && difference.min == 0)
@@ -60,10 +60,17 @@ public class Time {
 
     // Return if this time is equal to or before Time t.
     public boolean isBefore(Time t){
+        Log.v("Time Debugging", this.toString() + " is before " + t.toString() + ": " + ((this.hour < t.hour) || (this.hour == t.hour && this.min <= t.min)));
         return (this.hour < t.hour) || (this.hour == t.hour && this.min <= t.min);
     }
 
+    public boolean isStrictlyBefore(Time t){
+        Log.v("Time Debugging", this.toString() + " is strictly before " + t.toString() + ": " + ((this.hour < t.hour) || (this.hour == t.hour && this.min < t.min)));
+        return (this.hour < t.hour) || (this.hour == t.hour && this.min < t.min);
+    }
+
     public boolean isAfter(Time t){
+        Log.v("Time Debugging", this.toString() + " is after " + t.toString() + ": " + ((this.hour > t.hour) || (this.hour == t.hour && this.min >= t.min)));
         return (this.hour > t.hour) || (this.hour == t.hour && this.min >= t.min);
     }
 
