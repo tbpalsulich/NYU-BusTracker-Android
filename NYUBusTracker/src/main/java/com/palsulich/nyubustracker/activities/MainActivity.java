@@ -78,14 +78,15 @@ public class MainActivity extends Activity{
             try {
                 Class.forName("com.google.android.gms.maps.MapFragment");
                 mFrag = new MapFragment();
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.add(R.id.main_layout, mFrag).commit();
             } catch(ClassNotFoundException e) {
                 // it does not exist on the classpath
                 haveAMap = false;
                 return;
             }
 
-//            FragmentTransaction ft = getFragmentManager().beginTransaction();
-//            ft.add(R.id.main_layout, mFrag).commit();
+
 
            // MapFragment mFrag = ((MapFragment) getFragmentManager().findFragmentById(R.id.map));
             if (mFrag != null) mMap = mFrag.getMap();
