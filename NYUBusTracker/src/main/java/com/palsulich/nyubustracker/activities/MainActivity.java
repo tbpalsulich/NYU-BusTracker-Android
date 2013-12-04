@@ -65,6 +65,7 @@ public class MainActivity extends Activity{
     Timer busRefreshTimer; // Timer used to refresh the bus locations every few seconds.
 
     private GoogleMap mMap;     // Map to display all stops, segments, and buses.
+    private boolean haveAMap = false;   // Flag to see if the device can display a map.
 
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
@@ -76,8 +77,9 @@ public class MainActivity extends Activity{
                 // The Map is verified. It is now safe to manipulate the map.
                 mMap.getUiSettings().setRotateGesturesEnabled(false);
                 mMap.getUiSettings().setZoomControlsEnabled(false);
-
+                haveAMap = true;
             }
+            else haveAMap = false;
         }
     }
 
@@ -94,7 +96,7 @@ public class MainActivity extends Activity{
 
         setUpMapIfNeeded(); // Instantiates mMap, if it needs to be.
 
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+        if (haveAMap) mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
                 return !clickableMapMarkers.get(marker.getId());    // Return true to consume the event.
@@ -118,8 +120,8 @@ public class MainActivity extends Activity{
                 Stop.parseJSON(mFileGrabber.getStopJSON(networkInfo));
                 Route.parseJSON(mFileGrabber.getRouteJSON(networkInfo));
                 BusManager.parseTimes(mFileGrabber.getVersionJSON(networkInfo), mFileGrabber, networkInfo);
-                Bus.parseJSON(mFileGrabber.getVehicleJSON(networkInfo));
-                BusManager.parseSegments(mFileGrabber.getSegmentsJSON(networkInfo));
+                if (haveAMap) Bus.parseJSON(mFileGrabber.getVehicleJSON(networkInfo));
+                if (haveAMap) BusManager.parseSegments(mFileGrabber.getSegmentsJSON(networkInfo));
                 if (networkInfo == null || !networkInfo.isConnected()){
                     Context context = getApplicationContext();
                     CharSequence text = "Unable to connect to the network.";
@@ -166,41 +168,43 @@ public class MainActivity extends Activity{
     }
 
     private void renewBusRefreshTimer(){
-        if (busRefreshTimer != null) busRefreshTimer.cancel();
-        try{
-            if (routesBetweenStartAndEnd != null){
-                ConnectivityManager connMgr = (ConnectivityManager)
-                        getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-                Bus.parseJSON(mFileGrabber.getVehicleJSON(networkInfo));
-                updateMapWithNewBusLocations();
+        if(haveAMap){
+            if (busRefreshTimer != null) busRefreshTimer.cancel();
+            try{
+                if (routesBetweenStartAndEnd != null){
+                    ConnectivityManager connMgr = (ConnectivityManager)
+                            getSystemService(Context.CONNECTIVITY_SERVICE);
+                    NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+                    Bus.parseJSON(mFileGrabber.getVehicleJSON(networkInfo));
+                    updateMapWithNewBusLocations();
+                }
+            } catch (JSONException e){
+                e.printStackTrace();
             }
-        } catch (JSONException e){
-            e.printStackTrace();
-        }
 
-        busRefreshTimer = new Timer();
-        busRefreshTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try{
-                            if (routesBetweenStartAndEnd != null){
-                                ConnectivityManager connMgr = (ConnectivityManager)
-                                        getSystemService(Context.CONNECTIVITY_SERVICE);
-                                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-                                Bus.parseJSON(mFileGrabber.getVehicleJSON(networkInfo));
-                                updateMapWithNewBusLocations();
+            busRefreshTimer = new Timer();
+            busRefreshTimer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try{
+                                if (routesBetweenStartAndEnd != null){
+                                    ConnectivityManager connMgr = (ConnectivityManager)
+                                            getSystemService(Context.CONNECTIVITY_SERVICE);
+                                    NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+                                    Bus.parseJSON(mFileGrabber.getVehicleJSON(networkInfo));
+                                    updateMapWithNewBusLocations();
+                                }
+                            } catch (JSONException e){
+                                e.printStackTrace();
                             }
-                        } catch (JSONException e){
-                            e.printStackTrace();
                         }
-                    }
-                });
-            }
-        }, 10000L, 10000);
+                    });
+                }
+            }, 10000L, 10000);
+        }
     }
 
     @Override
@@ -253,76 +257,80 @@ public class MainActivity extends Activity{
     }
 
     private void updateMapWithNewBusLocations(){
-        BusManager sharedManager = BusManager.getBusManager();
-        for (Marker m : busesOnMap){
-            m.remove();
-        }
-        busesOnMap = new ArrayList<Marker>();
-        if (clickableMapMarkers == null) clickableMapMarkers = new HashMap<String, Boolean>();
-        for (Route r: routesBetweenStartAndEnd){
-            for (Bus b : sharedManager.getBuses()){
-                //Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
-                if (b.getRoute().equals(r.getID())){
-                    Marker mMarker = mMap.addMarker(new MarkerOptions()
-                            .position(b.getLocation())
-                            .icon(BitmapDescriptorFactory
-                                    .fromBitmap(rotateBitmap(
-                                            BitmapFactory.decodeResource(
-                                                    this.getResources(),
-                                                    R.drawable.ic_bus_arrow),
-                                            b.getHeading())))
-                            .anchor(0.5f, 0.5f));
-                    clickableMapMarkers.put(mMarker.getId(), false);
-                    busesOnMap.add(mMarker);
+        if (haveAMap){
+            BusManager sharedManager = BusManager.getBusManager();
+            for (Marker m : busesOnMap){
+                m.remove();
+            }
+            busesOnMap = new ArrayList<Marker>();
+            if (clickableMapMarkers == null) clickableMapMarkers = new HashMap<String, Boolean>();
+            for (Route r: routesBetweenStartAndEnd){
+                for (Bus b : sharedManager.getBuses()){
+                    //Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
+                    if (b.getRoute().equals(r.getID())){
+                        Marker mMarker = mMap.addMarker(new MarkerOptions()
+                                .position(b.getLocation())
+                                .icon(BitmapDescriptorFactory
+                                        .fromBitmap(rotateBitmap(
+                                                BitmapFactory.decodeResource(
+                                                        this.getResources(),
+                                                        R.drawable.ic_bus_arrow),
+                                                b.getHeading())))
+                                .anchor(0.5f, 0.5f));
+                        clickableMapMarkers.put(mMarker.getId(), false);
+                        busesOnMap.add(mMarker);
+                    }
                 }
             }
         }
     }
 
     private void updateMapWithNewStartOrEnd(){
-        setUpMapIfNeeded();
-        mMap.clear();
-        clickableMapMarkers = new HashMap<String, Boolean>();
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        boolean validBuilder = false;
-        for (Route r : routesBetweenStartAndEnd){
-            //Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
-            for (Stop s : r.getStops()){
-                Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
-                        .position(s.getLocation())
-                        .title(s.getName())
-                        .anchor(0.5f, 0.5f)
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_stop)));
-                clickableMapMarkers.put(mMarker.getId(), true);
-            }
-            updateMapWithNewBusLocations();
-            // Adds the segments of every Route to the map.
-            for (PolylineOptions p : r.getSegments()){
-                //Log.v("MapDebugging", "Trying to add a segment to the map.");
-                if (p != null){
-                    for (LatLng loc : p.getPoints()){
-                        validBuilder = true;
-                        builder.include(loc);
-                    }
-                    p.color(getResources().getColor(R.color.purple));
-                    mMap.addPolyline(p);
+        if (haveAMap){
+            setUpMapIfNeeded();
+            mMap.clear();
+            clickableMapMarkers = new HashMap<String, Boolean>();
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            boolean validBuilder = false;
+            for (Route r : routesBetweenStartAndEnd){
+                //Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
+                for (Stop s : r.getStops()){
+                    Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
+                            .position(s.getLocation())
+                            .title(s.getName())
+                            .anchor(0.5f, 0.5f)
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_stop)));
+                    clickableMapMarkers.put(mMarker.getId(), true);
                 }
-                //else Log.v("MapDebugging", "Segment was null for " + r.getID());
+                updateMapWithNewBusLocations();
+                // Adds the segments of every Route to the map.
+                for (PolylineOptions p : r.getSegments()){
+                    //Log.v("MapDebugging", "Trying to add a segment to the map.");
+                    if (p != null){
+                        for (LatLng loc : p.getPoints()){
+                            validBuilder = true;
+                            builder.include(loc);
+                        }
+                        p.color(getResources().getColor(R.color.purple));
+                        mMap.addPolyline(p);
+                    }
+                    //else Log.v("MapDebugging", "Segment was null for " + r.getID());
+                }
             }
-        }
-        if (validBuilder){
-            LatLngBounds bounds = builder.build();
-            try{
-                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 30));
-            } catch(IllegalStateException e) {
-                e.printStackTrace();
-                mMap.moveCamera(
-                        CameraUpdateFactory
-                                .newLatLngBounds(
-                                        bounds,
-                                        this.getResources().getDisplayMetrics().widthPixels,
-                                        this.getResources().getDisplayMetrics().heightPixels,
-                                        150));
+            if (validBuilder){
+                LatLngBounds bounds = builder.build();
+                try{
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 30));
+                } catch(IllegalStateException e) {
+                    e.printStackTrace();
+                    mMap.moveCamera(
+                            CameraUpdateFactory
+                                    .newLatLngBounds(
+                                            bounds,
+                                            this.getResources().getDisplayMetrics().widthPixels,
+                                            this.getResources().getDisplayMetrics().heightPixels,
+                                            150));
+                }
             }
         }
     }
@@ -335,7 +343,7 @@ public class MainActivity extends Activity{
             ((Button) findViewById(R.id.to_button)).setText(stopName);
             if (startStop != null){
                 setNextBusTime();    // Don't set the next bus if we don't have a valid route.
-                if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
+                if (routesBetweenStartAndEnd != null && haveAMap) updateMapWithNewStartOrEnd();
             }
         }
     }
