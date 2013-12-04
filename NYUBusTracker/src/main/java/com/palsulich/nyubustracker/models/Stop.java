@@ -2,7 +2,6 @@ package com.palsulich.nyubustracker.models;
 
 import android.util.Log;
 
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.palsulich.nyubustracker.helpers.BusManager;
 import com.palsulich.nyubustracker.helpers.FileGrabber;
@@ -126,8 +125,7 @@ public class Stop {
                 routesString += routes[j];
                 if (j != stopRoutes.length() - 1) routesString += ", ";
             }
-            Stop s = new Stop(stopName, stopLat, stopLng, stopID, routes);
-            sharedManager.addStop(s);
+            Stop s = sharedManager.getStop(stopName, stopLat, stopLng, stopID, routes);
             Log.v("JSONDebug", "Stop name: " + stopName + ", stop ID: " + stopID + ", routes: " + routesString);
         }
     }

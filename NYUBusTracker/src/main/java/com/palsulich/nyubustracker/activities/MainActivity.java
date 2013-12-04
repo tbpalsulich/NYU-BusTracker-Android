@@ -3,6 +3,7 @@ package com.palsulich.nyubustracker.activities;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -575,7 +576,7 @@ public class MainActivity extends Activity{
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
                 {
-                    Stop s = stops.get((Integer)buttonView.getTag());
+                    Stop s = stops.get((Integer) buttonView.getTag());
                     s.setFavorite(buttonView.isChecked());
                     Log.v("Dialog", "Checkbox is " + buttonView.isChecked());
                 }

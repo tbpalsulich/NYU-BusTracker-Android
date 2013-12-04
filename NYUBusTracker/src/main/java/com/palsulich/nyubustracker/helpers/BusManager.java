@@ -176,6 +176,15 @@ public final class BusManager {
         }
     }
 
+    public Stop getStop(String mName, String mLat, String mLng, String mID, String[] mRoutes){
+        Stop s = getStopByID(mID);
+        if (s == null){
+            s = new Stop(mName, mLat, mLng, mID, mRoutes);
+            addStop(s);
+        }
+        return s;
+    }
+
     /*
     addRoute will add a Route to our ArrayList of Routes, unless we're supposed to hide it.
      */
