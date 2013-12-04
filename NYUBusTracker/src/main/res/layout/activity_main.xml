@@ -17,7 +17,7 @@
 
     <Button
         android:id="@+id/from_button"
-        android:onClick="createFromDialog"
+        android:onClick="createStartDialog"
         style="@style/StartEndButton"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true" />
@@ -39,7 +39,7 @@
         android:textStyle="bold" />
 
     <Button
-        android:onClick="createToDialog"
+        android:onClick="createEndDialog"
         android:id="@+id/to_button"
         style="@style/StartEndButton"
         android:layout_below="@+id/from_divider"
