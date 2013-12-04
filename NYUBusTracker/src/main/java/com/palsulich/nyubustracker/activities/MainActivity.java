@@ -3,6 +3,7 @@ package com.palsulich.nyubustracker.activities;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -21,6 +22,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -57,6 +59,7 @@ public class MainActivity extends Activity{
     ArrayList<Time> timesBetweenStartAndEnd;        // List of all times between start and end.
     HashMap<String, Boolean> clickableMapMarkers;   // Hash of all markers which are clickable (so we don't zoom in on buses).
     ArrayList<Marker> busesOnMap = new ArrayList<Marker>();
+    MapFragment mFrag;
 
     // mFileGrabber helps to manage cached files/pull new files from the network.
     FileGrabber mFileGrabber;
@@ -70,7 +73,21 @@ public class MainActivity extends Activity{
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
-            MapFragment mFrag = ((MapFragment) getFragmentManager().findFragmentById(R.id.map));
+
+
+            try {
+                Class.forName("com.google.android.gms.maps.MapFragment");
+                mFrag = new MapFragment();
+            } catch(ClassNotFoundException e) {
+                // it does not exist on the classpath
+                haveAMap = false;
+                return;
+            }
+
+//            FragmentTransaction ft = getFragmentManager().beginTransaction();
+//            ft.add(R.id.main_layout, mFrag).commit();
+
+           // MapFragment mFrag = ((MapFragment) getFragmentManager().findFragmentById(R.id.map));
             if (mFrag != null) mMap = mFrag.getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {

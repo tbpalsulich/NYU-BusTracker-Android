@@ -2,6 +2,7 @@ package com.palsulich.nyubustracker.models;
 
 import android.util.Log;
 
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.palsulich.nyubustracker.helpers.BusManager;
 import com.palsulich.nyubustracker.helpers.FileGrabber;
@@ -24,7 +25,11 @@ public class Stop {
 
     public Stop(String mName, String mLat, String mLng, String mID, String[] mRoutes){
         name = mName;
-        loc = new LatLng(Double.parseDouble(mLat), Double.parseDouble(mLng));
+        try {
+            Class.forName("com.google.android.gms.maps.model.LatLng");
+            loc = new LatLng(Double.parseDouble(mLat), Double.parseDouble(mLng));
+        } catch(ClassNotFoundException e) {
+        }
         id = mID;
         routesString = mRoutes;
         times = new HashMap<String, HashMap<String, Time[]>>();
