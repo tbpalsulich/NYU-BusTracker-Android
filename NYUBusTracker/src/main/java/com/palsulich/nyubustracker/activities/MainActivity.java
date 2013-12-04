@@ -3,7 +3,6 @@ package com.palsulich.nyubustracker.activities;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -22,7 +21,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -238,8 +236,8 @@ public class MainActivity extends Activity{
         super.onPause();
         //Log.v("General Debugging", "onPause!");
         cacheToAndStartStop();
-        timeUntilTimer.cancel();
-        busRefreshTimer.cancel();
+        if (timeUntilTimer != null) timeUntilTimer.cancel();
+        if (busRefreshTimer != null) busRefreshTimer.cancel();
     }
 
     @Override
