@@ -11,9 +11,16 @@ import android.graphics.Matrix;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,7 +50,7 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity{
     Stop startStop;     // Stop object to keep track of the start location of the desired route.
     Stop endStop;       // Keep track of the desired end location.
     ArrayList<Route> routesBetweenStartAndEnd;        // List of all routes between start and end.
@@ -463,28 +470,26 @@ public class MainActivity extends Activity {
         renewTimeUntilTimer();
     }
 
-    public void createToDialog(View view) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        final String[] connectedStops = BusManager.getBusManager().getConnectedStops(startStop);
-        builder.setItems(connectedStops, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                setEndStop(connectedStops[which]);
-            }
-        });
-        Dialog dialog = builder.create();
+    public void createEndDialog(View view) {
+        final ArrayList<Stop> connectedStops = BusManager.getBusManager().getConnectedStops(startStop);
+        ListView listView = new ListView(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(listView);
+        final Dialog dialog = builder.create();
+        StopAdapter adapter = new StopAdapter(getApplicationContext(), connectedStops, false, dialog);
+        listView.setAdapter(adapter);
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
     }
 
-    public void createFromDialog(View view) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        final String[] stops = BusManager.getBusManager().getStopsAsArray();
-        builder.setItems(stops, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                setStartStop(stops[which]);
-            }
-        });
+    public void createStartDialog(View view) {
+        final ArrayList<Stop> stops = BusManager.getBusManager().getStops();
+        ListView listView = new ListView(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(listView);
         Dialog dialog = builder.create();
+        StopAdapter adapter = new StopAdapter(getApplicationContext(), stops, true, dialog);
+        listView.setAdapter(adapter);
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
     }
@@ -505,5 +510,73 @@ public class MainActivity extends Activity {
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
     }
+
+    private class StopAdapter extends BaseAdapter {
+
+        private LayoutInflater mInflater;
+        ArrayList<Stop> stops = new ArrayList<Stop>();
+        boolean startStops;
+        Dialog dialog;
+
+        public StopAdapter(Context context, ArrayList<Stop> mStops, boolean mStartStops, Dialog mDialog) {
+            // Cache the LayoutInflate to avoid asking for a new one each time.
+            mInflater = LayoutInflater.from(context);
+            stops = mStops;
+            startStops = mStartStops;
+            dialog = mDialog;
+        }
+
+        public int getCount() {
+            return stops.size();
+        }
+
+        public Object getItem(int position) {
+            return position;
+        }
+
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            convertView = mInflater.inflate(R.layout.stop_list_item, null);
+            final ViewHolder holder = new ViewHolder();
+
+            holder.text = (TextView) convertView.findViewById(R.id.stop_text);
+            holder.checkbox = (CheckBox) convertView.findViewById(R.id.stop_checkbox);
+            holder.checkbox.setTag(position);
+
+            holder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                {
+                    Stop s = stops.get((Integer)buttonView.getTag());
+                    s.setFavorite(buttonView.isChecked());
+                    Log.v("Dialog", "Checkbox is " + buttonView.isChecked());
+                }
+            });
+
+            holder.text.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Stop s = stops.get(position);
+                    if (startStops) setStartStop(s.getName());
+                    else setEndStop(s.getName());
+                    dialog.dismiss();
+                }
+            });
+            convertView.setTag(holder);
+            holder.text.setText(stops.get(position).getName());
+            holder.checkbox.setChecked(stops.get(position).getFavorite());
+            return convertView;
+        }
+
+        class ViewHolder {
+            CheckBox checkbox;
+            TextView text;
+        }
+    }
+
 
 }

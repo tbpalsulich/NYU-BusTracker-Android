@@ -14,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public final class BusManager {
     private static BusManager sharedBusManager = null;      // Singleton instance.
@@ -39,6 +40,7 @@ public final class BusManager {
     }
 
     public ArrayList<Stop> getStops() {
+        Collections.sort(stops, Stop.compare);
         return stops;
     }
 
@@ -147,22 +149,20 @@ public final class BusManager {
     Given a Stop, getConnectedStops returns an array of Strings corresponding to every stop which has
     some route between it and the given stop.
      */
-    public String[] getConnectedStops(Stop stop){
+    public ArrayList<Stop> getConnectedStops(Stop stop){
         int resultSize = 0;
-        String temp[] = new String[64];     // Shouldn't have more than 64 stops...
+        ArrayList<Stop> result = new ArrayList<Stop>();
         ArrayList<Route> stopRoutes = stop.getRoutes();
         for (Route route : stopRoutes) {       // For every route servicing this stop:
             Log.v("Route Debugging", route.toString() + " services this stop.");
-            String routeStops[] = route.getStopsAsArray();
-            for (String connectedStop : routeStops){    // add all of that route's stops.
-                if (!connectedStop.equals(stop.getName())){
-                    temp[resultSize++] = connectedStop;
+            for (Stop connectedStop : route.getStops()){    // add all of that route's stops.
+                if (!connectedStop.getName().equals(stop.getName())){
+                    result.add(connectedStop);
                     Log.v("Route Debugging", "   " + connectedStop + " is connected to " + stop.getName());
                 }
             }
         }
-        String result[] = new String[resultSize];       // Only return an array of the proper size.
-        System.arraycopy(temp, 0, result, 0, resultSize);
+        Collections.sort(result, Stop.compare);
         return result;
     }
 

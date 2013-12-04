@@ -11,6 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 
 public class Stop {
@@ -19,6 +20,7 @@ public class Stop {
     String[] routesString;
     ArrayList<Route> routes = null;
     HashMap<String, HashMap<String, Time[]>> times = null;
+    boolean favorite;
 
     public Stop(String mName, String mLat, String mLng, String mID, String[] mRoutes){
         name = mName;
@@ -49,6 +51,14 @@ public class Stop {
         return name;
     }
 
+    public boolean getFavorite(){
+        return favorite;
+    }
+
+    public void setFavorite(boolean checked){
+        favorite = checked;
+    }
+
     public boolean hasRouteByString(String routeID){
         for (String route : routesString){
             if (route.equals(routeID)) {
@@ -72,6 +82,20 @@ public class Stop {
         times.get(dayOfWeek).put(route, mTimes);
         Log.v("Debugging", "Adding " + mTimes.length + " times to " + name + "/" + route + " for " + dayOfWeek);
     }
+
+    public static Comparator<Stop> compare = new Comparator<Stop>() {
+        @Override
+        public int compare(Stop stop, Stop stop2) {
+            if (stop.getFavorite()){
+                if (stop2.getFavorite()){
+                    return Integer.signum(stop.getName().compareTo(stop2.getName()));
+                }
+                else return -1;
+            }
+            else if(stop2.getFavorite()) return 1;
+            else return Integer.signum(stop.getName().compareTo(stop2.getName()));
+        }
+    };
 
     public HashMap<String, HashMap<String, Time[]>> getTimes(){
         return times;
