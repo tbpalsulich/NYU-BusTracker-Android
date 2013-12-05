@@ -256,6 +256,10 @@ public class MainActivity extends Activity{
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
 
+    public static Bitmap zoomBitmap(Bitmap source, int x, int y){
+        return Bitmap.createScaledBitmap(source, x, y, false);
+    }
+
     private void updateMapWithNewBusLocations(){
         if (haveAMap){
             BusManager sharedManager = BusManager.getBusManager();
@@ -271,11 +275,15 @@ public class MainActivity extends Activity{
                         Marker mMarker = mMap.addMarker(new MarkerOptions()
                                 .position(b.getLocation())
                                 .icon(BitmapDescriptorFactory
-                                        .fromBitmap(rotateBitmap(
-                                                BitmapFactory.decodeResource(
-                                                        this.getResources(),
-                                                        R.drawable.ic_bus_arrow),
-                                                b.getHeading())))
+                                        .fromBitmap(
+                                                zoomBitmap(
+                                                    rotateBitmap(
+                                                        BitmapFactory.decodeResource(
+                                                            this.getResources(),
+                                                            R.drawable.ic_bus_arrow),
+                                                        b.getHeading()),
+                                                    75,
+                                                    75)))
                                 .anchor(0.5f, 0.5f));
                         clickableMapMarkers.put(mMarker.getId(), false);
                         busesOnMap.add(mMarker);
@@ -299,7 +307,14 @@ public class MainActivity extends Activity{
                             .position(s.getLocation())
                             .title(s.getName())
                             .anchor(0.5f, 0.5f)
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_stop)));
+                            .icon(BitmapDescriptorFactory
+                                    .fromBitmap(
+                                            zoomBitmap(
+                                                BitmapFactory.decodeResource(
+                                                    this.getResources(),
+                                                    R.drawable.ic_map_stop),
+                                                23,
+                                                23))));
                     clickableMapMarkers.put(mMarker.getId(), true);
                 }
                 updateMapWithNewBusLocations();
