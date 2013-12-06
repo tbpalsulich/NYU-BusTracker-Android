@@ -133,16 +133,15 @@ public final class BusManager {
         return null;
     }
 
-    /*
-    Given the name of a route (e.g. "E"), returns the Route with that name.
-     */
-    public Route getRouteByName(String name) {
-        for (Route route : routes) {
-            if (route.getLongName().equals(name)) {
-                return route;
-            }
+    public Stop getStop(String stopName, String stopLat, String stopLng, String stopID, String[] routes){
+        Stop s = getStopByID(stopID);
+        if (s == null){
+            s = new Stop(stopName, stopLat, stopLng, stopID, routes);
         }
-        return null;
+        else{
+            s.setValues(stopName, stopLat, stopLng, stopID, routes);
+        }
+        return s;
     }
 
     /*
@@ -184,6 +183,14 @@ public final class BusManager {
             Log.v("JSONDebug", "Adding route: " + route.getID());
             routes.add(route);
         }
+    }
+
+    public Route getRoute(String name, String id){
+        Route r;
+        if ((r = getRouteByID(id)) == null){
+            return new Route(name, id);
+        }
+        else return r.setName(name);
     }
 
     /*

@@ -39,6 +39,18 @@ public class Stop {
         }
     }
 
+    public void setValues(String mName, String mLat, String mLng, String mID, String[] mRoutes){
+        if(name.equals("")) name = mName;
+        if(loc == null) loc = new LatLng(Double.parseDouble(mLat), Double.parseDouble(mLng));
+        id = mID;
+        if(routesString == null) routesString = mRoutes;
+        BusManager sharedManager = BusManager.getBusManager();
+        for (String s : mRoutes){
+            Route r = sharedManager.getRouteByID(s);
+            if (r != null && !r.getStops().contains(this)) r.addStop(this);
+        }
+    }
+
     public LatLng getLocation(){
         return loc;
     }
@@ -121,7 +133,7 @@ public class Stop {
                 routesString += routes[j];
                 if (j != stopRoutes.length() - 1) routesString += ", ";
             }
-            Stop s = new Stop(stopName, stopLat, stopLng, stopID, routes);
+            Stop s = sharedManager.getStop(stopName, stopLat, stopLng, stopID, routes);
             sharedManager.addStop(s);
             Log.v("JSONDebug", "Stop name: " + stopName + ", stop ID: " + stopID + ", routes: " + routesString);
         }

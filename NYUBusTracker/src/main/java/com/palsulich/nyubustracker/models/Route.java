@@ -22,7 +22,7 @@ public class Route {
     ArrayList<String> segmentIDs;
     ArrayList<PolylineOptions> segments;
 
-    private Route(String mLongName, String mRouteID){
+    public Route(String mLongName, String mRouteID){
         segmentIDs = new ArrayList<String>();
         segments = new ArrayList<PolylineOptions>();
         longName = mLongName;
@@ -37,6 +37,11 @@ public class Route {
 
     public String toString(){
         return longName;
+    }
+
+    public Route setName(String name){
+        longName = name;
+        return this;
     }
 
     public ArrayList<String> getSegmentIDs() {
@@ -106,7 +111,7 @@ public class Route {
             JSONObject routeObject = jRoutes.getJSONObject(j);
             String routeLongName = routeObject.getString(FileGrabber.TAG_LONG_NAME);
             String routeID = routeObject.getString(FileGrabber.TAG_ROUTE_ID);
-            Route r = new Route(routeLongName, routeID);
+            Route r = sharedManager.getRoute(routeLongName, routeID);
             JSONArray stops = routeObject.getJSONArray(FileGrabber.TAG_STOPS);
             for (int i = 0; i < stops.length(); i++){
                 r.addStop(sharedManager.getStopByID(stops.getString(i)));
