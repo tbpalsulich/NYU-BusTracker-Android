@@ -11,15 +11,9 @@ import android.graphics.Matrix;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +28,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.palsulich.nyubustracker.R;
+import com.palsulich.nyubustracker.adapters.StopAdapter;
 import com.palsulich.nyubustracker.helpers.BusManager;
 import com.palsulich.nyubustracker.helpers.FileGrabber;
 import com.palsulich.nyubustracker.models.Bus;
@@ -499,7 +494,15 @@ public class MainActivity extends Activity{
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(listView);
         final Dialog dialog = builder.create();
-        StopAdapter adapter = new StopAdapter(getApplicationContext(), connectedStops, false, dialog);
+        StopAdapter adapter = new StopAdapter(getApplicationContext(), connectedStops, false, dialog,
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Stop s = connectedStops.get((Integer)view.getTag());
+                        setEndStop(s.getName());
+                        dialog.dismiss();
+                    }
+                });
         listView.setAdapter(adapter);
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
@@ -510,8 +513,16 @@ public class MainActivity extends Activity{
         ListView listView = new ListView(this);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(listView);
-        Dialog dialog = builder.create();
-        StopAdapter adapter = new StopAdapter(getApplicationContext(), stops, true, dialog);
+        final Dialog dialog = builder.create();
+        StopAdapter adapter = new StopAdapter(getApplicationContext(), stops, false, dialog,
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Stop s = stops.get((Integer)view.getTag());
+                        setStartStop(s.getName());
+                        dialog.dismiss();
+                    }
+                });
         listView.setAdapter(adapter);
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
@@ -533,73 +544,5 @@ public class MainActivity extends Activity{
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
     }
-
-    private class StopAdapter extends BaseAdapter {
-
-        private LayoutInflater mInflater;
-        ArrayList<Stop> stops = new ArrayList<Stop>();
-        boolean startStops;
-        Dialog dialog;
-
-        public StopAdapter(Context context, ArrayList<Stop> mStops, boolean mStartStops, Dialog mDialog) {
-            // Cache the LayoutInflate to avoid asking for a new one each time.
-            mInflater = LayoutInflater.from(context);
-            stops = mStops;
-            startStops = mStartStops;
-            dialog = mDialog;
-        }
-
-        public int getCount() {
-            return stops.size();
-        }
-
-        public Object getItem(int position) {
-            return position;
-        }
-
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(final int position, View convertView, ViewGroup parent) {
-            convertView = mInflater.inflate(R.layout.stop_list_item, null);
-            final ViewHolder holder = new ViewHolder();
-
-            holder.text = (TextView) convertView.findViewById(R.id.stop_text);
-            holder.checkbox = (CheckBox) convertView.findViewById(R.id.stop_checkbox);
-            holder.checkbox.setTag(position);
-
-            holder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-                {
-                    Stop s = stops.get((Integer)buttonView.getTag());
-                    s.setFavorite(buttonView.isChecked());
-                    Log.v("Dialog", "Checkbox is " + buttonView.isChecked());
-                }
-            });
-
-            holder.text.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Stop s = stops.get(position);
-                    if (startStops) setStartStop(s.getName());
-                    else setEndStop(s.getName());
-                    dialog.dismiss();
-                }
-            });
-            convertView.setTag(holder);
-            holder.text.setText(stops.get(position).getName());
-            holder.checkbox.setChecked(stops.get(position).getFavorite());
-            return convertView;
-        }
-
-        class ViewHolder {
-            CheckBox checkbox;
-            TextView text;
-        }
-    }
-
 
 }
