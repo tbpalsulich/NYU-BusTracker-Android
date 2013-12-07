@@ -490,6 +490,16 @@ public class MainActivity extends Activity{
         renewTimeUntilTimer();
     }
 
+    CompoundButton.OnCheckedChangeListener cbListener = new CompoundButton.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+        {
+            Stop s = (Stop) buttonView.getTag();
+            s.setFavorite(buttonView.isChecked());
+            Log.v("Dialog", "Checkbox is " + buttonView.isChecked());
+        }
+    };
+
     public void createEndDialog(View view) {
         final ArrayList<Stop> connectedStops = BusManager.getBusManager().getConnectedStops(startStop);
         ListView listView = new ListView(this);
@@ -500,20 +510,11 @@ public class MainActivity extends Activity{
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Stop s = connectedStops.get((Integer)view.getTag());
+                        Stop s = (Stop) view.getTag();
                         setEndStop(s.getName());
                         dialog.dismiss();
                     }
-                },
-                new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-                    {
-                        Stop s = connectedStops.get((Integer)buttonView.getTag());
-                        s.setFavorite(buttonView.isChecked());
-                        Log.v("Dialog", "Checkbox is " + buttonView.isChecked());
-                    }
-                });
+                }, cbListener);
         listView.setAdapter(adapter);
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
@@ -529,20 +530,11 @@ public class MainActivity extends Activity{
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Stop s = stops.get((Integer)view.getTag());
+                        Stop s = (Stop) view.getTag();
                         setStartStop(s.getName());
                         dialog.dismiss();
                     }
-                },
-                new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-                    {
-                        Stop s = stops.get((Integer)buttonView.getTag());
-                        s.setFavorite(buttonView.isChecked());
-                        Log.v("Dialog", "Checkbox is " + buttonView.isChecked());
-                    }
-                });
+                }, cbListener);
         listView.setAdapter(adapter);
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();

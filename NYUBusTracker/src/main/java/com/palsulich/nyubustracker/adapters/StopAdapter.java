@@ -52,9 +52,9 @@ public class StopAdapter extends BaseAdapter {
         final ViewHolder holder = new ViewHolder();
 
         holder.text = (TextView) convertView.findViewById(R.id.stop_text);
-        holder.text.setTag(position);
+        holder.text.setTag(stops.get(position));
         holder.checkbox = (CheckBox) convertView.findViewById(R.id.stop_checkbox);
-        holder.checkbox.setTag(position);
+        holder.checkbox.setTag(stops.get(position));
 
         holder.checkbox.setOnCheckedChangeListener(checkBoxOnCLickListener);
 
