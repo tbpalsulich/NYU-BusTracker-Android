@@ -2,7 +2,6 @@ package com.palsulich.nyubustracker.adapters;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,9 +22,11 @@ public class StopAdapter extends BaseAdapter {
     boolean startStops;
     Dialog dialog;
     View.OnClickListener textOnClickListener;
+    CompoundButton.OnCheckedChangeListener checkBoxOnCLickListener;
 
-    public StopAdapter(Context context, ArrayList<Stop> mStops, boolean mStartStops, Dialog mDialog, View.OnClickListener listener){
+    public StopAdapter(Context context, ArrayList<Stop> mStops, boolean mStartStops, Dialog mDialog, View.OnClickListener listener, CompoundButton.OnCheckedChangeListener cbListener){
         textOnClickListener = listener;
+        checkBoxOnCLickListener = cbListener;
         // Cache the LayoutInflate to avoid asking for a new one each time.
         mInflater = LayoutInflater.from(context);
         stops = mStops;
@@ -55,15 +56,7 @@ public class StopAdapter extends BaseAdapter {
         holder.checkbox = (CheckBox) convertView.findViewById(R.id.stop_checkbox);
         holder.checkbox.setTag(position);
 
-        holder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-            {
-                Stop s = stops.get((Integer)buttonView.getTag());
-                s.setFavorite(buttonView.isChecked());
-                Log.v("Dialog", "Checkbox is " + buttonView.isChecked());
-            }
-        });
+        holder.checkbox.setOnCheckedChangeListener(checkBoxOnCLickListener);
 
         holder.text.setOnClickListener(textOnClickListener);
         convertView.setTag(holder);

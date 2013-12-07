@@ -11,9 +11,11 @@ import android.graphics.Matrix;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -502,6 +504,15 @@ public class MainActivity extends Activity{
                         setEndStop(s.getName());
                         dialog.dismiss();
                     }
+                },
+                new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                    {
+                        Stop s = connectedStops.get((Integer)buttonView.getTag());
+                        s.setFavorite(buttonView.isChecked());
+                        Log.v("Dialog", "Checkbox is " + buttonView.isChecked());
+                    }
                 });
         listView.setAdapter(adapter);
         dialog.setCanceledOnTouchOutside(true);
@@ -521,6 +532,15 @@ public class MainActivity extends Activity{
                         Stop s = stops.get((Integer)view.getTag());
                         setStartStop(s.getName());
                         dialog.dismiss();
+                    }
+                },
+                new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                    {
+                        Stop s = stops.get((Integer)buttonView.getTag());
+                        s.setFavorite(buttonView.isChecked());
+                        Log.v("Dialog", "Checkbox is " + buttonView.isChecked());
                     }
                 });
         listView.setAdapter(adapter);
