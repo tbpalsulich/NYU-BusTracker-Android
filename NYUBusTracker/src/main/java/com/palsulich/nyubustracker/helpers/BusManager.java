@@ -149,13 +149,12 @@ public final class BusManager {
     some route between it and the given stop.
      */
     public ArrayList<Stop> getConnectedStops(Stop stop){
-        int resultSize = 0;
         ArrayList<Stop> result = new ArrayList<Stop>();
         ArrayList<Route> stopRoutes = stop.getRoutes();
         for (Route route : stopRoutes) {       // For every route servicing this stop:
             Log.v("Route Debugging", route.toString() + " services this stop.");
             for (Stop connectedStop : route.getStops()){    // add all of that route's stops.
-                if (!connectedStop.getName().equals(stop.getName())){
+                if (!connectedStop.getName().equals(stop.getName()) && !result.contains(connectedStop)){
                     result.add(connectedStop);
                     Log.v("Route Debugging", "   " + connectedStop + " is connected to " + stop.getName());
                 }
