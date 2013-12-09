@@ -9,6 +9,7 @@ public class Time {
     private boolean AM;
     private String route;
     private TimeOfWeek timeOfWeek;
+    private String separation;
 
     public Time(String time, TimeOfWeek mTimeOfWeek, String mRoute){           // Input a string like "8:04 PM".
         AM = time.contains("AM");       // Automatically accounts for AM/PM with military time.
@@ -24,14 +25,39 @@ public class Time {
         route = mRoute;
     }
 
+    private Time(){
+
+    }
+
+    public TimeOfWeek getTimeOfWeek(){
+        return timeOfWeek;
+    }
+
+    public boolean isSeparation(){
+        return separation != null;
+    }
+
+    public Time getSeparator(){
+        Time result = new Time();
+        switch (timeOfWeek){
+            case Weekday:
+                result.separation = "Weekday";
+                break;
+            case Friday:
+                result.separation = "Friday";
+                break;
+
+            case Weekend:
+                result.separation = "Weekend";
+                break;
+        }
+        return result;
+    }
+
     public Time(int mHour, int mMin){       // Input values in normal time (e.g. (4, 15)
         AM = mHour < 12;
         hour = mHour;
         min = mMin;
-    }
-
-    public void setRoute(String r){
-        route = r;
     }
 
     public String getRoute(){
@@ -94,7 +120,8 @@ public class Time {
     }
 
     public String toString(){
-        return getHourInNormalTime() + ":" + getMinInNormalTime() + " " + getAMorPM();
+        if (separation == null) return getHourInNormalTime() + ":" + getMinInNormalTime() + " " + getAMorPM() + getViaRoute();
+        else return separation;
     }
 
     private String getAMorPM(){

@@ -20,7 +20,15 @@ public class TimeAdapter extends BaseAdapter {
     public TimeAdapter(Context context, ArrayList<Time> mTimes){
         // Cache the LayoutInflate to avoid asking for a new one each time.
         mInflater = LayoutInflater.from(context);
-        times = mTimes;
+        times = new ArrayList<Time>();
+        Time.TimeOfWeek currentTime = null;
+        for (Time t : mTimes){
+            if (t.getTimeOfWeek() != currentTime){
+                times.add(t.getSeparator());
+                currentTime = t.getTimeOfWeek();
+            }
+            times.add(t);
+        }
     }
 
     public int getCount() {
@@ -28,19 +36,25 @@ public class TimeAdapter extends BaseAdapter {
     }
 
     public Object getItem(int position) {
-        return position;
+        return times.get(position);
     }
 
     public long getItemId(int position) {
         return position;
     }
 
+    public int getPosition(Time time) {
+        return times.indexOf(time);
+    }
+
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        // if something we pick a different layout to inflate.
-        convertView = mInflater.inflate(R.layout.time_list_item, null);
+        // if (something) we pick a different layout to inflate.
+        Time time = times.get(position);
+        if (time.isSeparation()) convertView = mInflater.inflate(R.layout.time_list_separator, null);
+        else convertView = mInflater.inflate(R.layout.time_list_item, null);
         TextView t = (TextView) convertView.findViewById(R.id.time_text);
-        t.setText(times.get(position).toString() + times.get(position).getViaRoute());
+        t.setText(times.get(position).toString());
         return convertView;
     }
 }

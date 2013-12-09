@@ -55,6 +55,8 @@ public class MainActivity extends Activity{
     HashMap<String, Boolean> clickableMapMarkers;   // Hash of all markers which are clickable (so we don't zoom in on buses).
     ArrayList<Marker> busesOnMap = new ArrayList<Marker>();
 
+    Time nextBusTime;
+
     // mFileGrabber helps to manage cached files/pull new files from the network.
     FileGrabber mFileGrabber;
 
@@ -434,20 +436,21 @@ public class MainActivity extends Activity{
                 timesBetweenStartAndEnd = tempTimesBetweenStartAndEnd;
                 routesBetweenStartAndEnd = routes;
                 Time currentTime = new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
-                Time nextBusTime = timesBetweenStartAndEnd.get(0);
+                Time mNextBusTime = timesBetweenStartAndEnd.get(0);
                 for (Time tempTime : timesBetweenStartAndEnd) {
                     if (tempTime.isAfter(currentTime)) {
-                        if (tempTime.isAfter(currentTime) && tempTime.isBefore(nextBusTime)) {
-                            nextBusTime = tempTime;
+                        if (tempTime.isAfter(currentTime) && tempTime.isBefore(mNextBusTime)) {
+                            mNextBusTime = tempTime;
                         }
-                        else if (tempTime.isAfter(currentTime) && nextBusTime.isStrictlyBefore(currentTime)){
-                            nextBusTime = tempTime;
+                        else if (tempTime.isAfter(currentTime) && mNextBusTime.isStrictlyBefore(currentTime)){
+                            mNextBusTime = tempTime;
                         }
                     }
                 }
+                nextBusTime = mNextBusTime;
                 String timeOfNextBus = nextBusTime.toString();
                 String timeUntilNextBus = currentTime.getTimeAsStringUntil(nextBusTime);
-                ((TextView) findViewById(R.id.times_button)).setText(timeOfNextBus + nextBusTime.getViaRoute());
+                ((TextView) findViewById(R.id.times_button)).setText(timeOfNextBus.toString());
                 ((TextView) findViewById(R.id.next_bus)).setText(timeUntilNextBus);
             }
             else{
@@ -535,6 +538,7 @@ public class MainActivity extends Activity{
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         TimeAdapter adapter = new TimeAdapter(getApplicationContext(), timesBetweenStartAndEnd);
         listView.setAdapter(adapter);
+        listView.setSelection(adapter.getPosition(nextBusTime));
         builder.setView(listView);
         Dialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(true);
