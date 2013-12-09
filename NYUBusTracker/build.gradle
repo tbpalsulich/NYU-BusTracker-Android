@@ -28,5 +28,6 @@ dependencies {
         compile 'com.android.support:support-v4:19.0.+'
         compile 'com.android.support:appcompat-v7:19.0.+'
         compile 'com.google.maps.android:android-maps-utils:0.1+'
+        compile 'se.emilsjolander:stickylistheaders:2.1.3'
     }
 }

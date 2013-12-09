@@ -12,23 +12,17 @@ import com.palsulich.nyubustracker.models.Time;
 
 import java.util.ArrayList;
 
-public class TimeAdapter extends BaseAdapter {
+import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 
-    private LayoutInflater mInflater;
+public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter{
+
+    private LayoutInflater inflater;
     private ArrayList<Time> times;
 
     public TimeAdapter(Context context, ArrayList<Time> mTimes){
         // Cache the LayoutInflate to avoid asking for a new one each time.
-        mInflater = LayoutInflater.from(context);
-        times = new ArrayList<Time>();
-        Time.TimeOfWeek currentTime = null;
-        for (Time t : mTimes){
-            if (t.getTimeOfWeek() != currentTime){
-                times.add(t.getSeparator());
-                currentTime = t.getTimeOfWeek();
-            }
-            times.add(t);
-        }
+        inflater = LayoutInflater.from(context);
+        times = mTimes;
     }
 
     public int getCount() {
@@ -51,10 +45,41 @@ public class TimeAdapter extends BaseAdapter {
     public View getView(final int position, View convertView, ViewGroup parent) {
         // if (something) we pick a different layout to inflate.
         Time time = times.get(position);
-        if (time.isSeparation()) convertView = mInflater.inflate(R.layout.time_list_separator, null);
-        else convertView = mInflater.inflate(R.layout.time_list_item, null);
+        if (time.isSeparation()) convertView = inflater.inflate(R.layout.time_list_header, null);
+        else convertView = inflater.inflate(R.layout.time_list_item, null);
         TextView t = (TextView) convertView.findViewById(R.id.time_text);
         t.setText(times.get(position).toString());
         return convertView;
+    }
+
+    @Override
+    public View getHeaderView(int position, View convertView, ViewGroup parent) {
+        HeaderViewHolder holder;
+        if (convertView == null) {
+            holder = new HeaderViewHolder();
+            convertView = inflater.inflate(R.layout.time_list_header, parent, false);
+            holder.text = (TextView) convertView.findViewById(R.id.time_text);
+            convertView.setTag(holder);
+        } else {
+            holder = (HeaderViewHolder) convertView.getTag();
+        }
+        //set header text as first char in name
+        String headerText = times.get(position).getTimeOfWeekAsString();
+        holder.text.setText(headerText);
+        return convertView;
+    }
+
+    @Override
+    public long getHeaderId(int position) {
+        //return the first character of the country as ID because this is what headers are based upon
+        return times.get(position).getTimeOfWeek().ordinal();
+    }
+
+    class HeaderViewHolder {
+        TextView text;
+    }
+
+    class ViewHolder {
+        TextView text;
     }
 }

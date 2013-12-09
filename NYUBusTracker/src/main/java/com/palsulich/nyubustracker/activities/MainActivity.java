@@ -47,6 +47,8 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
+
 public class MainActivity extends Activity{
     Stop startStop;     // Stop object to keep track of the start location of the desired route.
     Stop endStop;       // Keep track of the desired end location.
@@ -534,7 +536,7 @@ public class MainActivity extends Activity{
     }
 
     public void createTimesDialog(View view) {
-        ListView listView = new ListView(this);
+        StickyListHeadersListView listView = new StickyListHeadersListView(this);
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         TimeAdapter adapter = new TimeAdapter(getApplicationContext(), timesBetweenStartAndEnd);
         listView.setAdapter(adapter);

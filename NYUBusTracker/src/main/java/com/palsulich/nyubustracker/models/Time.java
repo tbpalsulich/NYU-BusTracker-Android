@@ -25,33 +25,24 @@ public class Time {
         route = mRoute;
     }
 
-    private Time(){
-
-    }
-
-    public TimeOfWeek getTimeOfWeek(){
-        return timeOfWeek;
-    }
-
     public boolean isSeparation(){
         return separation != null;
     }
 
-    public Time getSeparator(){
-        Time result = new Time();
+    public String getTimeOfWeekAsString(){
         switch (timeOfWeek){
             case Weekday:
-                result.separation = "Weekday";
-                break;
+                return "Weekday";
             case Friday:
-                result.separation = "Friday";
-                break;
-
+                return "Friday";
             case Weekend:
-                result.separation = "Weekend";
-                break;
+                return "Weekend";
         }
-        return result;
+        return "";
+    }
+
+    public TimeOfWeek getTimeOfWeek(){
+        return timeOfWeek;
     }
 
     public Time(int mHour, int mMin){       // Input values in normal time (e.g. (4, 15)
