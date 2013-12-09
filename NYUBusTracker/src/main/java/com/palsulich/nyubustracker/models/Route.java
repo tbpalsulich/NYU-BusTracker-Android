@@ -83,21 +83,6 @@ public class Route {
     public ArrayList<Stop> getStops(){
         return stops;
     }
-    public String[] getStopsAsArray(){
-        String[] result;
-        if(stops.size() == 0){
-            result = new String[1];
-            result[0] = "No stops available.";
-        }
-        else{
-            result = new String[stops.size()];
-        }
-        int j = 0;
-        for(Stop s : stops){
-            result[j++] = s.toString();
-        }
-        return result;
-    }
 
     public void addStop(Stop stop){
         if(!stops.contains(stop)) stops.add(stop);

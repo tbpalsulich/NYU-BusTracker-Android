@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/stops_background">
 
     <CheckBox
         android:id="@+id/stop_checkbox"
@@ -10,18 +11,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
+        android:paddingLeft="2dp"
         android:focusable="false"/>
 
     <TextView
         android:id="@+id/stop_text"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:text="test"
+        android:text="Stop Name"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/stop_checkbox"
         android:paddingTop="2dp"
         android:clickable="true"
         android:layout_alignBottom="@+id/stop_checkbox"
-        android:gravity="center_vertical" />
+        android:gravity="center_vertical"
+        android:textSize="16dp"/>
 
 </RelativeLayout>
