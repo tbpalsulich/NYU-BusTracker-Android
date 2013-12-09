@@ -540,7 +540,7 @@ public class MainActivity extends Activity{
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         TimeAdapter adapter = new TimeAdapter(getApplicationContext(), timesBetweenStartAndEnd);
         listView.setAdapter(adapter);
-        listView.setSelection(adapter.getPosition(nextBusTime));
+        // listView.setSelection(timesBetweenStartAndEnd.indexOf(nextBusTime));
         builder.setView(listView);
         Dialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(true);

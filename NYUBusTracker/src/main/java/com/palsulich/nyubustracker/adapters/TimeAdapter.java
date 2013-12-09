@@ -37,10 +37,6 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
         return position;
     }
 
-    public int getPosition(Time time) {
-        return times.indexOf(time);
-    }
-
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         // if (something) we pick a different layout to inflate.
