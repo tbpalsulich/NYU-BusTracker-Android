@@ -1,5 +1,6 @@
 package com.palsulich.nyubustracker.helpers;
 
+import android.content.SharedPreferences;
 import android.net.NetworkInfo;
 import android.util.Log;
 
@@ -142,6 +143,12 @@ public final class BusManager {
             s.setValues(stopName, stopLat, stopLng, stopID, routes);
         }
         return s;
+    }
+
+    public static void syncFavoriteStops(SharedPreferences preferences){
+        for (Stop s : stops){
+            s.setFavorite(preferences);
+        }
     }
 
     /*

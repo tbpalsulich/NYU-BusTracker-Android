@@ -117,6 +117,7 @@ public class MainActivity extends Activity{
                 Stop.parseJSON(mFileGrabber.getStopJSON(networkInfo));
                 Route.parseJSON(mFileGrabber.getRouteJSON(networkInfo));
                 BusManager.parseTimes(mFileGrabber.getVersionJSON(networkInfo), mFileGrabber, networkInfo);
+                BusManager.syncFavoriteStops(getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE));
                 if (haveAMap) Bus.parseJSON(mFileGrabber.getVehicleJSON(networkInfo));
                 if (haveAMap) BusManager.parseSegments(mFileGrabber.getSegmentsJSON(networkInfo));
                 if (networkInfo == null || !networkInfo.isConnected()){
@@ -496,6 +497,7 @@ public class MainActivity extends Activity{
         {
             Stop s = (Stop) buttonView.getTag();
             s.setFavorite(buttonView.isChecked());
+            getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(s.getID(), s.getFavorite()).commit();
             Log.v("Dialog", "Checkbox is " + buttonView.isChecked());
         }
     };

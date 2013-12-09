@@ -1,5 +1,6 @@
 package com.palsulich.nyubustracker.models;
 
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -21,6 +22,7 @@ public class Stop {
     ArrayList<Route> routes = null;
     HashMap<String, HashMap<String, Time[]>> times = null;
     boolean favorite;
+    public static String FAVORITES_PREF = "favorites";
 
     public Stop(String mName, String mLat, String mLng, String mID, String[] mRoutes){
         name = mName;
@@ -37,6 +39,10 @@ public class Stop {
             Route r = sharedManager.getRouteByID(s);
             if (r != null && !r.getStops().contains(this)) r.addStop(this);
         }
+    }
+
+    public void setFavorite(SharedPreferences preferences){
+        favorite = preferences.getBoolean(id, false);
     }
 
     public void setValues(String mName, String mLat, String mLng, String mID, String[] mRoutes){
