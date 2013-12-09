@@ -57,7 +57,6 @@ public class StopAdapter extends BaseAdapter {
         holder.checkbox.setOnCheckedChangeListener(checkBoxOnCLickListener);
 
         holder.text.setOnClickListener(textOnClickListener);
-        convertView.setTag(holder);
         holder.text.setText(stops.get(position).getName());
         holder.checkbox.setChecked(stops.get(position).getFavorite());
         return convertView;

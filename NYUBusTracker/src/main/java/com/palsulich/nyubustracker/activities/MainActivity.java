@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -31,6 +30,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.palsulich.nyubustracker.R;
 import com.palsulich.nyubustracker.adapters.StopAdapter;
+import com.palsulich.nyubustracker.adapters.TimeAdapter;
 import com.palsulich.nyubustracker.helpers.BusManager;
 import com.palsulich.nyubustracker.helpers.FileGrabber;
 import com.palsulich.nyubustracker.models.Bus;
@@ -531,17 +531,11 @@ public class MainActivity extends Activity{
     }
 
     public void createTimesDialog(View view) {
+        ListView listView = new ListView(this);
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        final Time[] times = timesBetweenStartAndEnd.toArray(new Time[1]);
-        final String[] timesAsString = new String[times.length];
-        for (int i = 0; i < times.length; i++) {
-            timesAsString[i] = times[i].toString() + times[i].getViaRoute();
-        }
-        builder.setItems(timesAsString, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                // Nothing to do, ish.
-            }
-        });
+        TimeAdapter adapter = new TimeAdapter(getApplicationContext(), timesBetweenStartAndEnd);
+        listView.setAdapter(adapter);
+        builder.setView(listView);
         Dialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
