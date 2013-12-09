@@ -496,9 +496,9 @@ public class MainActivity extends Activity{
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
         {
             Stop s = (Stop) buttonView.getTag();
-            s.setFavorite(buttonView.isChecked());
-            getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(s.getID(), s.getFavorite()).commit();
-            Log.v("Dialog", "Checkbox is " + buttonView.isChecked());
+            s.setFavorite(isChecked);
+            getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(s.getID(), isChecked).commit();
+            Log.v("Dialog", "Checkbox is " + isChecked);
         }
     };
 
@@ -508,7 +508,7 @@ public class MainActivity extends Activity{
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(listView);
         final Dialog dialog = builder.create();
-        StopAdapter adapter = new StopAdapter(getApplicationContext(), connectedStops, false, dialog,
+        StopAdapter adapter = new StopAdapter(getApplicationContext(), connectedStops, dialog,
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -528,7 +528,7 @@ public class MainActivity extends Activity{
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(listView);
         final Dialog dialog = builder.create();
-        StopAdapter adapter = new StopAdapter(getApplicationContext(), stops, false, dialog,
+        StopAdapter adapter = new StopAdapter(getApplicationContext(), stops, dialog,
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {

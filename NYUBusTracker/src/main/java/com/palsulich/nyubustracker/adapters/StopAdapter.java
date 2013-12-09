@@ -19,18 +19,16 @@ public class StopAdapter extends BaseAdapter {
 
     private LayoutInflater mInflater;
     ArrayList<Stop> stops = new ArrayList<Stop>();
-    boolean startStops;
     Dialog dialog;
     View.OnClickListener textOnClickListener;
     CompoundButton.OnCheckedChangeListener checkBoxOnCLickListener;
 
-    public StopAdapter(Context context, ArrayList<Stop> mStops, boolean mStartStops, Dialog mDialog, View.OnClickListener listener, CompoundButton.OnCheckedChangeListener cbListener){
+    public StopAdapter(Context context, ArrayList<Stop> mStops, Dialog mDialog, View.OnClickListener listener, CompoundButton.OnCheckedChangeListener cbListener){
         textOnClickListener = listener;
         checkBoxOnCLickListener = cbListener;
         // Cache the LayoutInflate to avoid asking for a new one each time.
         mInflater = LayoutInflater.from(context);
         stops = mStops;
-        startStops = mStartStops;
         dialog = mDialog;
     }
 
