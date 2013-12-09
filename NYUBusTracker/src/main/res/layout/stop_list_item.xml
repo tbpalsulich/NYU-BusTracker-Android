@@ -6,6 +6,7 @@
 
     <CheckBox
         android:id="@+id/stop_checkbox"
+        android:button="@drawable/heart_selector"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
