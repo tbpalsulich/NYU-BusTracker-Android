@@ -13,14 +13,13 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 
 public class Stop {
     String name, id;
     LatLng loc;
     String[] routesString;
     ArrayList<Route> routes = null;
-    HashMap<String, HashMap<String, Time[]>> times = null;
+    ArrayList<Time> times = null;
     boolean favorite;
     public static String FAVORITES_PREF = "favorites";
 
@@ -29,10 +28,7 @@ public class Stop {
         loc = new LatLng(Double.parseDouble(mLat), Double.parseDouble(mLng));
         id = mID;
         routesString = mRoutes;
-        times = new HashMap<String, HashMap<String, Time[]>>();
-        times.put("Weekday", new HashMap<String, Time[]>());
-        times.put("Weekend", new HashMap<String,Time[]>());
-        times.put("Friday", new HashMap<String, Time[]>());
+        times = new ArrayList<Time>();
         routes = new ArrayList<Route>();
         BusManager sharedManager = BusManager.getBusManager();
         for (String s : mRoutes){
@@ -96,9 +92,8 @@ public class Stop {
         return id;
     }
 
-    public void addTime(String route, String dayOfWeek, Time[] mTimes){
-        times.get(dayOfWeek).put(route, mTimes);
-        Log.v("Debugging", "Adding " + mTimes.length + " times to " + name + "/" + route + " for " + dayOfWeek);
+    public void addTime(Time t){
+        times.add(t);
     }
 
     public static Comparator<Stop> compare = new Comparator<Stop>() {
@@ -115,10 +110,19 @@ public class Stop {
         }
     };
 
-    public HashMap<String, HashMap<String, Time[]>> getTimes(){
+    public ArrayList<Time> getTimes(){
         return times;
     }
 
+    public ArrayList<Time> getTimesOfRoute(String route){
+        ArrayList<Time> result = new ArrayList<Time>();
+        for (Time t : times){
+            if (t.getRoute().equals(route)){
+                result.add(t);
+            }
+        }
+        return result;
+    }
     public static void parseJSON(JSONObject stopsJson) throws JSONException{
         JSONArray jStops = new JSONArray();
         BusManager sharedManager = BusManager.getBusManager();

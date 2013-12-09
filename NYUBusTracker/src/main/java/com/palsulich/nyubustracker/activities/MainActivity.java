@@ -135,8 +135,8 @@ public class MainActivity extends Activity{
             }
         }
 
-        setStartStop(mFileGrabber.getStartStopFile());
-        setEndStop(mFileGrabber.getEndStopFile());
+        setStartStop(sharedManager.getStopByName(mFileGrabber.getStartStopFile()));
+        setEndStop(sharedManager.getStopByName(mFileGrabber.getEndStopFile()));
 
         if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
 
@@ -348,12 +348,11 @@ public class MainActivity extends Activity{
         }
     }
 
-    private void setEndStop(String stopName) {
-        Stop tempStop = BusManager.getBusManager().getStopByName(stopName);
-        if (tempStop != null) {     // Make sure we actually have a stop!
+    private void setEndStop(Stop stop) {
+        if (stop != null) {     // Make sure we actually have a stop!
             // Check there is a route between these stops.
-            endStop = tempStop;
-            ((Button) findViewById(R.id.to_button)).setText(stopName);
+            endStop = stop;
+            ((Button) findViewById(R.id.to_button)).setText(stop.getName());
             if (startStop != null){
                 setNextBusTime();    // Don't set the next bus if we don't have a valid route.
                 if (routesBetweenStartAndEnd != null && haveAMap) updateMapWithNewStartOrEnd();
@@ -361,8 +360,8 @@ public class MainActivity extends Activity{
         }
     }
 
-    private void setStartStop(String stopName) {
-        if (endStop != null && endStop.getName().equals(stopName)) {    // We have an end stop and its name is the same as stopName.
+    private void setStartStop(Stop stop) {
+        if (endStop != null && endStop == stop) {    // We have an end stop and its name is the same as stopName.
             // Swap the start and end stops.
             Stop temp = startStop;
             startStop = endStop;
@@ -374,11 +373,10 @@ public class MainActivity extends Activity{
         } else {
             //Log.v("Debugging", "setStartStop not swapping");
             // We have a new start. So, we must ensure the end is actually connected.
-            Stop tempStop = BusManager.getBusManager().getStopByName(stopName);
-            if (tempStop != null){      // Don't set Start to an invalid stop. Should never happen.
-                startStop = tempStop;
+            if (stop != null){      // Don't set Start to an invalid stop. Should never happen.
+                startStop = stop;
                 //Log.v("Debugging", "New start stop: " + startStop.getName());
-                ((Button) findViewById(R.id.from_button)).setText(stopName);
+                ((Button) findViewById(R.id.from_button)).setText(stop.getName());
                 if (endStop != null){
                     // Loop through all connected Routes.
                     for (Route r : startStop.getRoutes()){
@@ -394,7 +392,7 @@ public class MainActivity extends Activity{
                     //Log.v("Debugging", "setStartStop picking default endStop: " + connectedStops.get(connectedStops.indexOf(startStop) + 1).getName());
                     // If we did not return above, the current endStop is not connected to the new
                     // startStop. So, by default pick the first connected stop.
-                    setEndStop(connectedStops.get(connectedStops.indexOf(startStop) - 1).getName());
+                    setEndStop(connectedStops.get(connectedStops.indexOf(startStop) - 1));
                 }
 
             }
@@ -418,27 +416,17 @@ public class MainActivity extends Activity{
         ArrayList<Route> fromRoutes = startStop.getRoutes();        // All the routes leaving the start stop.
         ArrayList<Route> routes = new ArrayList<Route>();               // All the routes connecting the two.
         for (Route r : fromRoutes) {
-            if (r.hasStop(endStop.getName()) && endStop.getTimes().get(getTimeOfWeek()).get(r.getLongName()) != null) {
-                //Log.v("Route Debugging", "Adding a route between " + startStop.getName() + " and " + endStop.getName() + ": " + r.getLongName());
+            if (r.hasStop(endStop.getName()) && endStop.getTimesOfRoute(r.getLongName()).size() != 0) {
+                Log.v("Route Debugging", "Adding a route between " + startStop.getName() + " and " + endStop.getName() + ": " + r.getLongName());
                 routes.add(r);
             }
         }
         if (routes.size() > 0) {
             ArrayList<Time> tempTimesBetweenStartAndEnd = new ArrayList<Time>();
             for (Route r : routes) {
-                String timeOfWeek = getTimeOfWeek();
                 // Get the Times at this stop for this route.
-                ArrayList<Time> times = new ArrayList<Time>();
-                if (startStop.getTimes().get(timeOfWeek).get(r.getLongName()) == null){
-                    //Log.v("Debugging", "Times today for this route is null: " + r.getLongName());
-                }
-                else{
-                    for (Time t : startStop.getTimes().get(timeOfWeek).get(r.getLongName())){
-                        times.add(t);
-                    }
-                    for (Time t : times){
-                        t.setRoute(r.getLongName());
-                    }
+                ArrayList<Time> times;
+                if ((times = startStop.getTimesOfRoute(r.getLongName())) != null){
                     tempTimesBetweenStartAndEnd.addAll(times);
                 }
             }
@@ -513,7 +501,7 @@ public class MainActivity extends Activity{
                     @Override
                     public void onClick(View view) {
                         Stop s = (Stop) view.getTag();
-                        setEndStop(s.getName());
+                        setEndStop(s);
                         dialog.dismiss();
                     }
                 }, cbListener);
@@ -533,7 +521,7 @@ public class MainActivity extends Activity{
                     @Override
                     public void onClick(View view) {
                         Stop s = (Stop) view.getTag();
-                        setStartStop(s.getName());
+                        setStartStop(s);
                         dialog.dismiss();
                     }
                 }, cbListener);

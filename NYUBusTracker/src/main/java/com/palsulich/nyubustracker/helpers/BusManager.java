@@ -261,38 +261,35 @@ public final class BusManager {
                     JSONObject routeTimes = routes.getJSONObject(s.getRoutes().get(i).getID());
                     if (routeTimes.has(FileGrabber.TAG_WEEKDAY)) {
                         JSONArray weekdayTimesJson = routeTimes.getJSONArray(FileGrabber.TAG_WEEKDAY);
-                        Time[] weekdayTimes = new Time[weekdayTimesJson.length()];
-                        Log.v("Debugging", "Found " + weekdayTimes.length + " weekday times.");
+                        Log.v("Debugging", "Found " + weekdayTimesJson.length() + " weekday times.");
                         if (weekdayTimesJson != null) {
-                            for (int k = 0; k < weekdayTimes.length; k++) {
-                                weekdayTimes[k] = new Time(weekdayTimesJson.getString(k));
-                            }
                             String weekdayRoute = routeTimes.getString(FileGrabber.TAG_ROUTE);
-                            s.addTime(weekdayRoute.substring(weekdayRoute.indexOf("Route ") + "Route ".length()), "Weekday", weekdayTimes);
+                            weekdayRoute = weekdayRoute.substring(weekdayRoute.indexOf("Route ") + "Route ".length());
+                            for (int k = 0; k < weekdayTimesJson.length(); k++){
+                                s.addTime(new Time(weekdayTimesJson.getString(k), Time.TimeOfWeek.Weekday, weekdayRoute));
+                            }
                         }
                     }
                     if (routeTimes.has(FileGrabber.TAG_FRIDAY)) {
                         JSONArray fridayTimesJson = routeTimes.getJSONArray(FileGrabber.TAG_FRIDAY);
-                        Time[] fridayTimes = new Time[fridayTimesJson.length()];
+                        Log.v("Debugging", "Found " + fridayTimesJson.length() + " friday times.");
                         if (fridayTimesJson != null) {
-                            for (int k = 0; k < fridayTimes.length; k++) {
-                                fridayTimes[k] = new Time(fridayTimesJson.getString(k));
-                            }
                             String fridayRoute = routeTimes.getString(FileGrabber.TAG_ROUTE);
-                            s.addTime(fridayRoute.substring(fridayRoute.indexOf("Route ") + "Route ".length()), "Friday", fridayTimes);
-
+                            fridayRoute = fridayRoute.substring(fridayRoute.indexOf("Route ") + "Route ".length());
+                            for (int k = 0; k < fridayTimesJson.length(); k++){
+                                s.addTime(new Time(fridayTimesJson.getString(k), Time.TimeOfWeek.Friday, fridayRoute));
+                            }
                         }
                     }
                     if (routeTimes.has(FileGrabber.TAG_WEEKEND)) {
                         JSONArray weekendTimesJson = routeTimes.getJSONArray(FileGrabber.TAG_WEEKEND);
-                        Time[] weekendTimes = new Time[weekendTimesJson.length()];
+                        Log.v("Debugging", "Found " + weekendTimesJson.length() + " weekend times.");
                         if (weekendTimesJson != null) {
-                            for (int k = 0; k < weekendTimes.length; k++) {
-                                weekendTimes[k] = new Time(weekendTimesJson.getString(k));
-                            }
                             String weekendRoute = routeTimes.getString(FileGrabber.TAG_ROUTE);
-                            s.addTime(weekendRoute.substring(weekendRoute.indexOf("Route ") + "Route ".length()), "Weekend", weekendTimes);
-
+                            weekendRoute = weekendRoute.substring(weekendRoute.indexOf("Route ") + "Route ".length());
+                            for (int k = 0; k < weekendTimesJson.length(); k++){
+                                s.addTime(new Time(weekendTimesJson.getString(k), Time.TimeOfWeek.Weekend, weekendRoute));
+                            }
                         }
                     }
                 }
