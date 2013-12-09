@@ -1,5 +1,6 @@
 package com.palsulich.nyubustracker.models;
 
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -12,15 +13,15 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 
 public class Stop {
     String name, id;
     LatLng loc;
     String[] routesString;
     ArrayList<Route> routes = null;
-    HashMap<String, HashMap<String, Time[]>> times = null;
+    ArrayList<Time> times = null;
     boolean favorite;
+    public static String FAVORITES_PREF = "favorites";
 
     public Stop(String mName, String mLat, String mLng, String mID, String[] mRoutes){
         name = mName;
@@ -31,11 +32,24 @@ public class Stop {
         }
         id = mID;
         routesString = mRoutes;
-        times = new HashMap<String, HashMap<String, Time[]>>();
-        times.put("Weekday", new HashMap<String, Time[]>());
-        times.put("Weekend", new HashMap<String,Time[]>());
-        times.put("Friday", new HashMap<String, Time[]>());
+        times = new ArrayList<Time>();
         routes = new ArrayList<Route>();
+        BusManager sharedManager = BusManager.getBusManager();
+        for (String s : mRoutes){
+            Route r = sharedManager.getRouteByID(s);
+            if (r != null && !r.getStops().contains(this)) r.addStop(this);
+        }
+    }
+
+    public void setFavorite(SharedPreferences preferences){
+        favorite = preferences.getBoolean(id, false);
+    }
+
+    public void setValues(String mName, String mLat, String mLng, String mID, String[] mRoutes){
+        if(name.equals("")) name = mName;
+        if(loc == null) loc = new LatLng(Double.parseDouble(mLat), Double.parseDouble(mLng));
+        id = mID;
+        if(routesString == null) routesString = mRoutes;
         BusManager sharedManager = BusManager.getBusManager();
         for (String s : mRoutes){
             Route r = sharedManager.getRouteByID(s);
@@ -82,9 +96,8 @@ public class Stop {
         return id;
     }
 
-    public void addTime(String route, String dayOfWeek, Time[] mTimes){
-        times.get(dayOfWeek).put(route, mTimes);
-        Log.v("Debugging", "Adding " + mTimes.length + " times to " + name + "/" + route + " for " + dayOfWeek);
+    public void addTime(Time t){
+        times.add(t);
     }
 
     public static Comparator<Stop> compare = new Comparator<Stop>() {
@@ -101,10 +114,15 @@ public class Stop {
         }
     };
 
-    public HashMap<String, HashMap<String, Time[]>> getTimes(){
-        return times;
+    public ArrayList<Time> getTimesOfRoute(String route){
+        ArrayList<Time> result = new ArrayList<Time>();
+        for (Time t : times){
+            if (t.getRoute().equals(route)){
+                result.add(t);
+            }
+        }
+        return result;
     }
-
     public static void parseJSON(JSONObject stopsJson) throws JSONException{
         JSONArray jStops = new JSONArray();
         BusManager sharedManager = BusManager.getBusManager();
@@ -126,6 +144,7 @@ public class Stop {
                 if (j != stopRoutes.length() - 1) routesString += ", ";
             }
             Stop s = sharedManager.getStop(stopName, stopLat, stopLng, stopID, routes);
+            sharedManager.addStop(s);
             Log.v("JSONDebug", "Stop name: " + stopName + ", stop ID: " + stopID + ", routes: " + routesString);
         }
     }

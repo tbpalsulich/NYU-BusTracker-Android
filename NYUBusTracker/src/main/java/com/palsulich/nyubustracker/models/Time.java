@@ -3,18 +3,15 @@ package com.palsulich.nyubustracker.models;
 import android.util.Log;
 
 public class Time {
+    public enum TimeOfWeek {Weekday, Friday, Weekend}
     private int hour;           // In 24 hour (military) format.
     private int min;
     private boolean AM;
     private String route;
+    private TimeOfWeek timeOfWeek;
+    private String separation;
 
-    public Time(){
-        hour = 0;
-        min = 0;
-        AM = false;
-    }
-
-    public Time(String time){           // Input a string like "8:04 PM".
+    public Time(String time, TimeOfWeek mTimeOfWeek, String mRoute){           // Input a string like "8:04 PM".
         AM = time.contains("AM");       // Automatically accounts for AM/PM with military time.
         hour = Integer.parseInt(time.substring(0, time.indexOf(":")).trim());
         min = Integer.parseInt(time.substring(time.indexOf(":") + 1, time.indexOf(" ")).trim());
@@ -24,6 +21,28 @@ public class Time {
         if (!AM && hour != 12){     // Its x:xx PM, but not 12:xx PM.
             hour += 12;
         }
+        timeOfWeek = mTimeOfWeek;
+        route = mRoute;
+    }
+
+    public boolean isSeparation(){
+        return separation != null;
+    }
+
+    public String getTimeOfWeekAsString(){
+        switch (timeOfWeek){
+            case Weekday:
+                return "Weekday";
+            case Friday:
+                return "Friday";
+            case Weekend:
+                return "Weekend";
+        }
+        return "";
+    }
+
+    public TimeOfWeek getTimeOfWeek(){
+        return timeOfWeek;
     }
 
     public Time(int mHour, int mMin){       // Input values in normal time (e.g. (4, 15)
@@ -32,8 +51,8 @@ public class Time {
         min = mMin;
     }
 
-    public void setRoute(String r){
-        route = r;
+    public String getRoute(){
+        return route;
     }
 
     public String getViaRoute(){
@@ -87,12 +106,13 @@ public class Time {
         }
         else{
             Log.v("Time", t.toString() + " isn't after " + this.toString());
-            return new Time();
+            return new Time(0, 0);
         }
     }
 
     public String toString(){
-        return getHourInNormalTime() + ":" + getMinInNormalTime() + " " + getAMorPM();
+        if (separation == null) return getHourInNormalTime() + ":" + getMinInNormalTime() + " " + getAMorPM() + getViaRoute();
+        else return separation;
     }
 
     private String getAMorPM(){

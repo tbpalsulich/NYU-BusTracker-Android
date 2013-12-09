@@ -22,7 +22,7 @@ public class Route {
     ArrayList<String> segmentIDs;
     ArrayList<PolylineOptions> segments;
 
-    private Route(String mLongName, String mRouteID){
+    public Route(String mLongName, String mRouteID){
         segmentIDs = new ArrayList<String>();
         segments = new ArrayList<PolylineOptions>();
         longName = mLongName;
@@ -37,6 +37,11 @@ public class Route {
 
     public String toString(){
         return longName;
+    }
+
+    public Route setName(String name){
+        longName = name;
+        return this;
     }
 
     public ArrayList<String> getSegmentIDs() {
@@ -78,21 +83,6 @@ public class Route {
     public ArrayList<Stop> getStops(){
         return stops;
     }
-    public String[] getStopsAsArray(){
-        String[] result;
-        if(stops.size() == 0){
-            result = new String[1];
-            result[0] = "No stops available.";
-        }
-        else{
-            result = new String[stops.size()];
-        }
-        int j = 0;
-        for(Stop s : stops){
-            result[j++] = s.toString();
-        }
-        return result;
-    }
 
     public void addStop(Stop stop){
         if(!stops.contains(stop)) stops.add(stop);
@@ -106,7 +96,7 @@ public class Route {
             JSONObject routeObject = jRoutes.getJSONObject(j);
             String routeLongName = routeObject.getString(FileGrabber.TAG_LONG_NAME);
             String routeID = routeObject.getString(FileGrabber.TAG_ROUTE_ID);
-            Route r = new Route(routeLongName, routeID);
+            Route r = sharedManager.getRoute(routeLongName, routeID);
             JSONArray stops = routeObject.getJSONArray(FileGrabber.TAG_STOPS);
             for (int i = 0; i < stops.length(); i++){
                 r.addStop(sharedManager.getStopByID(stops.getString(i)));

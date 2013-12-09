@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -13,13 +12,9 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -35,6 +30,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.palsulich.nyubustracker.R;
+import com.palsulich.nyubustracker.adapters.StopAdapter;
+import com.palsulich.nyubustracker.adapters.TimeAdapter;
 import com.palsulich.nyubustracker.helpers.BusManager;
 import com.palsulich.nyubustracker.helpers.FileGrabber;
 import com.palsulich.nyubustracker.models.Bus;
@@ -51,6 +48,8 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
+
 public class MainActivity extends Activity{
     Stop startStop;     // Stop object to keep track of the start location of the desired route.
     Stop endStop;       // Keep track of the desired end location.
@@ -59,6 +58,8 @@ public class MainActivity extends Activity{
     HashMap<String, Boolean> clickableMapMarkers;   // Hash of all markers which are clickable (so we don't zoom in on buses).
     ArrayList<Marker> busesOnMap = new ArrayList<Marker>();
     MapFragment mFrag;
+
+    Time nextBusTime;
 
     // mFileGrabber helps to manage cached files/pull new files from the network.
     FileGrabber mFileGrabber;
@@ -72,22 +73,7 @@ public class MainActivity extends Activity{
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
-
-
-            try {
-                Class.forName("com.google.android.gms.maps.MapFragment");
-                mFrag = new MapFragment();
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.add(R.id.main_layout, mFrag).commit();
-            } catch(ClassNotFoundException e) {
-                // it does not exist on the classpath
-                haveAMap = false;
-                return;
-            }
-
-
-
-           // MapFragment mFrag = ((MapFragment) getFragmentManager().findFragmentById(R.id.map));
+            MapFragment mFrag = ((MapFragment) getFragmentManager().findFragmentById(R.id.map));
             if (mFrag != null) mMap = mFrag.getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
@@ -137,6 +123,7 @@ public class MainActivity extends Activity{
                 Stop.parseJSON(mFileGrabber.getStopJSON(networkInfo));
                 Route.parseJSON(mFileGrabber.getRouteJSON(networkInfo));
                 BusManager.parseTimes(mFileGrabber.getVersionJSON(networkInfo), mFileGrabber, networkInfo);
+                BusManager.syncFavoriteStops(getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE));
                 if (haveAMap) Bus.parseJSON(mFileGrabber.getVehicleJSON(networkInfo));
                 if (haveAMap) BusManager.parseSegments(mFileGrabber.getSegmentsJSON(networkInfo));
                 if (networkInfo == null || !networkInfo.isConnected()){
@@ -154,8 +141,8 @@ public class MainActivity extends Activity{
             }
         }
 
-        setStartStop(mFileGrabber.getStartStopFile());
-        setEndStop(mFileGrabber.getEndStopFile());
+        setStartStop(sharedManager.getStopByName(mFileGrabber.getStartStopFile()));
+        setEndStop(sharedManager.getStopByName(mFileGrabber.getEndStopFile()));
 
         if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
 
@@ -273,6 +260,10 @@ public class MainActivity extends Activity{
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
 
+    public static Bitmap zoomBitmap(Bitmap source, int x, int y){
+        return Bitmap.createScaledBitmap(source, x, y, false);
+    }
+
     private void updateMapWithNewBusLocations(){
         if (haveAMap){
             BusManager sharedManager = BusManager.getBusManager();
@@ -288,11 +279,15 @@ public class MainActivity extends Activity{
                         Marker mMarker = mMap.addMarker(new MarkerOptions()
                                 .position(b.getLocation())
                                 .icon(BitmapDescriptorFactory
-                                        .fromBitmap(rotateBitmap(
-                                                BitmapFactory.decodeResource(
-                                                        this.getResources(),
-                                                        R.drawable.ic_bus_arrow),
-                                                b.getHeading())))
+                                        .fromBitmap(
+                                                zoomBitmap(
+                                                    rotateBitmap(
+                                                        BitmapFactory.decodeResource(
+                                                            this.getResources(),
+                                                            R.drawable.ic_bus_arrow),
+                                                        b.getHeading()),
+                                                    75,
+                                                    75)))
                                 .anchor(0.5f, 0.5f));
                         clickableMapMarkers.put(mMarker.getId(), false);
                         busesOnMap.add(mMarker);
@@ -316,7 +311,14 @@ public class MainActivity extends Activity{
                             .position(s.getLocation())
                             .title(s.getName())
                             .anchor(0.5f, 0.5f)
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_stop)));
+                            .icon(BitmapDescriptorFactory
+                                    .fromBitmap(
+                                            zoomBitmap(
+                                                BitmapFactory.decodeResource(
+                                                    this.getResources(),
+                                                    R.drawable.ic_map_stop),
+                                                23,
+                                                23))));
                     clickableMapMarkers.put(mMarker.getId(), true);
                 }
                 updateMapWithNewBusLocations();
@@ -352,12 +354,11 @@ public class MainActivity extends Activity{
         }
     }
 
-    private void setEndStop(String stopName) {
-        Stop tempStop = BusManager.getBusManager().getStopByName(stopName);
-        if (tempStop != null) {     // Make sure we actually have a stop!
+    private void setEndStop(Stop stop) {
+        if (stop != null) {     // Make sure we actually have a stop!
             // Check there is a route between these stops.
-            endStop = tempStop;
-            ((Button) findViewById(R.id.to_button)).setText(stopName);
+            endStop = stop;
+            ((Button) findViewById(R.id.to_button)).setText(stop.getName());
             if (startStop != null){
                 setNextBusTime();    // Don't set the next bus if we don't have a valid route.
                 if (routesBetweenStartAndEnd != null && haveAMap) updateMapWithNewStartOrEnd();
@@ -365,8 +366,8 @@ public class MainActivity extends Activity{
         }
     }
 
-    private void setStartStop(String stopName) {
-        if (endStop != null && endStop.getName().equals(stopName)) {    // We have an end stop and its name is the same as stopName.
+    private void setStartStop(Stop stop) {
+        if (endStop != null && endStop == stop) {    // We have an end stop and its name is the same as stopName.
             // Swap the start and end stops.
             Stop temp = startStop;
             startStop = endStop;
@@ -378,11 +379,10 @@ public class MainActivity extends Activity{
         } else {
             //Log.v("Debugging", "setStartStop not swapping");
             // We have a new start. So, we must ensure the end is actually connected.
-            Stop tempStop = BusManager.getBusManager().getStopByName(stopName);
-            if (tempStop != null){      // Don't set Start to an invalid stop. Should never happen.
-                startStop = tempStop;
+            if (stop != null){      // Don't set Start to an invalid stop. Should never happen.
+                startStop = stop;
                 //Log.v("Debugging", "New start stop: " + startStop.getName());
-                ((Button) findViewById(R.id.from_button)).setText(stopName);
+                ((Button) findViewById(R.id.from_button)).setText(stop.getName());
                 if (endStop != null){
                     // Loop through all connected Routes.
                     for (Route r : startStop.getRoutes()){
@@ -398,7 +398,7 @@ public class MainActivity extends Activity{
                     //Log.v("Debugging", "setStartStop picking default endStop: " + connectedStops.get(connectedStops.indexOf(startStop) + 1).getName());
                     // If we did not return above, the current endStop is not connected to the new
                     // startStop. So, by default pick the first connected stop.
-                    setEndStop(connectedStops.get(connectedStops.indexOf(startStop) - 1).getName());
+                    setEndStop(connectedStops.get(connectedStops.indexOf(startStop) - 1));
                 }
 
             }
@@ -422,27 +422,17 @@ public class MainActivity extends Activity{
         ArrayList<Route> fromRoutes = startStop.getRoutes();        // All the routes leaving the start stop.
         ArrayList<Route> routes = new ArrayList<Route>();               // All the routes connecting the two.
         for (Route r : fromRoutes) {
-            if (r.hasStop(endStop.getName()) && endStop.getTimes().get(getTimeOfWeek()).get(r.getLongName()) != null) {
-                //Log.v("Route Debugging", "Adding a route between " + startStop.getName() + " and " + endStop.getName() + ": " + r.getLongName());
+            if (r.hasStop(endStop.getName()) && endStop.getTimesOfRoute(r.getLongName()).size() != 0) {
+                Log.v("Route Debugging", "Adding a route between " + startStop.getName() + " and " + endStop.getName() + ": " + r.getLongName());
                 routes.add(r);
             }
         }
         if (routes.size() > 0) {
             ArrayList<Time> tempTimesBetweenStartAndEnd = new ArrayList<Time>();
             for (Route r : routes) {
-                String timeOfWeek = getTimeOfWeek();
                 // Get the Times at this stop for this route.
-                ArrayList<Time> times = new ArrayList<Time>();
-                if (startStop.getTimes().get(timeOfWeek).get(r.getLongName()) == null){
-                    //Log.v("Debugging", "Times today for this route is null: " + r.getLongName());
-                }
-                else{
-                    for (Time t : startStop.getTimes().get(timeOfWeek).get(r.getLongName())){
-                        times.add(t);
-                    }
-                    for (Time t : times){
-                        t.setRoute(r.getLongName());
-                    }
+                ArrayList<Time> times;
+                if ((times = startStop.getTimesOfRoute(r.getLongName())) != null){
                     tempTimesBetweenStartAndEnd.addAll(times);
                 }
             }
@@ -450,20 +440,21 @@ public class MainActivity extends Activity{
                 timesBetweenStartAndEnd = tempTimesBetweenStartAndEnd;
                 routesBetweenStartAndEnd = routes;
                 Time currentTime = new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
-                Time nextBusTime = timesBetweenStartAndEnd.get(0);
+                Time mNextBusTime = timesBetweenStartAndEnd.get(0);
                 for (Time tempTime : timesBetweenStartAndEnd) {
                     if (tempTime.isAfter(currentTime)) {
-                        if (tempTime.isAfter(currentTime) && tempTime.isBefore(nextBusTime)) {
-                            nextBusTime = tempTime;
+                        if (tempTime.isAfter(currentTime) && tempTime.isBefore(mNextBusTime)) {
+                            mNextBusTime = tempTime;
                         }
-                        else if (tempTime.isAfter(currentTime) && nextBusTime.isStrictlyBefore(currentTime)){
-                            nextBusTime = tempTime;
+                        else if (tempTime.isAfter(currentTime) && mNextBusTime.isStrictlyBefore(currentTime)){
+                            mNextBusTime = tempTime;
                         }
                     }
                 }
+                nextBusTime = mNextBusTime;
                 String timeOfNextBus = nextBusTime.toString();
                 String timeUntilNextBus = currentTime.getTimeAsStringUntil(nextBusTime);
-                ((TextView) findViewById(R.id.times_button)).setText(timeOfNextBus + nextBusTime.getViaRoute());
+                ((TextView) findViewById(R.id.times_button)).setText(timeOfNextBus.toString());
                 ((TextView) findViewById(R.id.next_bus)).setText(timeUntilNextBus);
             }
             else{
@@ -495,13 +486,32 @@ public class MainActivity extends Activity{
         renewTimeUntilTimer();
     }
 
+    CompoundButton.OnCheckedChangeListener cbListener = new CompoundButton.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+        {
+            Stop s = (Stop) buttonView.getTag();
+            s.setFavorite(isChecked);
+            getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(s.getID(), isChecked).commit();
+            Log.v("Dialog", "Checkbox is " + isChecked);
+        }
+    };
+
     public void createEndDialog(View view) {
         final ArrayList<Stop> connectedStops = BusManager.getBusManager().getConnectedStops(startStop);
         ListView listView = new ListView(this);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(listView);
         final Dialog dialog = builder.create();
-        StopAdapter adapter = new StopAdapter(getApplicationContext(), connectedStops, false, dialog);
+        StopAdapter adapter = new StopAdapter(getApplicationContext(), connectedStops, dialog,
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Stop s = (Stop) view.getTag();
+                        setEndStop(s);
+                        dialog.dismiss();
+                    }
+                }, cbListener);
         listView.setAdapter(adapter);
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
@@ -512,96 +522,30 @@ public class MainActivity extends Activity{
         ListView listView = new ListView(this);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(listView);
-        Dialog dialog = builder.create();
-        StopAdapter adapter = new StopAdapter(getApplicationContext(), stops, true, dialog);
+        final Dialog dialog = builder.create();
+        StopAdapter adapter = new StopAdapter(getApplicationContext(), stops, dialog,
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Stop s = (Stop) view.getTag();
+                        setStartStop(s);
+                        dialog.dismiss();
+                    }
+                }, cbListener);
         listView.setAdapter(adapter);
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
     }
 
     public void createTimesDialog(View view) {
+        StickyListHeadersListView listView = new StickyListHeadersListView(this);
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        final Time[] times = timesBetweenStartAndEnd.toArray(new Time[1]);
-        final String[] timesAsString = new String[times.length];
-        for (int i = 0; i < times.length; i++) {
-            timesAsString[i] = times[i].toString() + times[i].getViaRoute();
-        }
-        builder.setItems(timesAsString, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                // Nothing to do, ish.
-            }
-        });
+        TimeAdapter adapter = new TimeAdapter(getApplicationContext(), timesBetweenStartAndEnd);
+        listView.setAdapter(adapter);
+        // listView.setSelection(timesBetweenStartAndEnd.indexOf(nextBusTime));
+        builder.setView(listView);
         Dialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
     }
-
-    private class StopAdapter extends BaseAdapter {
-
-        private LayoutInflater mInflater;
-        ArrayList<Stop> stops = new ArrayList<Stop>();
-        boolean startStops;
-        Dialog dialog;
-
-        public StopAdapter(Context context, ArrayList<Stop> mStops, boolean mStartStops, Dialog mDialog) {
-            // Cache the LayoutInflate to avoid asking for a new one each time.
-            mInflater = LayoutInflater.from(context);
-            stops = mStops;
-            startStops = mStartStops;
-            dialog = mDialog;
-        }
-
-        public int getCount() {
-            return stops.size();
-        }
-
-        public Object getItem(int position) {
-            return position;
-        }
-
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(final int position, View convertView, ViewGroup parent) {
-            convertView = mInflater.inflate(R.layout.stop_list_item, null);
-            final ViewHolder holder = new ViewHolder();
-
-            holder.text = (TextView) convertView.findViewById(R.id.stop_text);
-            holder.checkbox = (CheckBox) convertView.findViewById(R.id.stop_checkbox);
-            holder.checkbox.setTag(position);
-
-            holder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-                {
-                    Stop s = stops.get((Integer) buttonView.getTag());
-                    s.setFavorite(buttonView.isChecked());
-                    Log.v("Dialog", "Checkbox is " + buttonView.isChecked());
-                }
-            });
-
-            holder.text.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Stop s = stops.get(position);
-                    if (startStops) setStartStop(s.getName());
-                    else setEndStop(s.getName());
-                    dialog.dismiss();
-                }
-            });
-            convertView.setTag(holder);
-            holder.text.setText(stops.get(position).getName());
-            holder.checkbox.setChecked(stops.get(position).getFavorite());
-            return convertView;
-        }
-
-        class ViewHolder {
-            CheckBox checkbox;
-            TextView text;
-        }
-    }
-
-
 }

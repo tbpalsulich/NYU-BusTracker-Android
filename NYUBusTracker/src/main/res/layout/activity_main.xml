@@ -2,8 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/purple"
-    android:id="@+id/main_layout">
+    android:background="@color/purple">
 
 
     <TextView
@@ -71,6 +70,11 @@
         android:layout_below="@+id/times_divider"
         android:layout_alignParentLeft="true" />
 
-
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/times_button"
+        android:name="com.google.android.gms.maps.MapFragment"/>
 
 </RelativeLayout>
