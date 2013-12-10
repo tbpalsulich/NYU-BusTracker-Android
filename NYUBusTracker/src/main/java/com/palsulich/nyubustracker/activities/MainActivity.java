@@ -357,7 +357,7 @@ public class MainActivity extends Activity{
             // Check there is a route between these stops.
             ArrayList<Route> routes = new ArrayList<Route>();               // All the routes connecting the two.
             for (Route r : startStop.getRoutes()) {
-                if (r.hasStop(endStop.getName()) && endStop.getTimesOfRoute(r.getLongName()).size() > 0) {
+                if (r.hasStop(stop.getName()) && stop.getTimesOfRoute(r.getLongName()).size() > 0) {
                     routes.add(r);
                 }
             }
@@ -373,7 +373,7 @@ public class MainActivity extends Activity{
     }
 
     private void setStartStop(Stop stop) {
-        if (endStop != null){
+        if (stop != null){
             if (endStop == stop) {    // We have an end stop and its name is the same as stopName.
                 // Swap the start and end stops.
                 Stop temp = startStop;
