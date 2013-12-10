@@ -428,6 +428,7 @@ public class MainActivity extends Activity{
                 timesBetweenStartAndEnd = new ArrayList<Time>(tempTimesBetweenStartAndEnd);
                 routesBetweenStartAndEnd = routes;
                 Time currentTime = new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
+                tempTimesBetweenStartAndEnd.add(currentTime);
                 Collections.sort(tempTimesBetweenStartAndEnd, Time.compare);
                 nextBusTime = tempTimesBetweenStartAndEnd.get(tempTimesBetweenStartAndEnd.indexOf(currentTime) + 1);
                 String timeOfNextBus = nextBusTime.toString();

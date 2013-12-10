@@ -2,7 +2,9 @@ package com.palsulich.nyubustracker.models;
 
 import android.util.Log;
 
+import java.util.Calendar;
 import java.util.Comparator;
+import java.util.Locale;
 
 public class Time {
     public enum TimeOfWeek {Weekday, Friday, Weekend}
@@ -73,6 +75,16 @@ public class Time {
         AM = mHour < 12;
         hour = mHour;
         min = mMin;
+        timeOfWeek = getCurrentTimeOfWeek();
+    }
+
+    private TimeOfWeek getCurrentTimeOfWeek() {
+        Calendar rightNow = Calendar.getInstance();
+        String dayOfWeek = rightNow.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault());
+        TimeOfWeek timeOfWeek = TimeOfWeek.Weekday;
+        if (dayOfWeek.equals("Saturday") || dayOfWeek.equals("Sunday")) timeOfWeek = TimeOfWeek.Weekend;
+        else if (dayOfWeek.equals("Friday")) timeOfWeek = TimeOfWeek.Friday;
+        return timeOfWeek;
     }
 
     public String getRoute(){
