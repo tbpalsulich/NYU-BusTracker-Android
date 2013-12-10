@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -57,7 +56,6 @@ public class MainActivity extends Activity{
     ArrayList<Time> timesBetweenStartAndEnd;        // List of all times between start and end.
     HashMap<String, Boolean> clickableMapMarkers;   // Hash of all markers which are clickable (so we don't zoom in on buses).
     ArrayList<Marker> busesOnMap = new ArrayList<Marker>();
-    MapFragment mFrag;
 
     Time nextBusTime;
 
@@ -141,11 +139,14 @@ public class MainActivity extends Activity{
             }
         }
 
+        // Initialize start and end stops. By default, they are Lafayette and Broadway.
         setStartStop(sharedManager.getStopByName(mFileGrabber.getStartStopFile()));
         setEndStop(sharedManager.getStopByName(mFileGrabber.getEndStopFile()));
 
+        // Update the map to show the corresponding stops, buses, and segments.
         if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
 
+        // Get the location of the buses every 10 sec.
         renewBusRefreshTimer();
     }
 
@@ -405,16 +406,6 @@ public class MainActivity extends Activity{
         }
     }
 
-    private String getTimeOfWeek() {
-        Calendar rightNow = Calendar.getInstance();
-        String dayOfWeek = rightNow.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault());
-        String timeOfWeek = "Weekday";
-        if (dayOfWeek.equals("Saturday") || dayOfWeek.equals("Sunday")) timeOfWeek = "Weekend";
-        else if (dayOfWeek.equals("Friday")) timeOfWeek = "Friday";
-
-        return timeOfWeek;
-    }
-
     private void setNextBusTime() {
         if (timeUntilTimer != null) timeUntilTimer.cancel();        // Don't want to be interrupted in the middle of this.
         if (busRefreshTimer != null) busRefreshTimer.cancel();
@@ -444,7 +435,7 @@ public class MainActivity extends Activity{
                 nextBusTime = tempTimesBetweenStartAndEnd.get(tempTimesBetweenStartAndEnd.indexOf(currentTime) + 1);
                 String timeOfNextBus = nextBusTime.toString();
                 String timeUntilNextBus = currentTime.getTimeAsStringUntil(nextBusTime);
-                ((TextView) findViewById(R.id.times_button)).setText(timeOfNextBus.toString());
+                ((TextView) findViewById(R.id.times_button)).setText(timeOfNextBus);
                 ((TextView) findViewById(R.id.next_bus)).setText(timeUntilNextBus);
             }
             else{

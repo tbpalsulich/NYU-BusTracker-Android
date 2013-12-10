@@ -8,28 +8,29 @@ public class Time {
     public enum TimeOfWeek {Weekday, Friday, Weekend}
     private int hour;           // In 24 hour (military) format.
     private int min;
-    private boolean AM;
-    private String route;
-    private TimeOfWeek timeOfWeek;
+    private boolean AM;         // Used for parsing the input string ("8:04 PM") => 20:04, AM = true
+    private String route;       // What route this time corresponds to.
+    private TimeOfWeek timeOfWeek;  // Either Weekday, Friday, Weekend.
 
-
-    // Neg if 1, Pos if 2 is before.
+    // compare is used to sort the list of times being checked for the "nextBusTime" in MainActivity.
     public static Comparator<Time> compare = new Comparator<Time>() {
+        // Return a negative number if Time1 is before, positive number if time2 is before, and 0 otherwise.
         @Override
         public int compare(Time time1, Time time2) {
-            if (time1.getTimeOfWeek().ordinal() == time2.getTimeOfWeek().ordinal()){
-                if (time1.isStrictlyBefore(time2)){
+            // timeOfWeek is an enum. ordinal() returns the rank of the given TimeOfWeek.
+            if (time1.getTimeOfWeek().ordinal() == time2.getTimeOfWeek().ordinal()){    // Times at the same time in the week.
+                if (time1.isStrictlyBefore(time2)){     // Checks hour and minute. Returns false if they're equal or time2 is before.
                     return -1;
                 }
                 if (time2.isStrictlyBefore(time1)){
                     return 1;
                 }
-                return 0;
+                return 0;       // Same exact time (hour, minute, and timeOfWeek).
             }
-            else if (time1.getTimeOfWeek().ordinal() < time2.getTimeOfWeek().ordinal()){
+            else if (time1.getTimeOfWeek().ordinal() < time2.getTimeOfWeek().ordinal()){    // Time1 is an earlier day.
                 return -1;
             }
-            else{
+            else{       // Time2 is an earlier day.
                 return 1;
             }
         }
@@ -49,6 +50,7 @@ public class Time {
         route = mRoute;
     }
 
+    // Returns a String representation of the time of week this Time is in.
     public String getTimeOfWeekAsString(){
         switch (timeOfWeek){
             case Weekday:
@@ -58,14 +60,16 @@ public class Time {
             case Weekend:
                 return "Weekend";
         }
-        return "";
+        Log.e("Time Debugging", "Invalid timeOfWeek");
+        return "";      // Should never reach here.
     }
 
     public TimeOfWeek getTimeOfWeek(){
         return timeOfWeek;
     }
 
-    public Time(int mHour, int mMin){       // Input values in normal time (e.g. (4, 15)
+    // Create a new Time given a military hour and minute.
+    public Time(int mHour, int mMin){
         AM = mHour < 12;
         hour = mHour;
         min = mMin;
@@ -75,13 +79,10 @@ public class Time {
         return route;
     }
 
-    public String getViaRoute(){
-        return " via Route " + route;
-    }
-
     // Return a nice string saying the difference between this time and the argument.
     public String getTimeAsStringUntil(Time t){
         Time difference = this.getTimeAsTimeUntil(t);
+        Log.v("Time Debugging", "this: " + this.toString() + " | that: " + t.toString());
         Log.v("Time Debugging", "Difference: " + difference.hour + ":" + difference.min);
         String result = "I don't know when the next bus is!";
         if (difference != null){
@@ -97,25 +98,15 @@ public class Time {
         return result;
     }
 
-    // Return if this time is equal to or before Time t.
-    public boolean isBefore(Time t){
-        //Log.v("Time Debugging", this.toString() + " is before " + t.toString() + ": " + ((this.hour < t.hour) || (this.hour == t.hour && this.min <= t.min)));
-        return (this.hour < t.hour) || (this.hour == t.hour && this.min <= t.min);
-    }
-
+    // isStrictlyBefore(t) returns false if the times are equal or this is after t.
     public boolean isStrictlyBefore(Time t){
         //Log.v("Time Debugging", this.toString() + " is strictly before " + t.toString() + ": " + ((this.hour < t.hour) || (this.hour == t.hour && this.min < t.min)));
         return (this.hour < t.hour) || (this.hour == t.hour && this.min < t.min);
     }
 
-    public boolean isAfter(Time t){
-        //Log.v("Time Debugging", this.toString() + " is after " + t.toString() + ": " + ((this.hour > t.hour) || (this.hour == t.hour && this.min >= t.min)));
-        return (this.hour > t.hour) || (this.hour == t.hour && this.min >= t.min);
-    }
-
     // Return a Time object who represents the difference in time between the two Times.
     public Time getTimeAsTimeUntil(Time t){
-        if (t.isAfter(this)){
+        if (this.isStrictlyBefore(t)){
             int hourDifference = t.hour - this.hour;
             int minDifference = t.min - this.min;
             if (minDifference < 0){
@@ -131,7 +122,7 @@ public class Time {
     }
 
     public String toString(){
-        return getHourInNormalTime() + ":" + getMinInNormalTime() + " " + getAMorPM() + getViaRoute();
+        return getHourInNormalTime() + ":" + getMinInNormalTime() + " " + getAMorPM() + " via " + route;
     }
 
     private String getAMorPM(){
@@ -147,6 +138,7 @@ public class Time {
         return hour;
     }
 
+    // Ensure the minute string is 2 digits long.
     private String getMinInNormalTime(){
         if (min < 10) return "0" + min;
         else return Integer.toString(min);
