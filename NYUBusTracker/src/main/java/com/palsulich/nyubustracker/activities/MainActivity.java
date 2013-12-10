@@ -355,50 +355,52 @@ public class MainActivity extends Activity{
     private void setEndStop(Stop stop) {
         if (stop != null) {     // Make sure we actually have a stop!
             // Check there is a route between these stops.
-            endStop = stop;
-            ((Button) findViewById(R.id.to_button)).setText(stop.getName());
-            if (startStop != null){
-                setNextBusTime();    // Don't set the next bus if we don't have a valid route.
-                if (routesBetweenStartAndEnd != null && haveAMap) updateMapWithNewStartOrEnd();
+            ArrayList<Route> routes = new ArrayList<Route>();               // All the routes connecting the two.
+            for (Route r : startStop.getRoutes()) {
+                if (r.hasStop(endStop.getName()) && endStop.getTimesOfRoute(r.getLongName()).size() > 0) {
+                    routes.add(r);
+                }
+            }
+            if (routes.size() > 0) {
+                endStop = stop;
+                ((Button) findViewById(R.id.to_button)).setText(stop.getName());
+                if (startStop != null){
+                    setNextBusTime();    // Don't set the next bus if we don't have a valid route.
+                    if (routesBetweenStartAndEnd != null && haveAMap) updateMapWithNewStartOrEnd();
+                }
             }
         }
     }
 
     private void setStartStop(Stop stop) {
-        if (endStop != null && endStop == stop) {    // We have an end stop and its name is the same as stopName.
-            // Swap the start and end stops.
-            Stop temp = startStop;
-            startStop = endStop;
-            ((Button) findViewById(R.id.from_button)).setText(startStop.getName());
-            endStop = temp;
-            ((Button) findViewById(R.id.to_button)).setText(endStop.getName());
-            setNextBusTime();
-            updateMapWithNewStartOrEnd();
-        } else {
-            //Log.v("Debugging", "setStartStop not swapping");
-            // We have a new start. So, we must ensure the end is actually connected.
-            if (stop != null){      // Don't set Start to an invalid stop. Should never happen.
+        if (endStop != null){
+            if (endStop == stop) {    // We have an end stop and its name is the same as stopName.
+                // Swap the start and end stops.
+                Stop temp = startStop;
+                startStop = endStop;
+                ((Button) findViewById(R.id.from_button)).setText(startStop.getName());
+                endStop = temp;
+                ((Button) findViewById(R.id.to_button)).setText(endStop.getName());
+                setNextBusTime();
+                updateMapWithNewStartOrEnd();
+            }
+            else { // We have a new start. So, we must ensure the end is actually connected. If not, pick a random connected stop.
                 startStop = stop;
-                //Log.v("Debugging", "New start stop: " + startStop.getName());
                 ((Button) findViewById(R.id.from_button)).setText(stop.getName());
                 if (endStop != null){
                     // Loop through all connected Routes.
                     for (Route r : startStop.getRoutes()){
-                        // If the current endStop is connected, we don't have to change endStop.
-                        if (r.hasStop(endStop.getName())){
-                            //Log.v("Debugging", "Found a connected end stop: " + endStop.getName() + " through " + r.getLongName());
+                        if (r.hasStop(endStop.getName()) && endStop.getTimesOfRoute(r.getLongName()).size() > 0){  // If the current endStop is connected, we don't have to change endStop.
                             setNextBusTime();
                             updateMapWithNewStartOrEnd();
                             return;
                         }
                     }
-                    ArrayList<Stop> connectedStops = startStop.getRoutes().get(0).getStops();
-                    //Log.v("Debugging", "setStartStop picking default endStop: " + connectedStops.get(connectedStops.indexOf(startStop) + 1).getName());
                     // If we did not return above, the current endStop is not connected to the new
-                    // startStop. So, by default pick the first connected stop.
+                    // startStop. So, by default, pick the first connected stop.
+                    ArrayList<Stop> connectedStops = startStop.getRoutes().get(0).getStops();
                     setEndStop(connectedStops.get(connectedStops.indexOf(startStop) - 1));
                 }
-
             }
         }
     }
@@ -410,6 +412,10 @@ public class MainActivity extends Activity{
         ArrayList<Route> fromRoutes = startStop.getRoutes();        // All the routes leaving the start stop.
         ArrayList<Route> routes = new ArrayList<Route>();               // All the routes connecting the two.
         for (Route r : fromRoutes) {
+            // A route is only "connected" if it has both stops AND it has times available at the endStop.
+            // Because we only need to worry about the Stop not having times after we *change* a stop,
+            // we check that there exists a "connecting" route before we call setNextBusTime. But, we leave
+            // the check that there are times for robustness.
             if (r.hasStop(endStop.getName()) && endStop.getTimesOfRoute(r.getLongName()).size() != 0) {
                 Log.v("Route Debugging", "Adding a route between " + startStop.getName() + " and " + endStop.getName() + ": " + r.getLongName());
                 routes.add(r);
@@ -425,42 +431,19 @@ public class MainActivity extends Activity{
                 }
             }
             if (tempTimesBetweenStartAndEnd.size() > 0){    // We actually found times.
+                // Here, we grab the list of all times of all routes between the start and end, add in the current
+                // time, then sort that list of times. That way, we know the first bus Time after the current time
+                // is the Time of the soonest next Bus.
                 timesBetweenStartAndEnd = new ArrayList<Time>(tempTimesBetweenStartAndEnd);
                 routesBetweenStartAndEnd = routes;
                 Time currentTime = new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
                 tempTimesBetweenStartAndEnd.add(currentTime);
                 Collections.sort(tempTimesBetweenStartAndEnd, Time.compare);
                 nextBusTime = tempTimesBetweenStartAndEnd.get(tempTimesBetweenStartAndEnd.indexOf(currentTime) + 1);
-                String timeOfNextBus = nextBusTime.toString();
-                String timeUntilNextBus = currentTime.getTimeAsStringUntil(nextBusTime);
-                ((TextView) findViewById(R.id.times_button)).setText(timeOfNextBus);
-                ((TextView) findViewById(R.id.next_bus)).setText(timeUntilNextBus);
-            }
-            else{
-                Context context = getApplicationContext();
-                CharSequence text = "No available times.";
-                int duration = Toast.LENGTH_LONG;
-
-                if (context != null){
-                    Toast toast = Toast.makeText(context, text, duration);
-                    toast.show();
-                }
-            }
-        } else
-        {
-            if (busRefreshTimer != null) busRefreshTimer.cancel();
-            if (timeUntilTimer != null) timeUntilTimer.cancel();
-
-            Context context = getApplicationContext();
-            CharSequence text = "No routes available!";
-            int duration = Toast.LENGTH_LONG;
-            
-            if (context != null){
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
+                ((TextView) findViewById(R.id.times_button)).setText(nextBusTime.toString());
+                ((TextView) findViewById(R.id.next_bus)).setText(currentTime.getTimeAsStringUntil(nextBusTime));
             }
         }
-
         renewBusRefreshTimer();
         renewTimeUntilTimer();
     }
