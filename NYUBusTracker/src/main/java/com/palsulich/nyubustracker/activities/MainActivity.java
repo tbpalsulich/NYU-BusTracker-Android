@@ -472,7 +472,7 @@ public class MainActivity extends Activity{
         // the list view. So, in this case, we supply the StopAdapter with a list of stops, and it gives us back the nice
         // views with a heart button to signify favorites and a TextView with the name of the stop.
         // We provide the onClickListeners to the adapter, which then attaches them to the respective views.
-        StopAdapter adapter = new StopAdapter(getApplicationContext(), connectedStops, dialog,
+        StopAdapter adapter = new StopAdapter(getApplicationContext(), connectedStops,
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -493,7 +493,7 @@ public class MainActivity extends Activity{
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(listView);
         final Dialog dialog = builder.create();
-        StopAdapter adapter = new StopAdapter(getApplicationContext(), stops, dialog,
+        StopAdapter adapter = new StopAdapter(getApplicationContext(), stops,
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
