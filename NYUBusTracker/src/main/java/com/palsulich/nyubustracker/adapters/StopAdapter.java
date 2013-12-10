@@ -1,6 +1,5 @@
 package com.palsulich.nyubustracker.adapters;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,23 +18,24 @@ public class StopAdapter extends BaseAdapter {
 
     private LayoutInflater mInflater;
     ArrayList<Stop> stops = new ArrayList<Stop>();
-    Dialog dialog;
     View.OnClickListener textOnClickListener;
     CompoundButton.OnCheckedChangeListener checkBoxOnCLickListener;
 
-    public StopAdapter(Context context, ArrayList<Stop> mStops, Dialog mDialog, View.OnClickListener listener, CompoundButton.OnCheckedChangeListener cbListener){
+    // Constructor. Just used to initialize variables.
+    public StopAdapter(Context context, ArrayList<Stop> mStops, View.OnClickListener listener, CompoundButton.OnCheckedChangeListener cbListener){
         textOnClickListener = listener;
         checkBoxOnCLickListener = cbListener;
         // Cache the LayoutInflate to avoid asking for a new one each time.
         mInflater = LayoutInflater.from(context);
         stops = mStops;
-        dialog = mDialog;
     }
 
+    // Number of elements feeding into this adapter.
     public int getCount() {
         return stops.size();
     }
 
+    // Return the object at the given position.
     public Object getItem(int position) {
         return position;
     }
@@ -44,21 +44,31 @@ public class StopAdapter extends BaseAdapter {
         return position;
     }
 
+    // getView gets the view for the given position (just a single element of our List View).
+    // In this case, our view is just a compound button and a text view. This method populates
+    // the CompoundButton and TextView with the proper values (by using the given position) from
+    // our list of stops.
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         convertView = mInflater.inflate(R.layout.stop_list_item, null);
         final ViewHolder holder = new ViewHolder();
 
+        // Get the specific views and store them in a ViewHolder.
         holder.text = (TextView) convertView.findViewById(R.id.stop_text);
-        holder.text.setTag(stops.get(position));
         holder.checkbox = (CheckBox) convertView.findViewById(R.id.stop_checkbox);
+
+        // Set their tags as the stop they represent. Used to pull out the stop on the other side (MainActivity).
+        holder.text.setTag(stops.get(position));
         holder.checkbox.setTag(stops.get(position));
 
+        // Set their onClickListeners to the ones provided in the constructor.
         holder.checkbox.setOnCheckedChangeListener(checkBoxOnCLickListener);
-
         holder.text.setOnClickListener(textOnClickListener);
+
+        // Update the display values of the views to reflect the object they represent.
         holder.text.setText(stops.get(position).getName());
         holder.checkbox.setChecked(stops.get(position).getFavorite());
+
         return convertView;
     }
 
