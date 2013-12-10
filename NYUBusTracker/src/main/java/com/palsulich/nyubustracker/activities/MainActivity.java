@@ -19,6 +19,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -39,7 +45,10 @@ import com.palsulich.nyubustracker.models.Stop;
 import com.palsulich.nyubustracker.models.Time;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -50,6 +59,25 @@ import java.util.TimerTask;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 public class MainActivity extends Activity{
+
+    private static String makeQuery(String param, String value, String charset) {
+        try {
+            return String.format(param + "=" + URLEncoder.encode(value, charset));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    private static final String query = makeQuery("agencies", "72", "UTF-8");
+
+    private static final String stopsURL = "http://api.transloc.com/1.2/stops.json?" + query;
+    private static final String routesURL = "http://api.transloc.com/1.2/routes.json?" + query;
+    private static final String segmentsURL = "http://api.transloc.com/1.2/segments.json?" + query;
+    private static final String vehiclesURL = "http://api.transloc.com/1.2/vehicles.json?" + query;
+    private static final String versionURL = "https://s3.amazonaws.com/nyubustimes/1.0/version.json";
+    public static final String timesURL = "https://s3.amazonaws.com/nyubustimes/1.0/";
+
     Stop startStop;     // Stop object to keep track of the start location of the desired route.
     Stop endStop;       // Keep track of the desired end location.
     ArrayList<Route> routesBetweenStartAndEnd;        // List of all routes between start and end.
@@ -68,6 +96,97 @@ public class MainActivity extends Activity{
     private GoogleMap mMap;     // Map to display all stops, segments, and buses.
     private boolean haveAMap = false;   // Flag to see if the device can display a map.
 
+    public static RequestQueue queue;
+
+    private BusManager sharedManager;
+
+    JsonObjectRequest busRequest = new JsonObjectRequest(Request.Method.GET, vehiclesURL, null, new Response.Listener<JSONObject>() {
+        @Override
+        public void onResponse(JSONObject response){
+            try{
+                Bus.parseJSON(response);
+            } catch (JSONException e){
+                displayNetworkError();
+                e.printStackTrace();
+            }
+        }
+    }, new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            error.printStackTrace();
+        }
+    });
+    JsonObjectRequest stopRequest = new JsonObjectRequest(Request.Method.GET, stopsURL, null, new Response.Listener<JSONObject>() {
+        @Override
+        public void onResponse(JSONObject response){
+            try{
+                Stop.parseJSON(response);
+                // Initialize start and end stops. By default, they are Lafayette and Broadway.
+                setStartStop(sharedManager.getStopByName(mFileGrabber.getStartStopFile()));
+                setEndStop(sharedManager.getStopByName(mFileGrabber.getEndStopFile()));
+            } catch (JSONException e){
+                displayNetworkError();
+                e.printStackTrace();
+            }
+        }
+    }, new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            error.printStackTrace();
+        }
+    });
+
+    JsonObjectRequest routeRequest = new JsonObjectRequest(Request.Method.GET, routesURL, null, new Response.Listener<JSONObject>() {
+        @Override
+        public void onResponse(JSONObject response){
+            try{
+                Route.parseJSON(response);
+            } catch (JSONException e){
+                displayNetworkError();
+                e.printStackTrace();
+            }
+        }
+    }, new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            error.printStackTrace();
+        }
+    });
+
+    JsonObjectRequest versionRequest = new JsonObjectRequest(Request.Method.GET, versionURL, null, new Response.Listener<JSONObject>() {
+        @Override
+        public void onResponse(JSONObject response){
+            try{
+                BusManager.parseTimes(response, queue);
+            } catch (JSONException e){
+                displayNetworkError();
+                e.printStackTrace();
+            }
+        }
+    }, new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            error.printStackTrace();
+        }
+    });
+
+    JsonObjectRequest segmentsRequest = new JsonObjectRequest(Request.Method.GET, segmentsURL, null, new Response.Listener<JSONObject>() {
+        @Override
+        public void onResponse(JSONObject response){
+            try{
+                BusManager.parseSegments(response);
+            } catch (JSONException e){
+                displayNetworkError();
+                e.printStackTrace();
+            }
+        }
+    }, new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            error.printStackTrace();
+        }
+    });
+
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
@@ -81,6 +200,16 @@ public class MainActivity extends Activity{
                 haveAMap = true;
             }
             else haveAMap = false;
+        }
+    }
+    public void displayNetworkError(){
+        Context context = getApplicationContext();
+        CharSequence text = "Unable to connect to the network.";
+        int duration = Toast.LENGTH_SHORT;
+
+        if (context != null){
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
         }
     }
 
@@ -108,41 +237,21 @@ public class MainActivity extends Activity{
         //final ListView listView = (ListView) findViewById(R.id.mainActivityList);
 
         // Singleton BusManager to keep track of all stops, routes, etc.
-        final BusManager sharedManager = BusManager.getBusManager();
+        sharedManager = BusManager.getBusManager();
+
+        queue = Volley.newRequestQueue(this);
 
         // Only parse stops, routes, buses, times, and segments if we don't have them. Could be more robust.
         if (!sharedManager.hasStops() && !sharedManager.hasRoutes()) {
-            try {
-                // The Class being created from the parsing *does* the parsing.
-                // mFileGrabber.get*JSON() returns a JSONObject.
-                ConnectivityManager connMgr = (ConnectivityManager)
-                        getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-                Stop.parseJSON(mFileGrabber.getStopJSON(networkInfo));
-                Route.parseJSON(mFileGrabber.getRouteJSON(networkInfo));
-                BusManager.parseTimes(mFileGrabber.getVersionJSON(networkInfo), mFileGrabber, networkInfo);
-                // Ensure we start the app with predefined favorite stops.
-                BusManager.syncFavoriteStops(getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE));
-                if (haveAMap) Bus.parseJSON(mFileGrabber.getVehicleJSON(networkInfo));
-                if (haveAMap) BusManager.parseSegments(mFileGrabber.getSegmentsJSON(networkInfo));
-                if (networkInfo == null || !networkInfo.isConnected()){
-                    Context context = getApplicationContext();
-                    CharSequence text = "Unable to connect to the network.";
-                    int duration = Toast.LENGTH_SHORT;
+            queue.add(busRequest);
+            queue.add(routeRequest);
+            queue.add(segmentsRequest);
+            queue.add(stopRequest);
+            queue.add(versionRequest);
 
-                    if (context != null){
-                        Toast toast = Toast.makeText(context, text, duration);
-                        toast.show();
-                    }
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            // Ensure we start the app with predefined favorite stops.
+            BusManager.syncFavoriteStops(getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE));
         }
-
-        // Initialize start and end stops. By default, they are Lafayette and Broadway.
-        setStartStop(sharedManager.getStopByName(mFileGrabber.getStartStopFile()));
-        setEndStop(sharedManager.getStopByName(mFileGrabber.getEndStopFile()));
 
         // Update the map to show the corresponding stops, buses, and segments.
         if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
@@ -184,28 +293,25 @@ public class MainActivity extends Activity{
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            try{
-                                if (routesBetweenStartAndEnd != null){
-                                    ConnectivityManager connMgr = (ConnectivityManager)
-                                            getSystemService(Context.CONNECTIVITY_SERVICE);
-                                    NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-                                    if (networkInfo == null || !networkInfo.isConnected()){
-                                        Context context = getApplicationContext();
-                                        CharSequence text = "Unable to connect to the network.";
-                                        int duration = Toast.LENGTH_SHORT;
+                            if (routesBetweenStartAndEnd != null){
+                                ConnectivityManager connMgr = (ConnectivityManager)
+                                        getSystemService(Context.CONNECTIVITY_SERVICE);
+                                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+                                if (networkInfo == null || !networkInfo.isConnected()){
+                                    Context context = getApplicationContext();
+                                    CharSequence text = "Unable to connect to the network.";
+                                    int duration = Toast.LENGTH_SHORT;
 
-                                        if (context != null){
-                                            Toast toast = Toast.makeText(context, text, duration);
-                                            toast.show();
-                                        }
-                                    }
-                                    else{
-                                        Bus.parseJSON(mFileGrabber.getVehicleJSON(networkInfo));
-                                        updateMapWithNewBusLocations();
+                                    if (context != null){
+                                        Toast toast = Toast.makeText(context, text, duration);
+                                        toast.show();
                                     }
                                 }
-                            } catch (JSONException e){
-                                e.printStackTrace();
+                                else{
+
+                                    queue.add(busRequest);
+                                    updateMapWithNewBusLocations();
+                                }
                             }
                         }
                     });
