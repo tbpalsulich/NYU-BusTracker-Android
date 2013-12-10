@@ -2,6 +2,8 @@ package com.palsulich.nyubustracker.models;
 
 import android.util.Log;
 
+import java.util.Comparator;
+
 public class Time {
     public enum TimeOfWeek {Weekday, Friday, Weekend}
     private int hour;           // In 24 hour (military) format.
@@ -9,7 +11,29 @@ public class Time {
     private boolean AM;
     private String route;
     private TimeOfWeek timeOfWeek;
-    private String separation;
+
+
+    // Neg if 1, Pos if 2 is before.
+    public static Comparator<Time> compare = new Comparator<Time>() {
+        @Override
+        public int compare(Time time1, Time time2) {
+            if (time1.getTimeOfWeek().ordinal() == time2.getTimeOfWeek().ordinal()){
+                if (time1.isStrictlyBefore(time2)){
+                    return -1;
+                }
+                if (time2.isStrictlyBefore(time1)){
+                    return 1;
+                }
+                return 0;
+            }
+            else if (time1.getTimeOfWeek().ordinal() < time2.getTimeOfWeek().ordinal()){
+                return -1;
+            }
+            else{
+                return 1;
+            }
+        }
+    };
 
     public Time(String time, TimeOfWeek mTimeOfWeek, String mRoute){           // Input a string like "8:04 PM".
         AM = time.contains("AM");       // Automatically accounts for AM/PM with military time.

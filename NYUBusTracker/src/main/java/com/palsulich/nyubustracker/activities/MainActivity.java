@@ -3,7 +3,6 @@ package com.palsulich.nyubustracker.activities;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -43,6 +42,7 @@ import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Timer;
@@ -437,21 +437,11 @@ public class MainActivity extends Activity{
                 }
             }
             if (tempTimesBetweenStartAndEnd.size() > 0){
-                timesBetweenStartAndEnd = tempTimesBetweenStartAndEnd;
+                timesBetweenStartAndEnd = new ArrayList<Time>(tempTimesBetweenStartAndEnd);
                 routesBetweenStartAndEnd = routes;
                 Time currentTime = new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
-                Time mNextBusTime = timesBetweenStartAndEnd.get(0);
-                for (Time tempTime : timesBetweenStartAndEnd) {
-                    if (tempTime.isAfter(currentTime)) {
-                        if (tempTime.isAfter(currentTime) && tempTime.isBefore(mNextBusTime)) {
-                            mNextBusTime = tempTime;
-                        }
-                        else if (tempTime.isAfter(currentTime) && mNextBusTime.isStrictlyBefore(currentTime)){
-                            mNextBusTime = tempTime;
-                        }
-                    }
-                }
-                nextBusTime = mNextBusTime;
+                Collections.sort(tempTimesBetweenStartAndEnd, Time.compare);
+                nextBusTime = tempTimesBetweenStartAndEnd.get(tempTimesBetweenStartAndEnd.indexOf(currentTime) + 1);
                 String timeOfNextBus = nextBusTime.toString();
                 String timeUntilNextBus = currentTime.getTimeAsStringUntil(nextBusTime);
                 ((TextView) findViewById(R.id.times_button)).setText(timeOfNextBus.toString());
