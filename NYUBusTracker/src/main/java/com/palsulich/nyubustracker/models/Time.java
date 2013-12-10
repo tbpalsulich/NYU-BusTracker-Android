@@ -134,7 +134,7 @@ public class Time {
     }
 
     public String toString(){
-        return getHourInNormalTime() + ":" + getMinInNormalTime() + " " + getAMorPM() + " via " + route;
+        return getHourInNormalTime() + ":" + getMinInNormalTime() + " " + getAMorPM() + " via Route " + route;
     }
 
     private String getAMorPM(){
