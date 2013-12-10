@@ -39,10 +39,17 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        // if (something) we pick a different layout to inflate.
-        convertView = inflater.inflate(R.layout.time_list_item, null);
-        TextView t = (TextView) convertView.findViewById(R.id.time_text);
-        t.setText(times.get(position).toString());
+        ViewHolder viewHolder;
+        if (convertView == null){
+            viewHolder = new ViewHolder();
+            convertView = inflater.inflate(R.layout.time_list_item, null);
+            viewHolder.text = (TextView) convertView.findViewById(R.id.time_text);
+            convertView.setTag(viewHolder);
+        }
+        else{
+            viewHolder = (ViewHolder) convertView.getTag();
+        }
+        viewHolder.text.setText(times.get(position).toString());
         return convertView;
     }
 
@@ -57,7 +64,7 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
         } else {
             holder = (HeaderViewHolder) convertView.getTag();
         }
-        //set header text as first char in name
+        // Set the header text to the time of week of this chunk of times.
         String headerText = times.get(position).getTimeOfWeekAsString();
         holder.text.setText(headerText);
         return convertView;

@@ -50,20 +50,26 @@ public class StopAdapter extends BaseAdapter {
     // our list of stops.
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        convertView = mInflater.inflate(R.layout.stop_list_item, null);
-        final ViewHolder holder = new ViewHolder();
+        ViewHolder holder;
+        if (convertView == null){
+            convertView = mInflater.inflate(R.layout.stop_list_item, null);
+            holder = new ViewHolder();
+            // Get the specific views and store them in a ViewHolder.
+            holder.text = (TextView) convertView.findViewById(R.id.stop_text);
+            holder.checkbox = (CheckBox) convertView.findViewById(R.id.stop_checkbox);
 
-        // Get the specific views and store them in a ViewHolder.
-        holder.text = (TextView) convertView.findViewById(R.id.stop_text);
-        holder.checkbox = (CheckBox) convertView.findViewById(R.id.stop_checkbox);
+            // Set their onClickListeners to the ones provided in the constructor.
+            holder.checkbox.setOnCheckedChangeListener(checkBoxOnCLickListener);
+            holder.text.setOnClickListener(textOnClickListener);
+            convertView.setTag(holder);
+        }
+        else{
+            holder = (ViewHolder) convertView.getTag();
+        }
 
         // Set their tags as the stop they represent. Used to pull out the stop on the other side (MainActivity).
         holder.text.setTag(stops.get(position));
         holder.checkbox.setTag(stops.get(position));
-
-        // Set their onClickListeners to the ones provided in the constructor.
-        holder.checkbox.setOnCheckedChangeListener(checkBoxOnCLickListener);
-        holder.text.setOnClickListener(textOnClickListener);
 
         // Update the display values of the views to reflect the object they represent.
         holder.text.setText(stops.get(position).getName());
