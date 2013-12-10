@@ -40,9 +40,7 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         // if (something) we pick a different layout to inflate.
-        Time time = times.get(position);
-        if (time.isSeparation()) convertView = inflater.inflate(R.layout.time_list_header, null);
-        else convertView = inflater.inflate(R.layout.time_list_item, null);
+        convertView = inflater.inflate(R.layout.time_list_item, null);
         TextView t = (TextView) convertView.findViewById(R.id.time_text);
         t.setText(times.get(position).toString());
         return convertView;

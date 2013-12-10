@@ -49,10 +49,6 @@ public class Time {
         route = mRoute;
     }
 
-    public boolean isSeparation(){
-        return separation != null;
-    }
-
     public String getTimeOfWeekAsString(){
         switch (timeOfWeek){
             case Weekday:
@@ -135,8 +131,7 @@ public class Time {
     }
 
     public String toString(){
-        if (separation == null) return getHourInNormalTime() + ":" + getMinInNormalTime() + " " + getAMorPM() + getViaRoute();
-        else return separation;
+        return getHourInNormalTime() + ":" + getMinInNormalTime() + " " + getAMorPM() + getViaRoute();
     }
 
     private String getAMorPM(){
