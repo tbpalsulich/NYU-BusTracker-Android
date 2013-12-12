@@ -88,6 +88,11 @@ public class Route {
         if(!stops.contains(stop)) stops.add(stop);
     }
 
+    public void addStop(int index, Stop stop){
+        if(stops.contains(stop)) stops.remove(stop);
+        stops.add(index, stop);
+    }
+
     public static void parseJSON(JSONObject routesJson) throws JSONException{
         JSONArray jRoutes = new JSONArray();
         BusManager sharedManager = BusManager.getBusManager();
@@ -99,7 +104,7 @@ public class Route {
             Route r = sharedManager.getRoute(routeLongName, routeID);
             JSONArray stops = routeObject.getJSONArray(FileGrabber.TAG_STOPS);
             for (int i = 0; i < stops.length(); i++){
-                r.addStop(sharedManager.getStopByID(stops.getString(i)));
+                r.addStop(i, sharedManager.getStopByID(stops.getString(i)));
             }
             JSONArray segments = routeObject.getJSONArray(FileGrabber.TAG_SEGMENTS);
             Log.v("MapDebugging", "Found " + segments.length() + " segments for route " + routeID);

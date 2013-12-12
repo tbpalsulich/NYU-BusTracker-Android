@@ -22,6 +22,10 @@ public class Stop {
     ArrayList<Time> times = null;
     boolean favorite;
     public static String FAVORITES_PREF = "favorites";
+    ArrayList<Stop> childStops;
+    Stop parent;
+    Stop oppositeStop;
+    boolean hidden;
 
     public Stop(String mName, String mLat, String mLng, String mID, String[] mRoutes){
         name = mName;
@@ -29,16 +33,64 @@ public class Stop {
             Class.forName("com.google.android.gms.maps.model.LatLng");
             loc = new LatLng(Double.parseDouble(mLat), Double.parseDouble(mLng));
         } catch(ClassNotFoundException e) {
+            e.printStackTrace();
         }
         id = mID;
         routesString = mRoutes;
         times = new ArrayList<Time>();
         routes = new ArrayList<Route>();
+        childStops = new ArrayList<Stop>();
         BusManager sharedManager = BusManager.getBusManager();
         for (String s : mRoutes){
             Route r = sharedManager.getRouteByID(s);
             if (r != null && !r.getStops().contains(this)) r.addStop(this);
         }
+    }
+
+    public void setOppositeStop(Stop stop){
+        oppositeStop = stop;
+    }
+
+    public Stop getOppositeStop(){
+        return oppositeStop;
+    }
+
+    public void setName(String name){
+        this.name = name;
+    }
+
+    public void setHidden(boolean hidden){
+        this.hidden = hidden;
+    }
+
+    public boolean isHidden(){
+        return hidden;
+    }
+
+    public void setParentStop(Stop parent){
+        this.parent = parent;
+    }
+
+    public Stop getParent(){
+        return parent;
+    }
+
+    public void addChildStop(Stop stop){
+        if (!childStops.contains(stop)){
+            childStops.add(stop);
+        }
+    }
+
+    public String getUltimateName(){
+        Stop s = this;
+        while (s.getParent() != null){
+            s = s.getParent();
+        }
+        return s.getName();
+    }
+
+    public ArrayList<Stop> getChildStops(){
+        return childStops;
     }
 
     public void setFavorite(SharedPreferences preferences){
@@ -86,7 +138,13 @@ public class Stop {
         return false;
     }
     public ArrayList<Route> getRoutes(){
-        return routes;
+        ArrayList<Route> result = new ArrayList<Route>(routes);
+        for (Stop child : childStops){
+            for (Route childRoute : child.getRoutes()){
+                result.add(childRoute);
+            }
+        }
+        return result;
     }
     public void addRoute(Route route){
         routes.add(route);
@@ -121,8 +179,23 @@ public class Stop {
                 result.add(t);
             }
         }
+        for (Stop childStop : childStops){
+            result.addAll(childStop.getTimesOfRoute(route));
+        }
         return result;
     }
+
+    public boolean isRelatedTo(Stop stop){
+        boolean result = (this.getUltimateName().equals(stop.getUltimateName()));
+        if (result){
+            return true;
+        }
+        else{
+            Log.v("Combine Debugging", this + " is not related to " + stop);
+            return false;
+        }
+    }
+
     public static void parseJSON(JSONObject stopsJson) throws JSONException{
         JSONArray jStops = new JSONArray();
         BusManager sharedManager = BusManager.getBusManager();
