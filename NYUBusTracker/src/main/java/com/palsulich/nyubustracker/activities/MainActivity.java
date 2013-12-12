@@ -319,19 +319,16 @@ public class MainActivity extends Activity{
                 //Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
                 for (Stop s : r.getStops()){
                     // Only put one representative from a family of stops on the p
-                    if ((startStop == s || !startStop.isRelatedTo(s)) &&        // Stops are trivially related to themselves.
-                        (endStop   == s ||   !endStop.isRelatedTo(s))){
-                        Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
-                                .position(s.getLocation())
-                                .title(s.getName())
-                                .anchor(0.5f, 0.5f)
-                                .icon(BitmapDescriptorFactory
-                                        .fromBitmap(
-                                                BitmapFactory.decodeResource(
-                                                        this.getResources(),
-                                                        R.drawable.ic_map_stop))));
-                        clickableMapMarkers.put(mMarker.getId(), true);
-                    }
+                    Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
+                            .position(s.getLocation())
+                            .title(s.getName())
+                            .anchor(0.5f, 0.5f)
+                            .icon(BitmapDescriptorFactory
+                                    .fromBitmap(
+                                            BitmapFactory.decodeResource(
+                                                    this.getResources(),
+                                                    R.drawable.ic_map_stop))));
+                    clickableMapMarkers.put(mMarker.getId(), true);
                 }
                 updateMapWithNewBusLocations();
                 // Adds the segments of every Route to the map.
