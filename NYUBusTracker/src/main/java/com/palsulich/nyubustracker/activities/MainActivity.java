@@ -120,7 +120,7 @@ public class MainActivity extends Activity{
                 NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
                 Stop.parseJSON(mFileGrabber.getStopJSON(networkInfo));
                 Route.parseJSON(mFileGrabber.getRouteJSON(networkInfo));
-                BusManager.parseTimes(mFileGrabber.getVersionJSON(networkInfo), mFileGrabber, networkInfo);
+                BusManager.parseTimes(mFileGrabber.getVersionJSON(networkInfo), mFileGrabber, networkInfo); // Must be after routes are parsed!
                 // Ensure we start the app with predefined favorite stops.
                 BusManager.syncFavoriteStops(getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE));
                 if (haveAMap) Bus.parseJSON(mFileGrabber.getVehicleJSON(networkInfo));
@@ -139,6 +139,13 @@ public class MainActivity extends Activity{
                 e.printStackTrace();
             }
         }
+        for (Route r : sharedManager.getRoutes()){
+            Log.v("Hard Combine Debugging", "Route " + r.getLongName());
+            for (Stop s : r.getStops()){
+                Log.v("Hard Combine Debugging", s.getName() + " | " + s.getID());
+            }
+        }
+
 
         // Initialize start and end stops. By default, they are Lafayette and Broadway.
         setStartStop(sharedManager.getStopByName(mFileGrabber.getStartStopFile()));
@@ -273,7 +280,8 @@ public class MainActivity extends Activity{
             }
             busesOnMap = new ArrayList<Marker>();
             if (clickableMapMarkers == null) clickableMapMarkers = new HashMap<String, Boolean>();  // New set of buses means new set of clickable markers!
-            for (Route r: routesBetweenStartAndEnd){
+            Route r = sharedManager.getRouteByName(nextBusTime.getRoute());
+            if (r != null){
                 for (Bus b : sharedManager.getBuses()){
                     //Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
                     if (b.getRoute().equals(r.getID())){
@@ -305,19 +313,25 @@ public class MainActivity extends Activity{
             clickableMapMarkers = new HashMap<String, Boolean>();
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             boolean validBuilder = false;
-            for (Route r : routesBetweenStartAndEnd){
+            BusManager sharedManager = BusManager.getBusManager();
+            Route r = sharedManager.getRouteByName(nextBusTime.getRoute());
+            if (r != null){
                 //Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
                 for (Stop s : r.getStops()){
-                    Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
-                            .position(s.getLocation())
-                            .title(s.getName())
-                            .anchor(0.5f, 0.5f)
-                            .icon(BitmapDescriptorFactory
-                                    .fromBitmap(
-                                            BitmapFactory.decodeResource(
-                                                    this.getResources(),
-                                                    R.drawable.ic_map_stop))));
-                    clickableMapMarkers.put(mMarker.getId(), true);
+                    // Only put one representative from a family of stops on the p
+                    if ((startStop == s || !startStop.isRelatedTo(s)) &&        // Stops are trivially related to themselves.
+                        (endStop   == s ||   !endStop.isRelatedTo(s))){
+                        Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
+                                .position(s.getLocation())
+                                .title(s.getName())
+                                .anchor(0.5f, 0.5f)
+                                .icon(BitmapDescriptorFactory
+                                        .fromBitmap(
+                                                BitmapFactory.decodeResource(
+                                                        this.getResources(),
+                                                        R.drawable.ic_map_stop))));
+                        clickableMapMarkers.put(mMarker.getId(), true);
+                    }
                 }
                 updateMapWithNewBusLocations();
                 // Adds the segments of every Route to the map.
@@ -363,7 +377,7 @@ public class MainActivity extends Activity{
             }
             if (routes.size() > 0) {
                 endStop = stop;
-                ((Button) findViewById(R.id.to_button)).setText(stop.getName());
+                ((Button) findViewById(R.id.to_button)).setText(stop.getUltimateName());
                 if (startStop != null){
                     setNextBusTime();    // Don't set the next bus if we don't have a valid route.
                     if (routesBetweenStartAndEnd != null && haveAMap) updateMapWithNewStartOrEnd();
@@ -378,15 +392,15 @@ public class MainActivity extends Activity{
                 // Swap the start and end stops.
                 Stop temp = startStop;
                 startStop = endStop;
-                ((Button) findViewById(R.id.from_button)).setText(startStop.getName());
+                ((Button) findViewById(R.id.from_button)).setText(startStop.getUltimateName());
                 endStop = temp;
-                ((Button) findViewById(R.id.to_button)).setText(endStop.getName());
+                ((Button) findViewById(R.id.to_button)).setText(endStop.getUltimateName());
                 setNextBusTime();
                 updateMapWithNewStartOrEnd();
             }
             else { // We have a new start. So, we must ensure the end is actually connected. If not, pick a random connected stop.
                 startStop = stop;
-                ((Button) findViewById(R.id.from_button)).setText(stop.getName());
+                ((Button) findViewById(R.id.from_button)).setText(stop.getUltimateName());
                 if (endStop != null){
                     // Loop through all connected Routes.
                     for (Route r : startStop.getRoutes()){
@@ -406,27 +420,51 @@ public class MainActivity extends Activity{
     }
 
     private void setNextBusTime() {
+        /*
+        Have a start stop that may have children, and an end stop that may have children.
+        Find all routes that have both stops (or their children).
+        Figure out which direction the user is going.
+        Get all times in that direction, on all available routes, from that start stop (or its children).
+        Insert the current time into that list and sort the list.
+        Next bus time is the first element after the current time.
+        Set the view values.
+         */
+
         if (timeUntilTimer != null) timeUntilTimer.cancel();        // Don't want to be interrupted in the middle of this.
         if (busRefreshTimer != null) busRefreshTimer.cancel();
         Calendar rightNow = Calendar.getInstance();
-        ArrayList<Route> fromRoutes = startStop.getRoutes();        // All the routes leaving the start stop.
-        ArrayList<Route> routes = new ArrayList<Route>();               // All the routes connecting the two.
-        for (Route r : fromRoutes) {
-            // A route is only "connected" if it has both stops AND it has times available at the endStop.
-            // Because we only need to worry about the Stop not having times after we *change* a stop,
-            // we check that there exists a "connecting" route before we call setNextBusTime. But, we leave
-            // the check that there are times for robustness.
-            if (r.hasStop(endStop.getName()) && endStop.getTimesOfRoute(r.getLongName()).size() != 0) {
-                Log.v("Route Debugging", "Adding a route between " + startStop.getName() + " and " + endStop.getName() + ": " + r.getLongName());
-                routes.add(r);
+        ArrayList<Route> startRoutes = startStop.getRoutes();        // All the routes leaving the start stop.
+        ArrayList<Route> endRoutes = endStop.getRoutes();
+        ArrayList<Route> availableRoutes = new ArrayList<Route>();               // All the routes connecting the two.
+        for (Route r : startRoutes) {
+            if (endRoutes.contains(r)){
+                availableRoutes.add(r);
             }
         }
-        if (routes.size() > 0) {
+        int bestDistance = BusManager.distanceBetween(startStop, endStop);
+
+        int testDistance = BusManager.distanceBetween(startStop.getOppositeStop(), endStop.getOppositeStop());
+        if (testDistance < bestDistance){
+            startStop = startStop.getOppositeStop();
+            endStop = endStop.getOppositeStop();
+        }
+
+        testDistance = BusManager.distanceBetween(startStop, endStop.getOppositeStop());
+        if (testDistance < bestDistance){
+            endStop = endStop.getOppositeStop();
+        }
+
+        testDistance = BusManager.distanceBetween(startStop.getOppositeStop(), endStop);
+        if (testDistance < bestDistance){
+            startStop = startStop.getOppositeStop();
+        }
+
+        if (availableRoutes.size() > 0) {
             ArrayList<Time> tempTimesBetweenStartAndEnd = new ArrayList<Time>();
-            for (Route r : routes) {
+            for (Route r : availableRoutes) {
                 // Get the Times at this stop for this route.
                 ArrayList<Time> times;
-                if ((times = startStop.getTimesOfRoute(r.getLongName())) != null){
+                if ((times = startStop.getTimesOfRoute(r.getLongName())).size() > 0){
                     tempTimesBetweenStartAndEnd.addAll(times);
                 }
             }
@@ -435,13 +473,15 @@ public class MainActivity extends Activity{
                 // time, then sort that list of times. That way, we know the first bus Time after the current time
                 // is the Time of the soonest next Bus.
                 timesBetweenStartAndEnd = new ArrayList<Time>(tempTimesBetweenStartAndEnd);
-                routesBetweenStartAndEnd = routes;
+                routesBetweenStartAndEnd = availableRoutes;
                 Time currentTime = new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
                 tempTimesBetweenStartAndEnd.add(currentTime);
                 Collections.sort(tempTimesBetweenStartAndEnd, Time.compare);
+                Collections.sort(timesBetweenStartAndEnd, Time.compare);
                 nextBusTime = tempTimesBetweenStartAndEnd.get(tempTimesBetweenStartAndEnd.indexOf(currentTime) + 1);
                 ((TextView) findViewById(R.id.times_button)).setText(nextBusTime.toString());
                 ((TextView) findViewById(R.id.next_bus)).setText(currentTime.getTimeAsStringUntil(nextBusTime));
+                updateMapWithNewStartOrEnd();
             }
         }
         renewBusRefreshTimer();
@@ -513,7 +553,9 @@ public class MainActivity extends Activity{
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         TimeAdapter adapter = new TimeAdapter(getApplicationContext(), timesBetweenStartAndEnd);
         listView.setAdapter(adapter);
-        // listView.setSelection(timesBetweenStartAndEnd.indexOf(nextBusTime));
+        int index = timesBetweenStartAndEnd.indexOf(nextBusTime);
+        int difference = timesBetweenStartAndEnd.size() - index;
+        listView.setSelection(index + ((difference >= 4) ? 4 : difference));    // I don't know why this hack is needed...
         builder.setView(listView);
         Dialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(true);
