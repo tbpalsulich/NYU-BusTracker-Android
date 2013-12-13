@@ -410,7 +410,6 @@ public class MainActivity extends Activity{
                     }
                     // If we did not return above, the current endStop is not connected to the new
                     // startStop. So, by default, pick the first connected stop.
-                    ArrayList<Stop> connectedStops = startStop.getRoutes().get(0).getStops();
                     BusManager sharedManager = BusManager.getBusManager();
                     setEndStop(sharedManager.getStopByName("715 Broadway at Washington Square"));
                 }
