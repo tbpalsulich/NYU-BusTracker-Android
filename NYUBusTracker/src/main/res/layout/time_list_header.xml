@@ -4,7 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/list_contrast_background">
+    android:background="@color/list_contrast_background"
+    android:paddingLeft="10dp"
+    android:minHeight="30dp"
+    android:alpha=".85">
     <TextView
         android:id="@+id/time_text"
         android:layout_width="fill_parent"
@@ -12,6 +15,8 @@
         android:text="Time Separation"
         android:layout_alignParentTop="true"
         android:paddingTop="2dp"
-        android:gravity="center_vertical"
-        android:textSize="16dp"/>
+        android:gravity="center_vertical|center_horizontal"
+        android:textIsSelectable="false"
+        android:textColor="#ffffff"
+        android:textSize="20dp" />
 </RelativeLayout>
