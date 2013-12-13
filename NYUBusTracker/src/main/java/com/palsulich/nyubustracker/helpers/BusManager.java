@@ -41,8 +41,14 @@ public final class BusManager {
     }
 
     public ArrayList<Stop> getStops() {
-        Collections.sort(stops, Stop.compare);
-        return stops;
+        ArrayList<Stop> result = new ArrayList<Stop>(stops);
+        for (Stop stop : stops){
+            if (stop.isHidden()){
+                result.remove(stop);
+            }
+        }
+        Collections.sort(result, Stop.compare);
+        return result;
     }
 
     public ArrayList<Route> getRoutes() {
@@ -123,6 +129,17 @@ public final class BusManager {
         return null;
     }
 
+    public Route getRouteByName(String name){
+        if (routes != null){
+            for (Route route : routes) {
+                if (route.getLongName().equals(name)){
+                    return route;
+                }
+            }
+        }
+        return null;
+    }
+
     public static void syncFavoriteStops(SharedPreferences preferences){
         for (Stop s : stops){
             s.setFavorite(preferences);
@@ -139,9 +156,22 @@ public final class BusManager {
         for (Route route : stopRoutes) {       // For every route servicing this stop:
             Log.v("Route Debugging", route.toString() + " services this stop.");
             for (Stop connectedStop : route.getStops()){    // add all of that route's stops.
-                if (!connectedStop.getName().equals(stop.getName()) && !result.contains(connectedStop)){
-                    result.add(connectedStop);
-                    Log.v("Route Debugging", "   " + connectedStop + " is connected to " + stop.getName());
+                if (!connectedStop.getUltimateName().equals(stop.getName()) &&
+                    !result.contains(connectedStop) &&
+                    (!connectedStop.isHidden() || !connectedStop.isRelatedTo(stop))){
+                    while (connectedStop.getParent() != null){
+                        connectedStop = connectedStop.getParent();
+                    }
+                    boolean repeatStop = false;
+                    for (Stop resultStop : result){
+                        if (resultStop.getName().equals(connectedStop.getName())){
+                            repeatStop = true;
+                        }
+                    }
+                    if (!repeatStop){
+                        result.add(connectedStop);
+                        //Log.v("Route Debugging","'" + connectedStop.getName() + "' is connected to '" + stop.getName() + "'");
+                    }
                 }
             }
         }
@@ -187,6 +217,36 @@ public final class BusManager {
             return new Route(name, id);
         }
         else return r.setName(name);
+    }
+
+    public static int distanceBetween(Stop stop1, Stop stop2){
+        // Check these stops and their children.
+        int result = 100;
+        if (stop1 != null && stop2 != null){
+            for (Route r : routes){
+                if (r.hasStopByID(stop1.getID()) && r.hasStopByID(stop2.getID())){
+                    int index1 = r.getStops().indexOf(stop1);
+                    int index2 = r.getStops().indexOf(stop2);
+                    result = index2 - index1;
+                    if (result < 0) result += r.getStops().size();
+                }
+            }
+            int children = 100;
+            for (Stop s : stop1.getChildStops()){
+                int test = distanceBetween(s, stop2);
+                if (test < children) children = test;
+            }
+            if (children < result) result = children;
+
+            children = 100;
+            for (Stop s : stop2.getChildStops()){
+                int test = distanceBetween(stop1, s);
+                if (test < children) children = test;
+            }
+            if (children < result) result = children;
+        }
+
+        return result;
     }
 
     /*
@@ -235,6 +295,37 @@ public final class BusManager {
                     }
                 }
             }
+        }
+
+        JSONArray jCombine = new JSONArray();
+        if (versionJson != null) jCombine = versionJson.getJSONArray("combine");
+        for (int j = 0; j < jCombine.length(); j++){
+            JSONObject combineObject = jCombine.getJSONObject(j);
+            String name = combineObject.getString("name");
+            String first = combineObject.getString("first");
+            String second = combineObject.getString("second");
+            Stop firstStop = sharedBusManager.getStopByID(first);
+            Stop secondStop = sharedBusManager.getStopByID(second);
+            firstStop.addChildStop(secondStop);
+            firstStop.setName(name);
+            secondStop.setParentStop(firstStop);
+            secondStop.setHidden(true);
+        }
+
+        JSONArray jOpposites = new JSONArray();
+        if (versionJson != null) jOpposites = versionJson.getJSONArray("opposite");
+        for (int j = 0; j < jOpposites.length(); j++){
+            JSONObject oppositeObject = jOpposites.getJSONObject(j);
+            String name = oppositeObject.getString("name");
+            String first = oppositeObject.getString("first");
+            String second = oppositeObject.getString("second");
+            Stop firstStop = sharedBusManager.getStopByID(first);
+            Stop secondStop = sharedBusManager.getStopByID(second);
+            firstStop.setOppositeStop(secondStop);
+            firstStop.setName(name);
+            secondStop.setOppositeStop(firstStop);
+            secondStop.setParentStop(firstStop);
+            secondStop.setHidden(true);
         }
 
         JSONArray jVersion = new JSONArray();
