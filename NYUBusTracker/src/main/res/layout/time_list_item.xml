@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/list_background">
+    android:background="@color/list_background"
+    android:minHeight="35dp">
     <TextView
         android:id="@+id/time_text"
         android:layout_width="fill_parent"
@@ -13,5 +14,8 @@
         android:layout_alignParentTop="true"
         android:paddingTop="2dp"
         android:gravity="center_vertical"
-        android:textSize="20dp"/>
+        android:textSize="20dp"
+        android:paddingLeft="10dp"
+        android:textColor="#ffffff"
+        android:minHeight="36dp" />
 </RelativeLayout>

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -548,6 +549,8 @@ public class MainActivity extends Activity{
     public void createTimesDialog(View view) {
         // Library provided ListView with headers that (gasp) stick to the top.
         StickyListHeadersListView listView = new StickyListHeadersListView(this);
+        listView.setDivider(new ColorDrawable(0xffffff));
+        listView.setDividerHeight(1);
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         TimeAdapter adapter = new TimeAdapter(getApplicationContext(), timesBetweenStartAndEnd);
         listView.setAdapter(adapter);
