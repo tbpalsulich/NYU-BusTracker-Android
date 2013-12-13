@@ -22,14 +22,12 @@ public final class BusManager {
     private static ArrayList<Stop> stops = null;            // Hold all known stops.
     private static ArrayList<Route> routes = null;
     private static ArrayList<String> hideRoutes = null;     // Routes to not show the user.
-    private static ArrayList<String> hideStops = null;      // Stops to not show the user.
     private static ArrayList<Bus> buses = null;
 
     private BusManager(){
         stops = new ArrayList<Stop>();
         routes = new ArrayList<Route>();
         hideRoutes = new ArrayList<String>();
-        hideStops = new ArrayList<String>();
         buses = new ArrayList<Bus>();
     }
 
@@ -183,7 +181,7 @@ public final class BusManager {
     addStop will add a Stop to our ArrayList of Stops, unless we're supposed to hide it.
      */
     public void addStop(Stop stop) {
-        if (hideStops != null && !hideStops.contains(stop.getID())){
+        if (!stop.isHidden()){
             stops.add(stop);
             Log.v("Debugging", "Added " + stop.toString() + " to list of stops (" + stops.size() + ")");
         }
@@ -285,16 +283,7 @@ public final class BusManager {
             String hideMeID = jHideStops.getString(j);
             Log.v("JSONDebug", "Hiding a stop... " + hideMeID);
             Stop s = sharedBusManager.getStopByID(hideMeID);
-            hideStops.add(hideMeID);           // In case we "hide" the stop before it exists.
-            if (s != null){
-                stops.remove(s);
-                for (Route r : routes){
-                    if (r.hasStopByID(hideMeID)){
-                        r.getStops().remove(s);
-                        Log.v("JSONDebug", "Removing stop " + s.getID() + " from " + r.getLongName());
-                    }
-                }
-            }
+            if (s != null) s.setHidden(true);
         }
 
         JSONArray jCombine = new JSONArray();

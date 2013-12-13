@@ -475,9 +475,10 @@ public class MainActivity extends Activity{
                 tempTimesBetweenStartAndEnd.add(currentTime);
                 Collections.sort(tempTimesBetweenStartAndEnd, Time.compare);
                 Collections.sort(timesBetweenStartAndEnd, Time.compare);
-                nextBusTime = tempTimesBetweenStartAndEnd.get(tempTimesBetweenStartAndEnd.indexOf(currentTime) + 1);
-                ((TextView) findViewById(R.id.times_button)).setText(nextBusTime.toString());
+                int index = tempTimesBetweenStartAndEnd.indexOf(currentTime);
+                nextBusTime = tempTimesBetweenStartAndEnd.get((index + 1) % tempTimesBetweenStartAndEnd.size());
                 ((TextView) findViewById(R.id.next_bus)).setText(currentTime.getTimeAsStringUntil(nextBusTime));
+                ((TextView) findViewById(R.id.times_button)).setText(nextBusTime.toString());
                 updateMapWithNewStartOrEnd();
             }
         }

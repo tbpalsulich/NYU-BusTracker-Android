@@ -118,6 +118,7 @@ public class Time {
 
     // Return a Time object who represents the difference in time between the two Times.
     public Time getTimeAsTimeUntil(Time t){
+        // TODO: isStrictlyBefore doesn't go across days. Fix difference in times over multiple days.
         if (this.isStrictlyBefore(t)){
             int hourDifference = t.hour - this.hour;
             int minDifference = t.min - this.min;
