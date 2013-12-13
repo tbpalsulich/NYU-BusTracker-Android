@@ -1,7 +1,5 @@
 package com.palsulich.nyubustracker.models;
 
-import android.util.Log;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.palsulich.nyubustracker.helpers.BusManager;
 import com.palsulich.nyubustracker.helpers.FileGrabber;
@@ -67,9 +65,9 @@ public class Bus {
             // getBus will either return an existing bus, or create a new one for us. We'll have to parse the bus JSON often.
             Bus b = sharedManager.getBus(vehicleID);
             b.setHeading(busHeading).setLocation(busLat, busLng).setRoute(busRoute);
-            Log.v("BusLocations", "Parsing buses: bus id: " + vehicleID + " | bus' route: " + busRoute);
+            //Log.v("BusLocations", "Parsing buses: bus id: " + vehicleID + " | bus' route: " + busRoute);
 
-            Log.v("JSONDebug", "Bus ID: " + vehicleID + " | Heading: " + busHeading + " | (" + busLat + ", " + busLng + ")");
+            //Log.v("JSONDebug", "Bus ID: " + vehicleID + " | Heading: " + busHeading + " | (" + busLat + ", " + busLng + ")");
         }
     }
 }

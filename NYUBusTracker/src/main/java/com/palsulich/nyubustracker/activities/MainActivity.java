@@ -411,7 +411,8 @@ public class MainActivity extends Activity{
                     // If we did not return above, the current endStop is not connected to the new
                     // startStop. So, by default, pick the first connected stop.
                     ArrayList<Stop> connectedStops = startStop.getRoutes().get(0).getStops();
-                    setEndStop(connectedStops.get(connectedStops.indexOf(startStop) - 1));
+                    BusManager sharedManager = BusManager.getBusManager();
+                    setEndStop(sharedManager.getStopByName("715 Broadway at Washington Square"));
                 }
             }
         }
@@ -555,8 +556,7 @@ public class MainActivity extends Activity{
         TimeAdapter adapter = new TimeAdapter(getApplicationContext(), timesBetweenStartAndEnd);
         listView.setAdapter(adapter);
         int index = timesBetweenStartAndEnd.indexOf(nextBusTime);
-        int difference = timesBetweenStartAndEnd.size() - index;
-        listView.setSelection(index + ((difference >= 4) ? 4 : difference));    // I don't know why this hack is needed...
+        listView.setSelection(index);
         builder.setView(listView);
         Dialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(true);
