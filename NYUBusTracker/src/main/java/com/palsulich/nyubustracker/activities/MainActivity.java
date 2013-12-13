@@ -314,22 +314,22 @@ public class MainActivity extends Activity{
             clickableMapMarkers = new HashMap<String, Boolean>();
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             boolean validBuilder = false;
-            BusManager sharedManager = BusManager.getBusManager();
-            Route r = sharedManager.getRouteByName(nextBusTime.getRoute());
-            if (r != null){
+            for (Route r : routesBetweenStartAndEnd){
                 //Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
                 for (Stop s : r.getStops()){
-                    // Only put one representative from a family of stops on the p
-                    Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
-                            .position(s.getLocation())
-                            .title(s.getName())
-                            .anchor(0.5f, 0.5f)
-                            .icon(BitmapDescriptorFactory
-                                    .fromBitmap(
-                                            BitmapFactory.decodeResource(
-                                                    this.getResources(),
-                                                    R.drawable.ic_map_stop))));
-                    clickableMapMarkers.put(mMarker.getId(), true);
+                    if ((!s.isHidden() && !s.isRelatedTo(startStop) && !s.isRelatedTo(endStop)) || (s == startStop || s == endStop)){
+                        // Only put one representative from a family of stops on the p
+                        Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
+                                .position(s.getLocation())
+                                .title(s.getName())
+                                .anchor(0.5f, 0.5f)
+                                .icon(BitmapDescriptorFactory
+                                        .fromBitmap(
+                                                BitmapFactory.decodeResource(
+                                                        this.getResources(),
+                                                        R.drawable.ic_map_stop))));
+                        clickableMapMarkers.put(mMarker.getId(), true);
+                    }
                 }
                 updateMapWithNewBusLocations();
                 // Adds the segments of every Route to the map.
@@ -431,8 +431,8 @@ public class MainActivity extends Activity{
         if (timeUntilTimer != null) timeUntilTimer.cancel();        // Don't want to be interrupted in the middle of this.
         if (busRefreshTimer != null) busRefreshTimer.cancel();
         Calendar rightNow = Calendar.getInstance();
-        ArrayList<Route> startRoutes = startStop.getRoutes();        // All the routes leaving the start stop.
-        ArrayList<Route> endRoutes = endStop.getRoutes();
+        ArrayList<Route> startRoutes = startStop.getUltimateParent().getRoutes();        // All the routes leaving the start stop.
+        ArrayList<Route> endRoutes = endStop.getUltimateParent().getRoutes();
         ArrayList<Route> availableRoutes = new ArrayList<Route>();               // All the routes connecting the two.
         for (Route r : startRoutes) {
             if (endRoutes.contains(r)){

@@ -75,6 +75,14 @@ public class Stop {
         return parent;
     }
 
+    public Stop getUltimateParent(){
+        Stop result = this;
+        while (result.getParent() != null){
+            result = result.getParent();
+        }
+        return result;
+    }
+
     public void addChildStop(Stop stop){
         if (!childStops.contains(stop)){
             childStops.add(stop);
@@ -141,7 +149,36 @@ public class Stop {
         ArrayList<Route> result = new ArrayList<Route>(routes);
         for (Stop child : childStops){
             for (Route childRoute : child.getRoutes()){
-                result.add(childRoute);
+                if (!result.contains(childRoute)){
+                    result.add(childRoute);
+                }
+            }
+        }
+        if (parent != null){
+            for (Stop child : parent.getChildStops()){
+                if (child != this){
+                    for (Route childRoute : child.getRoutes()){
+                        if (!result.contains(childRoute)){
+                            result.add(childRoute);
+                        }
+                    }
+                }
+            }
+        }
+        if (oppositeStop != null){
+            for (Route r : oppositeStop.routes){
+                if (!result.contains(r)){
+                    result.add(r);
+                }
+            }
+            for (Stop child : oppositeStop.getChildStops()){
+                if (child != this){
+                    for (Route childRoute : child.getRoutes()){
+                        if (!result.contains(childRoute)){
+                            result.add(childRoute);
+                        }
+                    }
+                }
             }
         }
         return result;
@@ -191,7 +228,7 @@ public class Stop {
             return true;
         }
         else{
-            Log.v("Combine Debugging", this + " is not related to " + stop);
+            //Log.v("Combine Debugging", this + " is not related to " + stop);
             return false;
         }
     }
