@@ -27,7 +27,15 @@ public class Time {
                 if (time2.isStrictlyBefore(time1)){
                     return 1;
                 }
-                return 0;       // Same exact time (hour, minute, and timeOfWeek).
+                // Same exact time (hour, minute, and timeOfWeek). So, check if we're looking at the current time.
+                if (time1.getRoute() == null){
+                    return -1;
+                }
+                if (time2.getRoute() == null){
+                    return 1;
+                }
+                // Times are the same, but we aren't comparing the current time.
+                return 0;
             }
             else if (time1.getTimeOfWeek().ordinal() < time2.getTimeOfWeek().ordinal()){    // Time1 is an earlier day.
                 return -1;
@@ -98,13 +106,16 @@ public class Time {
         Log.v("Time Debugging", "Difference: " + difference.hour + ":" + difference.min);
         String result = "I don't know when the next bus is!";
         if (difference != null){
-            if (difference.hour == 0 && difference.min == 0)
+            if (this.getTimeOfWeek() != t.getTimeOfWeek()){
+                result = "Bus currently offline.";
+            }
+            else if (difference.hour == 0 && difference.min == 0)
                 result = "Next bus is right now!";
-            if (difference.hour == 0 && difference.min > 0)
+            else if (difference.hour == 0 && difference.min > 0)
                 result = "Next bus is in " + difference.min + " minutes.";
-            if (difference.hour > 0 && difference.min == 0)
+            else if (difference.hour > 0 && difference.min == 0)
                 result = "Next bus is in " + difference.hour + " hours.";
-            if (difference.hour > 0 && difference.min > 0)
+            else if (difference.hour > 0 && difference.min > 0)
                 result = "Next bus is in " + difference.hour + " hours and " + difference.min + " minutes.";
         }
         return result;
@@ -120,6 +131,7 @@ public class Time {
     public Time getTimeAsTimeUntil(Time t){
         // TODO: isStrictlyBefore doesn't go across days. Fix difference in times over multiple days.
         if (this.isStrictlyBefore(t)){
+            Log.v("Time Debugging", this + " is strictly before " + t);
             int hourDifference = t.hour - this.hour;
             int minDifference = t.min - this.min;
             if (minDifference < 0){
@@ -129,7 +141,7 @@ public class Time {
             return new Time(hourDifference, minDifference);
         }
         else{
-            Log.v("Time", t.toString() + " isn't after " + this.toString());
+            Log.v("Time Debugging", t.toString() + " isn't after " + this.toString());
             return new Time(0, 0);
         }
     }
