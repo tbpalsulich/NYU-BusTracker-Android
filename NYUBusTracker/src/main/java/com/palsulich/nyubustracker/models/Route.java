@@ -93,6 +93,17 @@ public class Route {
         stops.add(index, stop);
     }
 
+    public boolean isActive(){
+        ArrayList<Time> times = sharedManager.getStopByName("715 Broadway at Washington Square").getTimesOfRoute(longName);
+        Time currentTime = Time.getCurrentTime();
+        for (Time t : times){
+            if (!t.isStrictlyBefore(currentTime) && currentTime.getTimeOfWeek() == t.getTimeOfWeek()){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void parseJSON(JSONObject routesJson) throws JSONException{
         JSONArray jRoutes = new JSONArray();
         BusManager sharedManager = BusManager.getBusManager();

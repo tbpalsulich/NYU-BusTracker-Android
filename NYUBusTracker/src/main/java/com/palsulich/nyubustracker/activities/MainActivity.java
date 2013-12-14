@@ -281,24 +281,25 @@ public class MainActivity extends Activity{
             }
             busesOnMap = new ArrayList<Marker>();
             if (clickableMapMarkers == null) clickableMapMarkers = new HashMap<String, Boolean>();  // New set of buses means new set of clickable markers!
-            Route r = sharedManager.getRouteByName(nextBusTime.getRoute());
-            if (r != null){
-                for (Bus b : sharedManager.getBuses()){
-                    //Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
-                    if (b.getRoute().equals(r.getID())){
-                        Marker mMarker = mMap.addMarker(new MarkerOptions()
-                                .position(b.getLocation())
-                                .icon(BitmapDescriptorFactory
-                                        .fromBitmap(
-                                                rotateBitmap(
-                                                        BitmapFactory.decodeResource(
-                                                                this.getResources(),
-                                                                R.drawable.ic_bus_arrow),
-                                                        b.getHeading())
-                                        ))
-                                .anchor(0.5f, 0.5f));
-                        clickableMapMarkers.put(mMarker.getId(), false);    // Unable to click on buses.
-                        busesOnMap.add(mMarker);
+            for (Route r : routesBetweenStartAndEnd){
+                if (r.isActive()){
+                    for (Bus b : sharedManager.getBuses()){
+                        //Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
+                        if (b.getRoute().equals(r.getID())){
+                            Marker mMarker = mMap.addMarker(new MarkerOptions()
+                                    .position(b.getLocation())
+                                    .icon(BitmapDescriptorFactory
+                                            .fromBitmap(
+                                                    rotateBitmap(
+                                                            BitmapFactory.decodeResource(
+                                                                    this.getResources(),
+                                                                    R.drawable.ic_bus_arrow),
+                                                            b.getHeading())
+                                            ))
+                                    .anchor(0.5f, 0.5f));
+                            clickableMapMarkers.put(mMarker.getId(), false);    // Unable to click on buses.
+                            busesOnMap.add(mMarker);
+                        }
                     }
                 }
             }
@@ -315,35 +316,37 @@ public class MainActivity extends Activity{
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             boolean validBuilder = false;
             for (Route r : routesBetweenStartAndEnd){
-                //Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
-                for (Stop s : r.getStops()){
-                    if ((!s.isHidden() && !s.isRelatedTo(startStop) && !s.isRelatedTo(endStop)) || (s == startStop || s == endStop)){
-                        // Only put one representative from a family of stops on the p
-                        Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
-                                .position(s.getLocation())
-                                .title(s.getName())
-                                .anchor(0.5f, 0.5f)
-                                .icon(BitmapDescriptorFactory
-                                        .fromBitmap(
-                                                BitmapFactory.decodeResource(
-                                                        this.getResources(),
-                                                        R.drawable.ic_map_stop))));
-                        clickableMapMarkers.put(mMarker.getId(), true);
-                    }
-                }
-                updateMapWithNewBusLocations();
-                // Adds the segments of every Route to the map.
-                for (PolylineOptions p : r.getSegments()){
-                    //Log.v("MapDebugging", "Trying to add a segment to the map.");
-                    if (p != null){
-                        for (LatLng loc : p.getPoints()){
-                            validBuilder = true;
-                            builder.include(loc);
+                if (r.isActive()){
+                    //Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
+                    for (Stop s : r.getStops()){
+                        if ((!s.isHidden() && !s.isRelatedTo(startStop) && !s.isRelatedTo(endStop)) || (s == startStop || s == endStop)){
+                            // Only put one representative from a family of stops on the p
+                            Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
+                                    .position(s.getLocation())
+                                    .title(s.getName())
+                                    .anchor(0.5f, 0.5f)
+                                    .icon(BitmapDescriptorFactory
+                                            .fromBitmap(
+                                                    BitmapFactory.decodeResource(
+                                                            this.getResources(),
+                                                            R.drawable.ic_map_stop))));
+                            clickableMapMarkers.put(mMarker.getId(), true);
                         }
-                        p.color(getResources().getColor(R.color.purple));
-                        mMap.addPolyline(p);
                     }
-                    //else Log.v("MapDebugging", "Segment was null for " + r.getID());
+                    updateMapWithNewBusLocations();
+                    // Adds the segments of every Route to the map.
+                    for (PolylineOptions p : r.getSegments()){
+                        //Log.v("MapDebugging", "Trying to add a segment to the map.");
+                        if (p != null){
+                            for (LatLng loc : p.getPoints()){
+                                validBuilder = true;
+                                builder.include(loc);
+                            }
+                            p.color(getResources().getColor(R.color.purple));
+                            mMap.addPolyline(p);
+                        }
+                        //else Log.v("MapDebugging", "Segment was null for " + r.getID());
+                    }
                 }
             }
             if (validBuilder){

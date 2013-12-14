@@ -95,6 +95,11 @@ public class Time {
         return timeOfWeek;
     }
 
+    public static Time getCurrentTime(){
+        Calendar rightNow = Calendar.getInstance();
+        return new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
+    }
+
     public String getRoute(){
         return route;
     }
