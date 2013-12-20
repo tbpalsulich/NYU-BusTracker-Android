@@ -11,7 +11,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -140,13 +139,6 @@ public class MainActivity extends Activity{
                 e.printStackTrace();
             }
         }
-        for (Route r : sharedManager.getRoutes()){
-            Log.v("Hard Combine Debugging", "Route " + r.getLongName());
-            for (Stop s : r.getStops()){
-                Log.v("Hard Combine Debugging", s.getName() + " | " + s.getID());
-            }
-        }
-
 
         // Initialize start and end stops. By default, they are Lafayette and Broadway.
         setStartStop(sharedManager.getStopByName(mFileGrabber.getStartStopFile()));
@@ -499,7 +491,6 @@ public class MainActivity extends Activity{
             getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE)
                     .edit().putBoolean(s.getID(), isChecked)
                     .commit();
-            Log.v("Dialog", "Checkbox is " + isChecked);
         }
     };
 
