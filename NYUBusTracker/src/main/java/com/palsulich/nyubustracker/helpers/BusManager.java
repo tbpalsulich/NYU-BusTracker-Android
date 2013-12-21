@@ -17,6 +17,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public final class BusManager {
     private static BusManager sharedBusManager = null;      // Singleton instance.
@@ -24,12 +26,14 @@ public final class BusManager {
     private static ArrayList<Route> routes = null;
     private static ArrayList<String> hideRoutes = null;     // Routes to not show the user.
     private static ArrayList<Bus> buses = null;
+    private static HashMap<String, PolylineOptions> segments;
 
     private BusManager(){
         stops = new ArrayList<Stop>();
         routes = new ArrayList<Route>();
         hideRoutes = new ArrayList<String>();
         buses = new ArrayList<Bus>();
+        segments = new HashMap<String, PolylineOptions>();
     }
 
     public static BusManager getBusManager() {
@@ -37,6 +41,10 @@ public final class BusManager {
             sharedBusManager = new BusManager();
         }
         return sharedBusManager;
+    }
+
+    public static PolylineOptions getSegment(String id){
+        return segments.get(id);
     }
 
     public ArrayList<Stop> getStops() {
@@ -371,14 +379,16 @@ public final class BusManager {
 
     public static void parseSegments(JSONObject segmentsJSON) throws JSONException{
         final BusManager sharedManager = BusManager.getBusManager();
-        JSONObject segments = new JSONObject();
-        if (segmentsJSON != null) segments = segmentsJSON.getJSONObject("data");
-        for (Route r : sharedManager.getRoutes()){
-            Log.v("MapDebugging", "Does this route (" + r.getID() + ") have segments?");
-            for (String seg : r.getSegmentIDs()){
-                Log.v("MapDebugging", "Yes. r.addSegment to route " + r.getID());
-                r.addSegment(PolyUtil.decode(segments.getString(seg)));
-            }
+        JSONObject jSegments = new JSONObject();
+        if (segmentsJSON != null) jSegments = segmentsJSON.getJSONObject("data");
+        Iterator<String> keys = jSegments.keys();
+
+        while(keys.hasNext()){
+            String key = keys.next();
+            String line = jSegments.getString(key);
+            Log.v("MapDebugging", "Key: " + key);
+            sharedManager.segments.put(key, new PolylineOptions().addAll(PolyUtil.decode(line)));
+            Log.v("MapDebugging", "*Adding segment: " + key + " | " + line);
         }
     }
 }

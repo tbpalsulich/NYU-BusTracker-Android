@@ -330,8 +330,9 @@ public class MainActivity extends Activity{
                     }
                     updateMapWithNewBusLocations();
                     // Adds the segments of every Route to the map.
-                    for (PolylineOptions p : r.getSegments()){
-                        //Log.v("MapDebugging", "Trying to add a segment to the map.");
+                    for (String id : r.getSegmentIDs()){
+                        Log.v("MapDebugging", "Trying to add a segment to the map: " + id);
+                        PolylineOptions p = sharedManager.getSegment(id);
                         if (p != null){
                             for (LatLng loc : p.getPoints()){
                                 validBuilder = true;
@@ -339,8 +340,9 @@ public class MainActivity extends Activity{
                             }
                             p.color(getResources().getColor(R.color.purple));
                             mMap.addPolyline(p);
+                            Log.v("MapDebugging", "Success!");
                         }
-                        //else Log.v("MapDebugging", "Segment was null for " + r.getID());
+                        else Log.v("MapDebugging", "Segment was null for " + r.getID());
                     }
                 }
             }

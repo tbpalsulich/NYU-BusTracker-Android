@@ -46,15 +46,6 @@ public class Route {
         return segmentIDs;
     }
 
-    public ArrayList<PolylineOptions> getSegments(){
-        return segments;
-    }
-
-    public void addSegment(List<LatLng> seg){
-        Log.v("MapDebugging", "Adding segment for route " + routeID);
-        segments.add(new PolylineOptions().addAll(seg));
-    }
-
     public String getLongName(){
         return longName;
     }
