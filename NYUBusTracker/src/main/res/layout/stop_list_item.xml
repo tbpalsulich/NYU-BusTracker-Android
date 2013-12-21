@@ -18,6 +18,8 @@
         android:id="@+id/stop_text"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:scrollHorizontally="true"
+        android:ellipsize="end"
         android:text="Stop Name"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/stop_checkbox"
