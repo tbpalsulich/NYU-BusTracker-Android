@@ -2,7 +2,6 @@ package com.palsulich.nyubustracker.models;
 
 import android.util.Log;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.palsulich.nyubustracker.helpers.BusManager;
 import com.palsulich.nyubustracker.helpers.FileGrabber;
@@ -12,7 +11,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Route {
     String longName = "";
@@ -94,7 +92,7 @@ public class Route {
     }
 
     public boolean isActive(){
-        ArrayList<Time> times = sharedManager.getStopByName("715 Broadway at Washington Square").getTimesOfRoute(longName);
+        ArrayList<Time> times = sharedManager.getStopByName("715 Broadway @ Washington Square").getTimesOfRoute(longName);
         Time currentTime = Time.getCurrentTime();
         for (Time t : times){
             if (!t.isStrictlyBefore(currentTime) && currentTime.getTimeOfWeek() == t.getTimeOfWeek()){

@@ -195,7 +195,7 @@ public class FileGrabber {
 
     public String getStartStopFile(){
         String result = getFile(FROM_STOP_FILE_NAME);
-        if (result.equals("")) return "715 Broadway at Washington Square";
+        if (result.equals("")) return "715 Broadway @ Washington Square";
         else return result;
     }
 
@@ -205,7 +205,7 @@ public class FileGrabber {
 
     public String getEndStopFile(){
         String result = getFile(TO_STOP_FILE_NAME);
-        if (result.equals("")) return "80 Lafayette Street";
+        if (result.equals("")) return "80 Lafayette St";
         else return result;
     }
 

@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.net.NetworkInfo;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
 import com.palsulich.nyubustracker.models.Bus;
 import com.palsulich.nyubustracker.models.Route;
@@ -155,8 +156,8 @@ public final class BusManager {
             Log.v("Route Debugging", route.toString() + " services this stop.");
             for (Stop connectedStop : route.getStops()){    // add all of that route's stops.
                 if (!connectedStop.getUltimateName().equals(stop.getName()) &&
-                    !result.contains(connectedStop) &&
-                    (!connectedStop.isHidden() || !connectedStop.isRelatedTo(stop))){
+                        !result.contains(connectedStop) &&
+                        (!connectedStop.isHidden() || !connectedStop.isRelatedTo(stop))){
                     while (connectedStop.getParent() != null){
                         connectedStop = connectedStop.getParent();
                     }
@@ -290,7 +291,7 @@ public final class BusManager {
         if (versionJson != null) jCombine = versionJson.getJSONArray("combine");
         for (int j = 0; j < jCombine.length(); j++){
             JSONObject combineObject = jCombine.getJSONObject(j);
-            String name = combineObject.getString("name");
+            String name = Stop.cleanName(combineObject.getString("name"));
             String first = combineObject.getString("first");
             String second = combineObject.getString("second");
             Stop firstStop = sharedBusManager.getStopByID(first);
@@ -305,7 +306,7 @@ public final class BusManager {
         if (versionJson != null) jOpposites = versionJson.getJSONArray("opposite");
         for (int j = 0; j < jOpposites.length(); j++){
             JSONObject oppositeObject = jOpposites.getJSONObject(j);
-            String name = oppositeObject.getString("name");
+            String name = Stop.cleanName(oppositeObject.getString("name"));
             String first = oppositeObject.getString("first");
             String second = oppositeObject.getString("second");
             Stop firstStop = sharedBusManager.getStopByID(first);

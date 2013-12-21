@@ -11,6 +11,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -143,6 +144,7 @@ public class MainActivity extends Activity{
         // Initialize start and end stops. By default, they are Lafayette and Broadway.
         setStartStop(sharedManager.getStopByName(mFileGrabber.getStartStopFile()));
         setEndStop(sharedManager.getStopByName(mFileGrabber.getEndStopFile()));
+        Log.v("Cleaning", "End:" + sharedManager.getStopByName(mFileGrabber.getEndStopFile()));
 
         // Update the map to show the corresponding stops, buses, and segments.
         if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
@@ -302,6 +304,7 @@ public class MainActivity extends Activity{
     // Clear the map, because we may have just changed what route we wish to display. Then, add everything back onto the map.
     private void updateMapWithNewStartOrEnd(){
         if (haveAMap){
+            BusManager sharedManager = BusManager.getBusManager();
             setUpMapIfNeeded();
             mMap.clear();
             clickableMapMarkers = new HashMap<String, Boolean>();
@@ -406,7 +409,7 @@ public class MainActivity extends Activity{
                     // If we did not return above, the current endStop is not connected to the new
                     // startStop. So, by default, pick the first connected stop.
                     BusManager sharedManager = BusManager.getBusManager();
-                    setEndStop(sharedManager.getStopByName("715 Broadway at Washington Square"));
+                    setEndStop(sharedManager.getStopByName("715 Broadway @ Washington Square"));
                 }
             }
         }

@@ -28,7 +28,7 @@ public class Stop {
     boolean hidden;
 
     public Stop(String mName, String mLat, String mLng, String mID, String[] mRoutes){
-        name = mName;
+        name = cleanName(mName);
         try {
             Class.forName("com.google.android.gms.maps.model.LatLng");
             loc = new LatLng(Double.parseDouble(mLat), Double.parseDouble(mLng));
@@ -45,6 +45,14 @@ public class Stop {
             Route r = sharedManager.getRouteByID(s);
             if (r != null && !r.getStops().contains(this)) r.addStop(this);
         }
+    }
+
+    public static String cleanName(String name){
+        name = name.replaceAll("at", "@");
+        name = name.replaceAll("[Aa]venue", "Ave");
+        name = name.replaceAll("bound", "");
+        name = name.replaceAll("[Ss]treet", "St");
+        return name;
     }
 
     public void setOppositeStop(Stop stop){
@@ -106,7 +114,7 @@ public class Stop {
     }
 
     public void setValues(String mName, String mLat, String mLng, String mID, String[] mRoutes){
-        if(name.equals("")) name = mName;
+        if(name.equals("")) name = cleanName(mName);
         if(loc == null) loc = new LatLng(Double.parseDouble(mLat), Double.parseDouble(mLng));
         id = mID;
         if(routesString == null) routesString = mRoutes;
