@@ -109,21 +109,31 @@ public class Time {
         Time difference = this.getTimeAsTimeUntil(t);
         Log.v("Time Debugging", "this: " + this.toString() + " | that: " + t.toString());
         Log.v("Time Debugging", "Difference: " + difference.hour + ":" + difference.min);
-        String result = "I don't know when the next bus is!";
         if (difference != null){
-            if (this.getTimeOfWeek() != t.getTimeOfWeek()){
-                result = "Bus currently offline.";
-            }
-            else if (difference.hour == 0 && difference.min == 0)
-                result = "Next bus is right now!";
-            else if (difference.hour == 0 && difference.min > 0)
-                result = "Next bus is in " + difference.min + " minutes.";
-            else if (difference.hour > 0 && difference.min == 0)
-                result = "Next bus is in " + difference.hour + " hours.";
-            else if (difference.hour > 0 && difference.min > 0)
-                result = "Next bus is in " + difference.hour + " hours and " + difference.min + " minutes.";
+            if (this.getTimeOfWeek() != t.getTimeOfWeek())
+                return "Bus currently offline.";
+            if (difference.hour >= 3)
+                return "Bus currently offline.";
+            if (difference.hour == 0 && difference.min == 0)
+                return "Next bus is right now!";
+            if (difference.hour == 0 && difference.min == 1)
+                return "Next bus is in " + difference.min + " minute.";
+            if (difference.hour == 0 && difference.min > 1)
+                return "Next bus is in " + difference.min + " minutes.";
+            if (difference.hour > 1 && difference.min == 0)
+                return "Next bus is in " + difference.hour + " hours.";
+            if (difference.hour == 1 && difference.min == 0)
+                return "Next bus is in " + difference.hour + " hour.";
+            if (difference.hour > 0 && difference.min == 1)
+                return "Next bus is in " + difference.hour + " hours and " + difference.min + " minute.";
+            if (difference.hour > 0 && difference.min > 1)
+                return "Next bus is in " + difference.hour + " hours and " + difference.min + " minutes.";
+            if (difference.hour == 1 && difference.min == 1)
+                return "Next bus is in " + difference.hour + " hour and " + difference.min + " minute.";
+            if (difference.hour == 1 && difference.min > 1)
+                return "Next bus is in " + difference.hour + " hour and " + difference.min + " minutes.";
         }
-        return result;
+        return "";
     }
 
     // isStrictlyBefore(t) returns false if the times are equal or this is after t.

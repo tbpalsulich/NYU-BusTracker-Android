@@ -461,8 +461,8 @@ public class MainActivity extends Activity{
             ArrayList<Time> tempTimesBetweenStartAndEnd = new ArrayList<Time>();
             for (Route r : availableRoutes) {
                 // Get the Times at this stop for this route.
-                ArrayList<Time> times;
-                if ((times = startStop.getTimesOfRoute(r.getLongName())).size() > 0){
+                ArrayList<Time> times = startStop.getTimesOfRoute(r.getLongName());
+                if (times.size() > 0){
                     tempTimesBetweenStartAndEnd.addAll(times);
                 }
             }
