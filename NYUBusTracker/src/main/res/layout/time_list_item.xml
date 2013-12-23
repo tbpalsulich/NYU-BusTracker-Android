@@ -14,8 +14,7 @@
         android:layout_alignParentTop="true"
         android:paddingTop="2dp"
         android:gravity="center_vertical"
-        android:textSize="20dp"
+        android:textSize="18dp"
         android:paddingLeft="10dp"
-        android:textColor="#ffffff"
         android:minHeight="36dp" />
 </RelativeLayout>
