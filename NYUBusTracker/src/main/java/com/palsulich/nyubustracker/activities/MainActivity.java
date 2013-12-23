@@ -238,10 +238,12 @@ public class MainActivity extends Activity{
     public void onResume() {
         super.onResume();
         //Log.v("General Debugging", "onResume!");
-        setNextBusTime();
-        renewTimeUntilTimer();
-        renewBusRefreshTimer();
-        setUpMapIfNeeded();
+        if (endStop != null && startStop != null){
+            setNextBusTime();
+            renewTimeUntilTimer();
+            renewBusRefreshTimer();
+            setUpMapIfNeeded();
+        }
     }
 
     public void cacheToAndStartStop() {
@@ -546,18 +548,20 @@ public class MainActivity extends Activity{
     }
 
     public void createTimesDialog(View view) {
-        // Library provided ListView with headers that (gasp) stick to the top.
-        StickyListHeadersListView listView = new StickyListHeadersListView(this);
-        listView.setDivider(new ColorDrawable(0xffffff));
-        listView.setDividerHeight(1);
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        TimeAdapter adapter = new TimeAdapter(getApplicationContext(), timesBetweenStartAndEnd);
-        listView.setAdapter(adapter);
-        int index = timesBetweenStartAndEnd.indexOf(nextBusTime);
-        listView.setSelection(index);
-        builder.setView(listView);
-        Dialog dialog = builder.create();
-        dialog.setCanceledOnTouchOutside(true);
-        dialog.show();
+        if (timesBetweenStartAndEnd != null){
+            // Library provided ListView with headers that (gasp) stick to the top.
+            StickyListHeadersListView listView = new StickyListHeadersListView(this);
+            listView.setDivider(new ColorDrawable(0xffffff));
+            listView.setDividerHeight(1);
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            TimeAdapter adapter = new TimeAdapter(getApplicationContext(), timesBetweenStartAndEnd);
+            listView.setAdapter(adapter);
+            int index = timesBetweenStartAndEnd.indexOf(nextBusTime);
+            listView.setSelection(index);
+            builder.setView(listView);
+            Dialog dialog = builder.create();
+            dialog.setCanceledOnTouchOutside(true);
+            dialog.show();
+        }
     }
 }
