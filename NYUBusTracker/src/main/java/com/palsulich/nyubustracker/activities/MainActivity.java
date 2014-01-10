@@ -480,8 +480,9 @@ public class MainActivity extends Activity{
                 Collections.sort(timesBetweenStartAndEnd, Time.compare);
                 int index = tempTimesBetweenStartAndEnd.indexOf(currentTime);
                 nextBusTime = tempTimesBetweenStartAndEnd.get((index + 1) % tempTimesBetweenStartAndEnd.size());
-                ((TextView) findViewById(R.id.next_bus)).setText(currentTime.getTimeAsStringUntil(nextBusTime));
-                ((TextView) findViewById(R.id.times_button)).setText(nextBusTime.toString());
+                ((TextView) findViewById(R.id.next_time)).setText(currentTime.getTimeAsStringUntil(nextBusTime));
+                ((TextView) findViewById(R.id.next_route)).setText("via Route "+nextBusTime.getRoute());
+//                ((TextView) findViewById(R.id.times_button)).setText(nextBusTime.toString());
                 updateMapWithNewStartOrEnd();
             }
         }
