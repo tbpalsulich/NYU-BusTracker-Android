@@ -37,7 +37,7 @@
         </activity>
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="***REMOVED***"/>
+            android:value="AIzaSyBejvQ79OwSw7j8kpcZtx9NzV6TitRschw"/>
     </application>
 
 </manifest>
