@@ -5,7 +5,7 @@ NYU Bus Tracker
 Mobile and Transloc apps (maps with real time bus locations) with the [massive schedules]
 (http://www.nyu.edu/life/travel-and-transportation/university-transportation.html) of the NYU bus system.
 
-This app relies on the [Transloc API](api.transloc.com) for drawing the routes, getting real time
+This app relies on the [Transloc API](http://www.api.transloc.com) for drawing the routes, getting real time
 bus locations, and getting the list of stops with locations. The bus times were manually parsed (not
 available from the API).
 
