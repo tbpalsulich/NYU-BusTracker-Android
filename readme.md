@@ -18,10 +18,11 @@ Design
 [Route](https://github.com/tpalsulich/NYU-BusTracker-Android/blob/master/NYUBusTracker/src/main/java/com/palsulich/nyubustracker/models/Route.java),
 [Stop](https://github.com/tpalsulich/NYU-BusTracker-Android/blob/master/NYUBusTracker/src/main/java/com/palsulich/nyubustracker/models/Stop.java), and
 [Time](https://github.com/tpalsulich/NYU-BusTracker-Android/blob/master/NYUBusTracker/src/main/java/com/palsulich/nyubustracker/models/Time.java)
-classes. They are all managed by a singleton BusManager. Routes have an in order list of Stops.
-Stops have a list of Routes that service that stop and a list of Times corresponding to that
-particular route. Data accesses from the activities go through BusManager. Tests for connection
-between stops generally go through BusManager, as well.
+classes. They are all managed by a singleton
+[BusManager](https://github.com/tpalsulich/NYU-BusTracker-Android/blob/master/NYUBusTracker/src/main/java/com/palsulich/nyubustracker/helpers/BusManager.java)
+class. Routes have an in order list of Stops. Stops have a list of Routes that service that stop and
+a list of Times corresponding to that particular route. Data accesses from the activities go through
+BusManager. Tests for connection between stops generally go through BusManager, as well.
 
 * Every JSON file (segments, routes, stops, times) is cached when retrieved (except for bus
 locations). But, background network calls should be made after returning the cached data to ensure
