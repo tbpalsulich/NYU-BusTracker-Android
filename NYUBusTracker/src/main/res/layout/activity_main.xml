@@ -1,5 +1,4 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/purple">
@@ -65,16 +64,10 @@
         android:onClick="createTimesDialog"
         style="@style/TimesButton"
         android:layout_height="90dp"
+        android:layout_marginBottom="8dp"
         android:layout_below="@+id/to_divider"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
-
-    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/map"
-        android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        android:layout_below="@+id/times_button"
-        android:name="com.google.android.gms.maps.MapFragment"/>
 
     <TextView
         android:id="@+id/next_bus"
@@ -110,7 +103,15 @@
         android:layout_below="@+id/next_time"
         android:layout_alignLeft="@+id/next_time"
         android:layout_alignStart="@+id/next_time"
+        android:layout_marginBottom="4dp"
         android:textSize="16dp"
         android:textColor="#ffffff" />
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/times_button"
+        android:name="com.google.android.gms.maps.MapFragment"/>
 
 </RelativeLayout>
