@@ -71,7 +71,6 @@
 
     <TextView
         android:id="@+id/next_bus"
-        android:text="Next Bus In:"
         android:layout_below="@+id/to_divider"
         android:layout_alignParentLeft="false"
         android:layout_alignParentStart="true"
