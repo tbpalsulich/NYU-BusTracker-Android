@@ -27,6 +27,7 @@ public final class BusManager {
     private static ArrayList<String> hideRoutes = null;     // Routes to not show the user.
     private static ArrayList<Bus> buses = null;
     private static HashMap<String, PolylineOptions> segments;
+    private static boolean online;
 
     private BusManager(){
         stops = new ArrayList<Stop>();
@@ -34,6 +35,7 @@ public final class BusManager {
         hideRoutes = new ArrayList<String>();
         buses = new ArrayList<Bus>();
         segments = new HashMap<String, PolylineOptions>();
+        online = false;
     }
 
     public static BusManager getBusManager() {
@@ -41,6 +43,13 @@ public final class BusManager {
             sharedBusManager = new BusManager();
         }
         return sharedBusManager;
+    }
+
+    public boolean isOnline(){
+        return online;
+    }
+    public void setOnline(boolean state){
+        online = state;
     }
 
     public static PolylineOptions getSegment(String id){

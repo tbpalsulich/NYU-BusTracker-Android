@@ -80,31 +80,29 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="#ffffff"
-        android:textSize="16dp" />
+        android:textSize="16sp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="5 Minutes"
         android:id="@+id/next_time"
         android:layout_below="@+id/next_bus"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginLeft="4dp"
         android:textColor="#ffffff"
-        android:textSize="35dp" />
+        android:textSize="35sp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="via Route E"
         android:id="@+id/next_route"
         android:layout_below="@+id/next_time"
         android:layout_alignLeft="@+id/next_time"
         android:layout_alignStart="@+id/next_time"
         android:layout_marginBottom="4dp"
-        android:textSize="16dp"
+        android:textSize="16sp"
         android:textColor="#ffffff" />
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
