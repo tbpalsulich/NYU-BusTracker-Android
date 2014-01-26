@@ -10,8 +10,6 @@ import android.widget.TextView;
 import com.palsulich.nyubustracker.R;
 import com.palsulich.nyubustracker.models.Time;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 
 import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
@@ -42,18 +40,18 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
-        ViewHolder routeHolder;
         if (convertView == null){
             viewHolder = new ViewHolder();
-            routeHolder = new ViewHolder();
             convertView = inflater.inflate(R.layout.time_list_item, null);
-            viewHolder.text = (TextView) convertView.findViewById(R.id.time_text);
+            viewHolder.timeText = (TextView) convertView.findViewById(R.id.time_text);
+            viewHolder.viaRouteText = (TextView) convertView.findViewById(R.id.route_text);
             convertView.setTag(viewHolder);
         }
         else{
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        viewHolder.text.setText(times.get(position).toString());
+        if (viewHolder.timeText != null) viewHolder.timeText.setText(times.get(position).toString());
+        if (viewHolder.viaRouteText != null) viewHolder.viaRouteText.setText("Route " + times.get(position).getRoute());
         return convertView;
     }
 
@@ -85,6 +83,7 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
     }
 
     class ViewHolder {
-        TextView text;
+        TextView timeText;
+        TextView viaRouteText;
     }
 }

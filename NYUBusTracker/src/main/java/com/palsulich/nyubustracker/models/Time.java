@@ -135,37 +135,6 @@ public class Time {
         }
         return "";
     }
-/*
-    public String getTimeAsStringUntil(Time t){
-        Time difference = this.getTimeAsTimeUntil(t);
-        Log.v("Time Debugging", "this: " + this.toString() + " | that: " + t.toString());
-        Log.v("Time Debugging", "Difference: " + difference.hour + ":" + difference.min);
-        if (difference != null){
-            if (this.getTimeOfWeek() != t.getTimeOfWeek())
-                return "Bus currently offline.";
-            if (difference.hour >= 3)
-                return "Bus currently offline.";
-            if (difference.hour == 0 && difference.min == 0)
-                return "Next bus is right now!";
-            if (difference.hour == 0 && difference.min == 1)
-                return "Next bus is in " + difference.min + " minute.";
-            if (difference.hour == 0 && difference.min > 1)
-                return "Next bus is in " + difference.min + " minutes.";
-            if (difference.hour > 1 && difference.min == 0)
-                return "Next bus is in " + difference.hour + " hours.";
-            if (difference.hour == 1 && difference.min == 0)
-                return "Next bus is in " + difference.hour + " hour.";
-            if (difference.hour > 0 && difference.min == 1)
-                return "Next bus is in " + difference.hour + " hours and " + difference.min + " minute.";
-            if (difference.hour > 0 && difference.min > 1)
-                return "Next bus is in " + difference.hour + " hours and " + difference.min + " minutes.";
-            if (difference.hour == 1 && difference.min == 1)
-                return "Next bus is in " + difference.hour + " hour and " + difference.min + " minute.";
-            if (difference.hour == 1 && difference.min > 1)
-                return "Next bus is in " + difference.hour + " hour and " + difference.min + " minutes.";
-        }
-        return "";
-    }*/
 
     // isStrictlyBefore(t) returns false if the times are equal or this is after t.
     public boolean isStrictlyBefore(Time t){
@@ -192,7 +161,7 @@ public class Time {
     }
 
     public String toString(){
-        return getHourInNormalTime() + ":" + getMinInNormalTime() + " " + getAMorPM() + " via Route " + route;
+        return getHourInNormalTime() + ":" + getMinInNormalTime() + " " + getAMorPM();
     }
 
     private String getAMorPM(){
