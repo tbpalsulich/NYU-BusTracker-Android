@@ -20,6 +20,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -91,6 +93,11 @@ public class MainActivity extends Activity{
 
         //Log.v("General Debugging", "onCreate!");
         setContentView(R.layout.activity_main);
+
+        int retCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
+        if (retCode != ConnectionResult.SUCCESS){
+            GooglePlayServicesUtil.getErrorDialog(retCode, this, 1).show();
+        }
 
         mFileGrabber = new FileGrabber(getCacheDir());
 

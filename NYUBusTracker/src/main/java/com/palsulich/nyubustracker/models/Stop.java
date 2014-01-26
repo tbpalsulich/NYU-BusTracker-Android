@@ -29,12 +29,7 @@ public class Stop {
 
     public Stop(String mName, String mLat, String mLng, String mID, String[] mRoutes){
         name = cleanName(mName);
-        try {
-            Class.forName("com.google.android.gms.maps.model.LatLng");
-            loc = new LatLng(Double.parseDouble(mLat), Double.parseDouble(mLng));
-        } catch(ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        loc = new LatLng(Double.parseDouble(mLat), Double.parseDouble(mLng));
         id = mID;
         routesString = mRoutes;
         times = new ArrayList<Time>();
