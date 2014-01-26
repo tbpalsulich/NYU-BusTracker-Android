@@ -321,26 +321,34 @@ public class MainActivity extends Activity{
             boolean validBuilder = false;
             for (Route r : routesBetweenStartAndEnd){
                 if (r.isActive()){
-                    //Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
+                    Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
                     for (Stop s : r.getStops()){
-                        if ((!s.isHidden() && !s.isRelatedTo(startStop) && !s.isRelatedTo(endStop)) || (s == startStop || s == endStop)){
-                            // Only put one representative from a family of stops on the p
-                            Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
-                                    .position(s.getLocation())
-                                    .title(s.getName())
-                                    .anchor(0.5f, 0.5f)
-                                    .icon(BitmapDescriptorFactory
-                                            .fromBitmap(
-                                                    BitmapFactory.decodeResource(
-                                                            this.getResources(),
-                                                            R.drawable.ic_map_stop))));
-                            clickableMapMarkers.put(mMarker.getId(), true);
+                        for (Stop f : s.getFamily()){
+                            if ((!f.isHidden() && !f.isRelatedTo(startStop) && !f.isRelatedTo(endStop))
+                              || (f == startStop || f == endStop)){
+                                // Only put one representative from a family of stops on the p
+                                Log.v("MapDebugging", "Not hiding " + f);
+                                Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
+                                        .position(f.getLocation())
+                                        .title(f.getName())
+                                        .anchor(0.5f, 0.5f)
+                                        .icon(BitmapDescriptorFactory
+                                                .fromBitmap(
+                                                        BitmapFactory.decodeResource(
+                                                                this.getResources(),
+                                                                R.drawable.ic_map_stop))));
+                                clickableMapMarkers.put(mMarker.getId(), true);
+                            }
+                            else{
+                                Log.v("MapDebugging", "** Hiding " + f);
+                                Log.v("MapDebugging", "      " + f.isHidden());// && !s.isRelatedTo(startStop) && !s.isRelatedTo(endStop)));
+                            }
                         }
                     }
                     updateMapWithNewBusLocations();
                     // Adds the segments of every Route to the map.
                     for (String id : r.getSegmentIDs()){
-                        Log.v("MapDebugging", "Trying to add a segment to the map: " + id);
+                        //Log.v("MapDebugging", "Trying to add a segment to the map: " + id);
                         PolylineOptions p = sharedManager.getSegment(id);
                         if (p != null){
                             for (LatLng loc : p.getPoints()){
@@ -349,9 +357,9 @@ public class MainActivity extends Activity{
                             }
                             p.color(getResources().getColor(R.color.purple));
                             mMap.addPolyline(p);
-                            Log.v("MapDebugging", "Success!");
+                            //Log.v("MapDebugging", "Success!");
                         }
-                        else Log.v("MapDebugging", "Segment was null for " + r.getID());
+                        //else Log.v("MapDebugging", "Segment was null for " + r.getID());
                     }
                 }
             }

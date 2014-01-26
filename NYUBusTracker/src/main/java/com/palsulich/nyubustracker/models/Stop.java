@@ -100,6 +100,21 @@ public class Stop {
         return s.getName();
     }
 
+    public ArrayList<Stop> getFamily(){
+        ArrayList<Stop> result = new ArrayList<Stop>(childStops);
+        if (parent != null){
+            result.add(parent);
+            if (parent.oppositeStop != null){
+                result.add(parent.oppositeStop);
+            }
+        }
+        if (oppositeStop != null){
+            result.add(oppositeStop);
+        }
+        result.add(this);
+        return result;
+    }
+
     public ArrayList<Stop> getChildStops(){
         return childStops;
     }
