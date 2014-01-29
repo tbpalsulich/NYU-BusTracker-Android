@@ -1,7 +1,5 @@
 package com.palsulich.nyubustracker.helpers;
 
-import android.content.SharedPreferences;
-import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -26,14 +24,36 @@ public final class BusManager {
     private static ArrayList<Route> routes = null;
     private static ArrayList<String> hideRoutes = null;     // Routes to not show the user.
     private static ArrayList<Bus> buses = null;
+    private static ArrayList<String> timesToDownload = null;
+    private static HashMap<String, Integer> timesVersions = null;
     private static HashMap<String, PolylineOptions> segments;
     private static boolean online;
+
+    public static final String TAG_DATA = "data";
+    public static final String TAG_LONG_NAME = "long_name";
+    public static final String TAG_LOCATION = "location";
+    public static final String TAG_LAT = "lat";
+    public static final String TAG_LNG = "lng";
+    public static final String TAG_HEADING = "heading";
+    public static final String TAG_STOP_NAME = "name";
+    public static final String TAG_STOP_ID = "stop_id";
+    public static final String TAG_ROUTES = "routes";
+    public static final String TAG_ROUTE = "route";
+    public static final String TAG_ROUTE_ID = "route_id";
+    public static final String TAG_WEEKDAY = "Weekday";
+    public static final String TAG_FRIDAY = "Friday";
+    public static final String TAG_WEEKEND = "Weekend";
+    public static final String TAG_VEHICLE_ID = "vehicle_id";
+    public static final String TAG_SEGMENTS = "segments";
+    public static final String TAG_STOPS = "stops";
 
     private BusManager(){
         stops = new ArrayList<Stop>();
         routes = new ArrayList<Route>();
         hideRoutes = new ArrayList<String>();
         buses = new ArrayList<Bus>();
+        timesToDownload = new ArrayList<String>();
+        timesVersions = new HashMap<String, Integer>();
         segments = new HashMap<String, PolylineOptions>();
         online = false;
     }
@@ -56,6 +76,10 @@ public final class BusManager {
         return segments.get(id);
     }
 
+    public static ArrayList<String> getTimesToDownload(){
+        return timesToDownload;
+    }
+
     public ArrayList<Stop> getStops() {
         ArrayList<Stop> result = new ArrayList<Stop>(stops);
         for (Stop stop : stops){
@@ -67,8 +91,8 @@ public final class BusManager {
         return result;
     }
 
-    public ArrayList<Route> getRoutes() {
-        return routes;
+    public static HashMap<String, Integer> getTimesVersions(){
+        return timesVersions;
     }
 
     public boolean hasStops() {
@@ -98,7 +122,9 @@ public final class BusManager {
      */
     public Stop getStopByName(String stopName) {
         for (Stop s : stops) {
-            if (s.getName().equals(stopName)) return s;
+            if (s.getName().equals(stopName)) {
+                return s;
+            }
         }
         return null;
     }
@@ -145,53 +171,38 @@ public final class BusManager {
         return null;
     }
 
-    public Route getRouteByName(String name){
-        if (routes != null){
-            for (Route route : routes) {
-                if (route.getLongName().equals(name)){
-                    return route;
-                }
-            }
-        }
-        return null;
-    }
-
-    public static void syncFavoriteStops(SharedPreferences preferences){
-        for (Stop s : stops){
-            s.setFavorite(preferences);
-        }
-    }
-
     /*
     Given a Stop, getConnectedStops returns an array of Strings corresponding to every stop which has
     some route between it and the given stop.
      */
     public ArrayList<Stop> getConnectedStops(Stop stop){
         ArrayList<Stop> result = new ArrayList<Stop>();
-        ArrayList<Route> stopRoutes = stop.getRoutes();
-        for (Route route : stopRoutes) {       // For every route servicing this stop:
-            Log.v("Route Debugging", route.toString() + " services this stop.");
-            for (Stop connectedStop : route.getStops()){    // add all of that route's stops.
-                if (!connectedStop.getUltimateName().equals(stop.getName()) &&
-                        !result.contains(connectedStop) &&
-                        (!connectedStop.isHidden() || !connectedStop.isRelatedTo(stop))){
-                    while (connectedStop.getParent() != null){
-                        connectedStop = connectedStop.getParent();
-                    }
-                    boolean repeatStop = false;
-                    for (Stop resultStop : result){
-                        if (resultStop.getName().equals(connectedStop.getName())){
-                            repeatStop = true;
+        if (stop != null){
+            ArrayList<Route> stopRoutes = stop.getRoutes();
+            for (Route route : stopRoutes) {       // For every route servicing this stop:
+                Log.v("Route Debugging", route.toString() + " services this stop.");
+                for (Stop connectedStop : route.getStops()){    // add all of that route's stops.
+                    if (!connectedStop.getUltimateName().equals(stop.getName()) &&
+                            !result.contains(connectedStop) &&
+                            (!connectedStop.isHidden() || !connectedStop.isRelatedTo(stop))){
+                        while (connectedStop.getParent() != null){
+                            connectedStop = connectedStop.getParent();
                         }
-                    }
-                    if (!repeatStop){
-                        result.add(connectedStop);
-                        //Log.v("Route Debugging","'" + connectedStop.getName() + "' is connected to '" + stop.getName() + "'");
+                        boolean repeatStop = false;
+                        for (Stop resultStop : result){
+                            if (resultStop.getName().equals(connectedStop.getName())){
+                                repeatStop = true;
+                            }
+                        }
+                        if (!repeatStop){
+                            result.add(connectedStop);
+                            //Log.v("Route Debugging","'" + connectedStop.getName() + "' is connected to '" + stop.getName() + "'");
+                        }
                     }
                 }
             }
+            Collections.sort(result, Stop.compare);
         }
-        Collections.sort(result, Stop.compare);
         return result;
     }
 
@@ -270,11 +281,11 @@ public final class BusManager {
     Version also has a list of hideroutes, hidestops, combine, and opposite stops. We also handle
     parsing those here, since we already have the file.
     To parse all of the times, we get the stop name from the version file then make a new request
-    to our FileGrabber to get the times JSON object corresponding to that stop ID.
+    to get the times JSON object corresponding to that stop ID.
     So, the sequence of events is: we're parsing version.json, we find a stop object (specified by an
     ID), we request the JSON of times for that stop, and we parse those times.
      */
-    public static void parseTimes(JSONObject versionJson, FileGrabber mFileGrabber, NetworkInfo networkInfo) throws JSONException {
+    public static void parseVersion(JSONObject versionJson) throws JSONException {
         ArrayList<Stop> stops = sharedBusManager.getStops();
         Log.v("Debugging", "Looking for times for " + stops.size() + " stops.");
         JSONArray jHides = new JSONArray();
@@ -341,48 +352,52 @@ public final class BusManager {
             JSONObject stopObject = jVersion.getJSONObject(j);
             String file = stopObject.getString("file");
             Log.v("Debugging", "Looking for times for " + file);
-            JSONObject timesJson = mFileGrabber.getTimesFromFile(file, networkInfo);
-            JSONObject routes = timesJson.getJSONObject(FileGrabber.TAG_ROUTES);
-            Stop s = sharedBusManager.getStopByID(file.substring(0, file.indexOf(".")));
-            for (int i = 0; i < s.getRoutes().size(); i++) {
-                if (routes.has(s.getRoutes().get(i).getID())) {
-                    JSONObject routeTimes = routes.getJSONObject(s.getRoutes().get(i).getID());
-                    if (routeTimes.has(FileGrabber.TAG_WEEKDAY)) {
-                        JSONArray weekdayTimesJson = routeTimes.getJSONArray(FileGrabber.TAG_WEEKDAY);
-                        Log.v("Debugging", "Found " + weekdayTimesJson.length() + " weekday times.");
-                        if (weekdayTimesJson != null) {
-                            String weekdayRoute = routeTimes.getString(FileGrabber.TAG_ROUTE);
-                            weekdayRoute = weekdayRoute.substring(weekdayRoute.indexOf("Route ") + "Route ".length());
-                            for (int k = 0; k < weekdayTimesJson.length(); k++){
-                                s.addTime(new Time(weekdayTimesJson.getString(k), Time.TimeOfWeek.Weekday, weekdayRoute));
-                            }
+            timesToDownload.add("https://s3.amazonaws.com/nyubustimes/1.0/" + file);
+            timesVersions.put(file.substring(0, file.indexOf(".json")), stopObject.getInt("version"));
+        }
+    }
+
+    public static void parseTime(JSONObject timesJson) throws JSONException{
+        JSONObject routes = timesJson.getJSONObject(BusManager.TAG_ROUTES);
+        String stopID = timesJson.getString("stop_id");
+        Stop s = sharedBusManager.getStopByID(stopID);
+        for (int i = 0; i < s.getRoutes().size(); i++) {
+            if (routes.has(s.getRoutes().get(i).getID())) {
+                JSONObject routeTimes = routes.getJSONObject(s.getRoutes().get(i).getID());
+                if (routeTimes.has(BusManager.TAG_WEEKDAY)) {
+                    JSONArray weekdayTimesJson = routeTimes.getJSONArray(BusManager.TAG_WEEKDAY);
+                    Log.v("Debugging", "Found " + weekdayTimesJson.length() + " weekday times.");
+                    if (weekdayTimesJson != null) {
+                        String weekdayRoute = routeTimes.getString(BusManager.TAG_ROUTE);
+                        weekdayRoute = weekdayRoute.substring(weekdayRoute.indexOf("Route ") + "Route ".length());
+                        for (int k = 0; k < weekdayTimesJson.length(); k++){
+                            s.addTime(new Time(weekdayTimesJson.getString(k), Time.TimeOfWeek.Weekday, weekdayRoute));
                         }
                     }
-                    if (routeTimes.has(FileGrabber.TAG_FRIDAY)) {
-                        JSONArray fridayTimesJson = routeTimes.getJSONArray(FileGrabber.TAG_FRIDAY);
-                        Log.v("Debugging", "Found " + fridayTimesJson.length() + " friday times.");
-                        if (fridayTimesJson != null) {
-                            String fridayRoute = routeTimes.getString(FileGrabber.TAG_ROUTE);
-                            fridayRoute = fridayRoute.substring(fridayRoute.indexOf("Route ") + "Route ".length());
-                            for (int k = 0; k < fridayTimesJson.length(); k++){
-                                s.addTime(new Time(fridayTimesJson.getString(k), Time.TimeOfWeek.Friday, fridayRoute));
-                            }
+                }
+                if (routeTimes.has(BusManager.TAG_FRIDAY)) {
+                    JSONArray fridayTimesJson = routeTimes.getJSONArray(BusManager.TAG_FRIDAY);
+                    Log.v("Debugging", "Found " + fridayTimesJson.length() + " friday times.");
+                    if (fridayTimesJson != null) {
+                        String fridayRoute = routeTimes.getString(BusManager.TAG_ROUTE);
+                        fridayRoute = fridayRoute.substring(fridayRoute.indexOf("Route ") + "Route ".length());
+                        for (int k = 0; k < fridayTimesJson.length(); k++){
+                            s.addTime(new Time(fridayTimesJson.getString(k), Time.TimeOfWeek.Friday, fridayRoute));
                         }
                     }
-                    if (routeTimes.has(FileGrabber.TAG_WEEKEND)) {
-                        JSONArray weekendTimesJson = routeTimes.getJSONArray(FileGrabber.TAG_WEEKEND);
-                        Log.v("Debugging", "Found " + weekendTimesJson.length() + " weekend times.");
-                        if (weekendTimesJson != null) {
-                            String weekendRoute = routeTimes.getString(FileGrabber.TAG_ROUTE);
-                            weekendRoute = weekendRoute.substring(weekendRoute.indexOf("Route ") + "Route ".length());
-                            for (int k = 0; k < weekendTimesJson.length(); k++){
-                                s.addTime(new Time(weekendTimesJson.getString(k), Time.TimeOfWeek.Weekend, weekendRoute));
-                            }
+                }
+                if (routeTimes.has(BusManager.TAG_WEEKEND)) {
+                    JSONArray weekendTimesJson = routeTimes.getJSONArray(BusManager.TAG_WEEKEND);
+                    Log.v("Debugging", "Found " + weekendTimesJson.length() + " weekend times.");
+                    if (weekendTimesJson != null) {
+                        String weekendRoute = routeTimes.getString(BusManager.TAG_ROUTE);
+                        weekendRoute = weekendRoute.substring(weekendRoute.indexOf("Route ") + "Route ".length());
+                        for (int k = 0; k < weekendTimesJson.length(); k++){
+                            s.addTime(new Time(weekendTimesJson.getString(k), Time.TimeOfWeek.Weekend, weekendRoute));
                         }
                     }
                 }
             }
-
         }
     }
 
@@ -396,7 +411,7 @@ public final class BusManager {
             String key = keys.next();
             String line = jSegments.getString(key);
             Log.v("MapDebugging", "Key: " + key);
-            sharedManager.segments.put(key, new PolylineOptions().addAll(PolyUtil.decode(line)));
+            segments.put(key, new PolylineOptions().addAll(PolyUtil.decode(line)));
             Log.v("MapDebugging", "*Adding segment: " + key + " | " + line);
         }
     }

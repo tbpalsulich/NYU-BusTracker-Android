@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.palsulich.nyubustracker.helpers.BusManager;
-import com.palsulich.nyubustracker.helpers.FileGrabber;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -254,16 +253,16 @@ public class Stop {
     public static void parseJSON(JSONObject stopsJson) throws JSONException{
         JSONArray jStops = new JSONArray();
         BusManager sharedManager = BusManager.getBusManager();
-        if (stopsJson != null) jStops = stopsJson.getJSONArray(FileGrabber.TAG_DATA);
+        if (stopsJson != null) jStops = stopsJson.getJSONArray(BusManager.TAG_DATA);
         Log.v("JSONDebug", "Number of stops: " + jStops.length());
         for (int i = 0; i < jStops.length(); i++) {
             JSONObject stopObject = jStops.getJSONObject(i);
-            String stopID = stopObject.getString(FileGrabber.TAG_STOP_ID);
-            String stopName = stopObject.getString(FileGrabber.TAG_STOP_NAME);
-            JSONObject location = stopObject.getJSONObject(FileGrabber.TAG_LOCATION);
-            String stopLat = location.getString(FileGrabber.TAG_LAT);
-            String stopLng = location.getString(FileGrabber.TAG_LNG);
-            JSONArray stopRoutes = stopObject.getJSONArray(FileGrabber.TAG_ROUTES);
+            String stopID = stopObject.getString(BusManager.TAG_STOP_ID);
+            String stopName = stopObject.getString(BusManager.TAG_STOP_NAME);
+            JSONObject location = stopObject.getJSONObject(BusManager.TAG_LOCATION);
+            String stopLat = location.getString(BusManager.TAG_LAT);
+            String stopLng = location.getString(BusManager.TAG_LNG);
+            JSONArray stopRoutes = stopObject.getJSONArray(BusManager.TAG_ROUTES);
             String[] routes = new String[stopRoutes.length()];
             String routesString = "";
             for (int j = 0; j < stopRoutes.length(); j++) {

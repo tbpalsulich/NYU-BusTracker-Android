@@ -3,13 +3,16 @@ package com.palsulich.nyubustracker.activities;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -35,14 +38,24 @@ import com.palsulich.nyubustracker.R;
 import com.palsulich.nyubustracker.adapters.StopAdapter;
 import com.palsulich.nyubustracker.adapters.TimeAdapter;
 import com.palsulich.nyubustracker.helpers.BusManager;
-import com.palsulich.nyubustracker.helpers.FileGrabber;
 import com.palsulich.nyubustracker.models.Bus;
 import com.palsulich.nyubustracker.models.Route;
 import com.palsulich.nyubustracker.models.Stop;
 import com.palsulich.nyubustracker.models.Time;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -52,7 +65,7 @@ import java.util.TimerTask;
 
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
-public class MainActivity extends Activity{
+public class MainActivity extends Activity {
     Stop startStop;     // Stop object to keep track of the start location of the desired route.
     Stop endStop;       // Keep track of the desired end location.
     ArrayList<Route> routesBetweenStartAndEnd;        // List of all routes between start and end.
@@ -60,10 +73,145 @@ public class MainActivity extends Activity{
     HashMap<String, Boolean> clickableMapMarkers;   // Hash of all markers which are clickable (so we don't zoom in on buses).
     ArrayList<Marker> busesOnMap = new ArrayList<Marker>();
 
-    Time nextBusTime;
+    private static final String query = makeQuery("agencies", "72", "UTF-8");
+    private static final String stopsURL = "http://api.transloc.com/1.2/stops.json?" + query;
+    private static final String routesURL = "http://api.transloc.com/1.2/routes.json?" + query;
+    private static final String segmentsURL = "http://api.transloc.com/1.2/segments.json?" + query;
+    private static final String vehiclesURL = "http://api.transloc.com/1.2/vehicles.json?" + query;
+    private static final String versionURL = "https://s3.amazonaws.com/nyubustimes/1.0/version.json";
+    private static final String RUN_ONCE_PREF = "runOnce";
+    private static final String STOP_PREF = "stops";
+    private static final String START_STOP_PREF = "startStop";
+    private static final String END_STOP_PREF = "endStop";
+    private static final String TIME_VERSION_PREF = "stopVersions";
+    private static final String FIRST_TIME = "firstTime";
+    private static final String STOP_JSON_FILE = "stopJson";
+    private static final String ROUTE_JSON_FILE = "routeJson";
+    private static final String SEGMENT_JSON_FILE = "segmentJson";
+    private static final String VERSION_JSON_FILE = "versionJson";
 
-    // mFileGrabber helps to manage cached files/pull new files from the network.
-    FileGrabber mFileGrabber;
+    private static String makeQuery(String param, String value, String charset) {
+        try {
+            return String.format(param + "=" + URLEncoder.encode(value, charset));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    private Downloader stopDownloader = new Downloader(new DownloaderHelper() {
+        @Override
+        public void parse(JSONObject jsonObject) {
+            try {
+                Stop.parseJSON(jsonObject);
+                FileOutputStream fos = openFileOutput(STOP_JSON_FILE, MODE_PRIVATE);
+                fos.write(jsonObject.toString().getBytes());
+                fos.close();
+            } catch (JSONException e) {
+                Log.e("JSON", "Error parsing Stop JSON.");
+                e.printStackTrace();
+            } catch (IOException e) {
+                Log.e("JSON", "Error with Stop JSON IO.");
+                e.printStackTrace();
+            }
+        }
+    });
+
+    private Downloader routeDownloader = new Downloader(new DownloaderHelper() {
+        @Override
+        public void parse(JSONObject jsonObject) {
+            try {
+                Route.parseJSON(jsonObject);
+                FileOutputStream fos = openFileOutput(ROUTE_JSON_FILE, MODE_PRIVATE);
+                fos.write(jsonObject.toString().getBytes());
+                fos.close();
+            } catch (JSONException e) {
+                Log.e("JSON", "Error parsing Route JSON.");
+                e.printStackTrace();
+            } catch (IOException e) {
+                Log.e("JSON", "Error with Route JSON IO.");
+                e.printStackTrace();
+            }
+        }
+    });
+
+    private Downloader segmentDownloader = new Downloader(new DownloaderHelper() {
+        @Override
+        public void parse(JSONObject jsonObject) {
+            try {
+                BusManager.parseSegments(jsonObject);
+                FileOutputStream fos = openFileOutput(SEGMENT_JSON_FILE, MODE_PRIVATE);
+                fos.write(jsonObject.toString().getBytes());
+                fos.close();
+            } catch (JSONException e) {
+                Log.e("JSON", "Error parsing Segment JSON.");
+                e.printStackTrace();
+            } catch (IOException e) {
+                Log.e("JSON", "Error with Segment JSON IO.");
+                e.printStackTrace();
+            }
+        }
+    });
+
+    private Downloader versionDownloader = new Downloader(new DownloaderHelper() {
+        @Override
+        public void parse(JSONObject jsonObject) {
+            try {
+                BusManager.parseVersion(jsonObject);
+                for (String timeURL : BusManager.getTimesToDownload()){
+                    SharedPreferences preferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
+                    String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
+                    int newestStopTimeVersion = BusManager.getTimesVersions().get(stopID);
+                    if (preferences.getInt(stopID, 0) != newestStopTimeVersion){
+                        new Downloader(timeDownloaderHelper).execute(timeURL);
+                        preferences.edit().putInt(stopID, newestStopTimeVersion);
+                    }
+                }
+                FileOutputStream fos = openFileOutput(VERSION_JSON_FILE, MODE_PRIVATE);
+                fos.write(jsonObject.toString().getBytes());
+                fos.close();
+            } catch (JSONException e) {
+                Log.e("JSON", "Error parsing Version JSON.");
+                e.printStackTrace();
+            } catch (IOException e) {
+                Log.e("JSON", "Error with Version JSON IO.");
+                e.printStackTrace();
+            }
+        }
+    });
+
+    private DownloaderHelper busDownloaderHelper = new DownloaderHelper() {
+        @Override
+        public void parse(JSONObject jsonObject) {
+            try {
+                Bus.parseJSON(jsonObject);
+                updateMapWithNewBusLocations();
+            } catch (JSONException e) {
+                Log.e("JSON", "Error parsing Vehicle JSON.");
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private DownloaderHelper timeDownloaderHelper = new DownloaderHelper() {
+        @Override
+        public void parse(JSONObject jsonObject) {
+            try {
+                BusManager.parseTime(jsonObject);
+                FileOutputStream fos = openFileOutput(jsonObject.getString("stop_id"), MODE_PRIVATE);
+                fos.write(jsonObject.toString().getBytes());
+                fos.close();
+            } catch (JSONException e) {
+                Log.e("JSON", "Error parsing Time JSON.");
+                e.printStackTrace();
+            } catch (IOException e) {
+                Log.e("JSON", "Error with Time JSON IO.");
+                e.printStackTrace();
+            }
+        }
+    };
+
+    Time nextBusTime;
 
     Timer timeUntilTimer;  // Timer used to refresh the "time until next bus" every minute, on the minute.
     Timer busRefreshTimer; // Timer used to refresh the bus locations every few seconds.
@@ -82,9 +230,28 @@ public class MainActivity extends Activity{
                 mMap.getUiSettings().setRotateGesturesEnabled(false);
                 mMap.getUiSettings().setZoomControlsEnabled(false);
                 haveAMap = true;
-            }
-            else haveAMap = false;
+            } else haveAMap = false;
         }
+    }
+
+    public String readSavedData (String fileName) {
+        StringBuilder buffer = new StringBuilder("");
+        try {
+            FileInputStream inputStream = openFileInput(fileName);
+            InputStreamReader streamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(streamReader);
+
+            String readString = bufferedReader.readLine();
+            while (readString != null) {
+                buffer.append(readString);
+                readString = bufferedReader.readLine();
+            }
+
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return buffer.toString() ;
     }
 
     @Override
@@ -94,12 +261,12 @@ public class MainActivity extends Activity{
         //Log.v("General Debugging", "onCreate!");
         setContentView(R.layout.activity_main);
 
+        final ProgressDialog progressDialog;
+
         int retCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
-        if (retCode != ConnectionResult.SUCCESS){
+        if (retCode != ConnectionResult.SUCCESS) {
             GooglePlayServicesUtil.getErrorDialog(retCode, this, 1).show();
         }
-
-        mFileGrabber = new FileGrabber(getCacheDir());
 
         renewTimeUntilTimer();       // Creates and starts the timer to refresh time until next bus.
 
@@ -112,52 +279,93 @@ public class MainActivity extends Activity{
             }
         });
 
-        // List just for development use to display all
-        //final ListView listView = (ListView) findViewById(R.id.mainActivityList);
-
         // Singleton BusManager to keep track of all stops, routes, etc.
         final BusManager sharedManager = BusManager.getBusManager();
 
-        // Only parse stops, routes, buses, times, and segments if we don't have them. Could be more robust.
-        if (!sharedManager.hasStops() && !sharedManager.hasRoutes()) {
-            try {
-                // The Class being created from the parsing *does* the parsing.
-                // mFileGrabber.get*JSON() returns a JSONObject.
-                ConnectivityManager connMgr = (ConnectivityManager)
-                        getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-                Stop.parseJSON(mFileGrabber.getStopJSON(networkInfo));
-                Route.parseJSON(mFileGrabber.getRouteJSON(networkInfo));
-                BusManager.parseTimes(mFileGrabber.getVersionJSON(networkInfo), mFileGrabber, networkInfo); // Must be after routes are parsed!
-                // Ensure we start the app with predefined favorite stops.
-                BusManager.syncFavoriteStops(getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE));
-                if (haveAMap) Bus.parseJSON(mFileGrabber.getVehicleJSON(networkInfo));
-                if (haveAMap) BusManager.parseSegments(mFileGrabber.getSegmentsJSON(networkInfo));
-                if (networkInfo == null || !networkInfo.isConnected()){
-                    Context context = getApplicationContext();
-                    CharSequence text = "Unable to connect to the network.";
-                    int duration = Toast.LENGTH_SHORT;
+        SharedPreferences preferences = getSharedPreferences(RUN_ONCE_PREF, MODE_PRIVATE);
+        if (preferences.getBoolean(FIRST_TIME, true)) {
+            preferences.edit().putBoolean(FIRST_TIME, false).commit();
+            ConnectivityManager connMgr = (ConnectivityManager)
+                    getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+            if (networkInfo != null && networkInfo.isConnected()) {
+                // Download and parse everything, put it all in persistent memory, continue.
+                progressDialog = ProgressDialog.show(this, "Downloading Data", "Please wait...", true, false);
 
-                    if (context != null){
-                        Toast toast = Toast.makeText(context, text, duration);
-                        toast.show();
+                stopDownloader.execute(stopsURL);
+                routeDownloader.execute(routesURL);
+                segmentDownloader.execute(segmentsURL);
+                versionDownloader.execute(versionURL);
+
+                new Timer().scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        if (stopDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+                            routeDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+                            segmentDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+                            versionDownloader.getStatus() == AsyncTask.Status.FINISHED){
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Stop broadway = sharedManager.getStopByName("715 Broadway @ Washington Square");
+                                    Stop lafayette = sharedManager.getStopByName("80 Lafayette St");
+                                    getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE)
+                                            .edit()
+                                            .putBoolean(broadway.getID(), true).commit();
+                                    setStartStop(broadway);
+                                    setEndStop(lafayette);
+                                    broadway.setFavorite(true);
+                                    Log.v("Refactor", "End: " + endStop.getName());
+                                    // Update the map to show the corresponding stops, buses, and segments.
+                                    if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
+                                    renewBusRefreshTimer();
+                                    renewTimeUntilTimer();
+                                    progressDialog.dismiss();
+                                }
+
+                            });
+                            this.cancel();
+                        }
                     }
+                }, 0L, 500L);
+            } else {
+                Context context = getApplicationContext();
+                CharSequence text = "Unable to connect to the network.";
+                int duration = Toast.LENGTH_SHORT;
+
+                if (context != null){
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
+        } else {
+            if (!sharedManager.hasRoutes() || !sharedManager.hasStops()){
+                Log.v("Refactor", "Parsing cached files...");
+                try{
+                    Stop.parseJSON(new JSONObject(readSavedData(STOP_JSON_FILE)));
+                    Route.parseJSON(new JSONObject(readSavedData(ROUTE_JSON_FILE)));
+                    BusManager.parseSegments(new JSONObject(readSavedData(SEGMENT_JSON_FILE)));
+                    BusManager.parseVersion(new JSONObject(readSavedData(VERSION_JSON_FILE)));
+                    for (String timeURL : BusManager.getTimesToDownload()){
+                        // Check version in preferences
+                        // URL is http://something.amazon.com/stuff/stuff/{stop id}.json
+                        String timeFileName = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
+                        BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
+                    }
+                } catch (JSONException e){
+                    Log.e("JSON", "Error with JSON parsing cached file.");
+                }
+            }
+            setStartStop(sharedManager.getStopByName(preferences.getString(START_STOP_PREF, "715 Broadway @ Washington Square")));
+            setEndStop(sharedManager.getStopByName(preferences.getString(END_STOP_PREF, "80 Lafayette St")));
+
+            // Update the map to show the corresponding stops, buses, and segments.
+            if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
+
+            // Get the location of the buses every 10 sec.
+            renewBusRefreshTimer();
+            renewTimeUntilTimer();
         }
-
-        // Initialize start and end stops. By default, they are Lafayette and Broadway.
-        setStartStop(sharedManager.getStopByName(mFileGrabber.getStartStopFile()));
-        setEndStop(sharedManager.getStopByName(mFileGrabber.getEndStopFile()));
-        Log.v("Cleaning", "End:" + sharedManager.getStopByName(mFileGrabber.getEndStopFile()));
-
-        // Update the map to show the corresponding stops, buses, and segments.
-        if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
-
-        // Get the location of the buses every 10 sec.
-        renewBusRefreshTimer();
     }
 
     /*
@@ -175,15 +383,15 @@ public class MainActivity extends Activity{
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if(startStop != null && endStop != null) setNextBusTime();
+                        if (startStop != null && endStop != null) setNextBusTime();
                     }
                 });
             }
         }, (60 - rightNow.get(Calendar.SECOND)) * 1000, 60000);
     }
 
-    private void renewBusRefreshTimer(){
-        if(haveAMap){
+    private void renewBusRefreshTimer() {
+        if (haveAMap) {
             if (busRefreshTimer != null) busRefreshTimer.cancel();
 
             busRefreshTimer = new Timer();
@@ -193,33 +401,26 @@ public class MainActivity extends Activity{
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            try{
-                                if (routesBetweenStartAndEnd != null){
-                                    ConnectivityManager connMgr = (ConnectivityManager)
-                                            getSystemService(Context.CONNECTIVITY_SERVICE);
-                                    NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-                                    if (networkInfo == null || !networkInfo.isConnected()){
-                                        Context context = getApplicationContext();
-                                        CharSequence text = "Unable to connect to the network.";
-                                        int duration = Toast.LENGTH_SHORT;
+                            ConnectivityManager connMgr = (ConnectivityManager)
+                                    getSystemService(Context.CONNECTIVITY_SERVICE);
+                            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+                            if (networkInfo != null && networkInfo.isConnected()) {
+                                new Downloader(busDownloaderHelper).execute(vehiclesURL);
+                            }
+                            else{
+                                Context context = getApplicationContext();
+                                CharSequence text = "Unable to connect to the network.";
+                                int duration = Toast.LENGTH_SHORT;
 
-                                        if (context != null){
-                                            Toast toast = Toast.makeText(context, text, duration);
-                                            toast.show();
-                                        }
-                                    }
-                                    else{
-                                        Bus.parseJSON(mFileGrabber.getVehicleJSON(networkInfo));
-                                        updateMapWithNewBusLocations();
-                                    }
+                                if (context != null){
+                                    Toast toast = Toast.makeText(context, text, duration);
+                                    toast.show();
                                 }
-                            } catch (JSONException e){
-                                e.printStackTrace();
                             }
                         }
                     });
                 }
-            }, 0, 10000);
+            }, 0, 1500L);
         }
     }
 
@@ -245,7 +446,7 @@ public class MainActivity extends Activity{
     public void onResume() {
         super.onResume();
         //Log.v("General Debugging", "onResume!");
-        if (endStop != null && startStop != null){
+        if (endStop != null && startStop != null) {
             setNextBusTime();
             renewTimeUntilTimer();
             renewBusRefreshTimer();
@@ -254,9 +455,10 @@ public class MainActivity extends Activity{
     }
 
     public void cacheToAndStartStop() {
-        FileGrabber mFileGrabber = new FileGrabber(getCacheDir());
-        if (endStop != null) mFileGrabber.setEndStop(endStop.getName());         // Creates or updates cache file.
-        if (startStop != null) mFileGrabber.setStartStop(startStop.getName());
+        if (endStop != null)
+            getSharedPreferences(STOP_PREF, MODE_PRIVATE).edit().putString(END_STOP_PREF, endStop.getName()).commit();         // Creates or updates cache file.
+        if (startStop != null)
+            getSharedPreferences(STOP_PREF, MODE_PRIVATE).edit().putString(START_STOP_PREF, startStop.getName()).commit();
 
     }
 
@@ -267,8 +469,7 @@ public class MainActivity extends Activity{
         return true;
     }
 
-    public static Bitmap rotateBitmap(Bitmap source, float angle)
-    {
+    public static Bitmap rotateBitmap(Bitmap source, float angle) {
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
@@ -276,19 +477,20 @@ public class MainActivity extends Activity{
 
 
     // Clear the map of all buses and put them all back on in their new locations.
-    private void updateMapWithNewBusLocations(){
-        if (haveAMap){
+    private void updateMapWithNewBusLocations() {
+        if (haveAMap && routesBetweenStartAndEnd != null) {
             BusManager sharedManager = BusManager.getBusManager();
-            for (Marker m : busesOnMap){
+            for (Marker m : busesOnMap) {
                 m.remove();
             }
             busesOnMap = new ArrayList<Marker>();
-            if (clickableMapMarkers == null) clickableMapMarkers = new HashMap<String, Boolean>();  // New set of buses means new set of clickable markers!
-            for (Route r : routesBetweenStartAndEnd){
-                if (r.isActive()){
-                    for (Bus b : sharedManager.getBuses()){
+            if (clickableMapMarkers == null)
+                clickableMapMarkers = new HashMap<String, Boolean>();  // New set of buses means new set of clickable markers!
+            for (Route r : routesBetweenStartAndEnd) {
+                if (r.isActive()) {
+                    for (Bus b : sharedManager.getBuses()) {
                         //Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
-                        if (b.getRoute().equals(r.getID())){
+                        if (b.getRoute().equals(r.getID())) {
                             Marker mMarker = mMap.addMarker(new MarkerOptions()
                                     .position(b.getLocation())
                                     .icon(BitmapDescriptorFactory
@@ -311,21 +513,21 @@ public class MainActivity extends Activity{
 
 
     // Clear the map, because we may have just changed what route we wish to display. Then, add everything back onto the map.
-    private void updateMapWithNewStartOrEnd(){
-        if (haveAMap){
+    private void updateMapWithNewStartOrEnd() {
+        if (haveAMap) {
             BusManager sharedManager = BusManager.getBusManager();
             setUpMapIfNeeded();
             mMap.clear();
             clickableMapMarkers = new HashMap<String, Boolean>();
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             boolean validBuilder = false;
-            for (Route r : routesBetweenStartAndEnd){
-                if (r.isActive()){
+            for (Route r : routesBetweenStartAndEnd) {
+                if (r.isActive()) {
                     Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
-                    for (Stop s : r.getStops()){
-                        for (Stop f : s.getFamily()){
+                    for (Stop s : r.getStops()) {
+                        for (Stop f : s.getFamily()) {
                             if ((!f.isHidden() && !f.isRelatedTo(startStop) && !f.isRelatedTo(endStop))
-                              || (f == startStop || f == endStop)){
+                                    || (f == startStop || f == endStop)) {
                                 // Only put one representative from a family of stops on the p
                                 Log.v("MapDebugging", "Not hiding " + f);
                                 Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
@@ -338,8 +540,7 @@ public class MainActivity extends Activity{
                                                                 this.getResources(),
                                                                 R.drawable.ic_map_stop))));
                                 clickableMapMarkers.put(mMarker.getId(), true);
-                            }
-                            else{
+                            } else {
                                 Log.v("MapDebugging", "** Hiding " + f);
                                 Log.v("MapDebugging", "      " + f.isHidden());// && !s.isRelatedTo(startStop) && !s.isRelatedTo(endStop)));
                             }
@@ -347,11 +548,11 @@ public class MainActivity extends Activity{
                     }
                     updateMapWithNewBusLocations();
                     // Adds the segments of every Route to the map.
-                    for (String id : r.getSegmentIDs()){
+                    for (String id : r.getSegmentIDs()) {
                         //Log.v("MapDebugging", "Trying to add a segment to the map: " + id);
-                        PolylineOptions p = sharedManager.getSegment(id);
-                        if (p != null){
-                            for (LatLng loc : p.getPoints()){
+                        PolylineOptions p = BusManager.getSegment(id);
+                        if (p != null) {
+                            for (LatLng loc : p.getPoints()) {
                                 validBuilder = true;
                                 builder.include(loc);
                             }
@@ -363,11 +564,11 @@ public class MainActivity extends Activity{
                     }
                 }
             }
-            if (validBuilder){
+            if (validBuilder) {
                 LatLngBounds bounds = builder.build();
-                try{
+                try {
                     mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 30));
-                } catch(IllegalStateException e) {      // In case the view is not done being created.
+                } catch (IllegalStateException e) {      // In case the view is not done being created.
                     e.printStackTrace();
                     mMap.moveCamera(
                             CameraUpdateFactory
@@ -386,14 +587,14 @@ public class MainActivity extends Activity{
             // Check there is a route between these stops.
             ArrayList<Route> routes = new ArrayList<Route>();               // All the routes connecting the two.
             for (Route r : startStop.getRoutes()) {
-                if (r.hasStop(stop.getName()) && stop.getTimesOfRoute(r.getLongName()).size() > 0) {
+                if (r.hasStop(stop.getName())) {
                     routes.add(r);
                 }
             }
             if (routes.size() > 0) {
                 endStop = stop;
                 ((Button) findViewById(R.id.to_button)).setText(stop.getUltimateName());
-                if (startStop != null){
+                if (startStop != null) {
                     setNextBusTime();    // Don't set the next bus if we don't have a valid route.
                     if (routesBetweenStartAndEnd != null && haveAMap) updateMapWithNewStartOrEnd();
                 }
@@ -402,7 +603,7 @@ public class MainActivity extends Activity{
     }
 
     private void setStartStop(Stop stop) {
-        if (stop != null){
+        if (stop != null) {
             if (endStop == stop) {    // We have an end stop and its name is the same as stopName.
                 // Swap the start and end stops.
                 Stop temp = startStop;
@@ -412,14 +613,13 @@ public class MainActivity extends Activity{
                 ((Button) findViewById(R.id.to_button)).setText(endStop.getUltimateName());
                 setNextBusTime();
                 updateMapWithNewStartOrEnd();
-            }
-            else { // We have a new start. So, we must ensure the end is actually connected. If not, pick a random connected stop.
+            } else { // We have a new start. So, we must ensure the end is actually connected. If not, pick a random connected stop.
                 startStop = stop;
                 ((Button) findViewById(R.id.from_button)).setText(stop.getUltimateName());
-                if (endStop != null){
+                if (endStop != null) {
                     // Loop through all connected Routes.
-                    for (Route r : startStop.getRoutes()){
-                        if (r.hasStop(endStop.getName()) && endStop.getTimesOfRoute(r.getLongName()).size() > 0){  // If the current endStop is connected, we don't have to change endStop.
+                    for (Route r : startStop.getRoutes()) {
+                        if (r.hasStop(endStop.getName()) && endStop.getTimesOfRoute(r.getLongName()).size() > 0) {  // If the current endStop is connected, we don't have to change endStop.
                             setNextBusTime();
                             updateMapWithNewStartOrEnd();
                             return;
@@ -445,32 +645,33 @@ public class MainActivity extends Activity{
         Set the view values.
          */
 
-        if (timeUntilTimer != null) timeUntilTimer.cancel();        // Don't want to be interrupted in the middle of this.
+        if (timeUntilTimer != null)
+            timeUntilTimer.cancel();        // Don't want to be interrupted in the middle of this.
         if (busRefreshTimer != null) busRefreshTimer.cancel();
         Calendar rightNow = Calendar.getInstance();
         ArrayList<Route> startRoutes = startStop.getUltimateParent().getRoutes();        // All the routes leaving the start stop.
         ArrayList<Route> endRoutes = endStop.getUltimateParent().getRoutes();
         ArrayList<Route> availableRoutes = new ArrayList<Route>();               // All the routes connecting the two.
         for (Route r : startRoutes) {
-            if (endRoutes.contains(r)){
+            if (endRoutes.contains(r)) {
                 availableRoutes.add(r);
             }
         }
         int bestDistance = BusManager.distanceBetween(startStop, endStop);
 
         int testDistance = BusManager.distanceBetween(startStop.getOppositeStop(), endStop.getOppositeStop());
-        if (testDistance < bestDistance){
+        if (testDistance < bestDistance) {
             startStop = startStop.getOppositeStop();
             endStop = endStop.getOppositeStop();
         }
 
         testDistance = BusManager.distanceBetween(startStop, endStop.getOppositeStop());
-        if (testDistance < bestDistance){
+        if (testDistance < bestDistance) {
             endStop = endStop.getOppositeStop();
         }
 
         testDistance = BusManager.distanceBetween(startStop.getOppositeStop(), endStop);
-        if (testDistance < bestDistance){
+        if (testDistance < bestDistance) {
             startStop = startStop.getOppositeStop();
         }
 
@@ -479,11 +680,11 @@ public class MainActivity extends Activity{
             for (Route r : availableRoutes) {
                 // Get the Times at this stop for this route.
                 ArrayList<Time> times = startStop.getTimesOfRoute(r.getLongName());
-                if (times.size() > 0){
+                if (times.size() > 0) {
                     tempTimesBetweenStartAndEnd.addAll(times);
                 }
             }
-            if (tempTimesBetweenStartAndEnd.size() > 0){    // We actually found times.
+            if (tempTimesBetweenStartAndEnd.size() > 0) {    // We actually found times.
                 // Here, we grab the list of all times of all routes between the start and end, add in the current
                 // time, then sort that list of times. That way, we know the first bus Time after the current time
                 // is the Time of the soonest next Bus.
@@ -496,11 +697,10 @@ public class MainActivity extends Activity{
                 int index = tempTimesBetweenStartAndEnd.indexOf(currentTime);
                 nextBusTime = tempTimesBetweenStartAndEnd.get((index + 1) % tempTimesBetweenStartAndEnd.size());
                 ((TextView) findViewById(R.id.next_time)).setText(currentTime.getTimeAsStringUntil(nextBusTime));
-                if (BusManager.getBusManager().isOnline()){
-                    ((TextView) findViewById(R.id.next_route)).setText("via Route "+nextBusTime.getRoute());
+                if (BusManager.getBusManager().isOnline()) {
+                    ((TextView) findViewById(R.id.next_route)).setText("via Route " + nextBusTime.getRoute());
                     ((TextView) findViewById(R.id.next_bus)).setText("Next Bus In:");
-                }
-                else{
+                } else {
                     ((TextView) findViewById(R.id.next_route)).setText("");
                     ((TextView) findViewById(R.id.next_bus)).setText("");
                 }
@@ -513,8 +713,7 @@ public class MainActivity extends Activity{
 
     CompoundButton.OnCheckedChangeListener cbListener = new CompoundButton.OnCheckedChangeListener() {
         @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-        {
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             Stop s = (Stop) buttonView.getTag();
             s.setFavorite(isChecked);
             getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE)
@@ -570,7 +769,7 @@ public class MainActivity extends Activity{
     }
 
     public void createTimesDialog(View view) {
-        if (timesBetweenStartAndEnd != null){
+        if (timesBetweenStartAndEnd != null) {
             // Library provided ListView with headers that (gasp) stick to the top.
             StickyListHeadersListView listView = new StickyListHeadersListView(this);
             listView.setDivider(new ColorDrawable(0xffffff));
@@ -585,5 +784,79 @@ public class MainActivity extends Activity{
             dialog.setCanceledOnTouchOutside(true);
             dialog.show();
         }
+    }
+
+    private class Downloader extends AsyncTask<String, Integer, JSONObject> {
+        DownloaderHelper helper;
+
+        public Downloader(DownloaderHelper helper) {
+            this.helper = helper;
+        }
+
+        @Override
+        public JSONObject doInBackground(String... urls) {
+            try {
+                return new JSONObject(downloadUrl(urls[0]));
+            } catch (IOException e) {
+                Log.e("JSON", "DownloadURL IO error.");
+                e.printStackTrace();
+            } catch (JSONException e) {
+                Log.e("JSON", "DownloadURL JSON error.");
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject result) {
+            helper.parse(result);
+        }
+    }
+
+    public abstract class DownloaderHelper {
+        public abstract void parse(JSONObject jsonObject);
+    }
+
+    // Given a URL, establishes an HttpUrlConnection and retrieves
+// the web page content as a InputStream, which it returns as
+// a string.
+    public static String downloadUrl(String myUrl) throws IOException {
+        InputStream is = null;
+
+        try {
+            URL url = new URL(myUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(10000 /* milliseconds */);
+            conn.setConnectTimeout(15000 /* milliseconds */);
+            conn.setRequestMethod("GET");
+            conn.setDoInput(true);
+            // Starts the query
+            conn.connect();
+            int response = conn.getResponseCode();
+            //Log.d("JSON", "The response is: " + response);
+            is = conn.getInputStream();
+
+            // Convert the InputStream into a string
+            return readIt(is);
+
+            // Makes sure that the InputStream is closed after the app is
+            // finished using it.
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
+    }
+
+    // Reads an InputStream and converts it to a String.
+    public static String readIt(InputStream stream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(
+                stream, "iso-8859-1"), 128);
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line);
+        }
+        return sb.toString();
     }
 }

@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.palsulich.nyubustracker.helpers.BusManager;
-import com.palsulich.nyubustracker.helpers.FileGrabber;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -97,17 +96,17 @@ public class Route {
     public static void parseJSON(JSONObject routesJson) throws JSONException{
         JSONArray jRoutes = new JSONArray();
         BusManager sharedManager = BusManager.getBusManager();
-        if (routesJson != null) jRoutes = routesJson.getJSONObject(FileGrabber.TAG_DATA).getJSONArray("72");
+        if (routesJson != null) jRoutes = routesJson.getJSONObject(BusManager.TAG_DATA).getJSONArray("72");
         for (int j = 0; j < jRoutes.length(); j++) {
             JSONObject routeObject = jRoutes.getJSONObject(j);
-            String routeLongName = routeObject.getString(FileGrabber.TAG_LONG_NAME);
-            String routeID = routeObject.getString(FileGrabber.TAG_ROUTE_ID);
+            String routeLongName = routeObject.getString(BusManager.TAG_LONG_NAME);
+            String routeID = routeObject.getString(BusManager.TAG_ROUTE_ID);
             Route r = sharedManager.getRoute(routeLongName, routeID);
-            JSONArray stops = routeObject.getJSONArray(FileGrabber.TAG_STOPS);
+            JSONArray stops = routeObject.getJSONArray(BusManager.TAG_STOPS);
             for (int i = 0; i < stops.length(); i++){
                 r.addStop(i, sharedManager.getStopByID(stops.getString(i)));
             }
-            JSONArray segments = routeObject.getJSONArray(FileGrabber.TAG_SEGMENTS);
+            JSONArray segments = routeObject.getJSONArray(BusManager.TAG_SEGMENTS);
             Log.v("MapDebugging", "Found " + segments.length() + " segments for route " + routeID);
             for (int i = 0; i < segments.length(); i++){
                 Log.v("MapDebugging", "parseJSON of Route adding segment ID " + segments.getJSONArray(i).getString(0) + " for " + routeID + "(" + r.getSegmentIDs().size() + " total)");
