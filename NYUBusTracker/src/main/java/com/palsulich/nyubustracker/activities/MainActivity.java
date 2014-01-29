@@ -23,6 +23,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.analytics.tracking.android.EasyTracker;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -347,11 +348,10 @@ public class MainActivity extends Activity {
                     BusManager.parseSegments(new JSONObject(readSavedData(SEGMENT_JSON_FILE)));
                     BusManager.parseVersion(new JSONObject(readSavedData(VERSION_JSON_FILE)));
                     for (String timeURL : BusManager.getTimesToDownload()){
-                        // Check version in preferences
-                        // URL is http://something.amazon.com/stuff/stuff/{stop id}.json
                         String timeFileName = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
                         BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
                     }
+                    //TODO: Make network call to check version. But, should ask the user how often they want to check for updates.
                 } catch (JSONException e){
                     Log.e("JSON", "Error with JSON parsing cached file.");
                 }
@@ -452,6 +452,19 @@ public class MainActivity extends Activity {
             renewBusRefreshTimer();
             setUpMapIfNeeded();
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EasyTracker.getInstance(this).activityStart(this);
+    }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EasyTracker.getInstance(this).activityStop(this);
     }
 
     public void cacheToAndStartStop() {
