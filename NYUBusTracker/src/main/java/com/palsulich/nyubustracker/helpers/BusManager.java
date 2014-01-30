@@ -251,7 +251,7 @@ public final class BusManager {
         int result = 100;
         if (stop1 != null && stop2 != null){
             for (Route r : routes){
-                if (r.hasStopByID(stop1.getID()) && r.hasStopByID(stop2.getID())){
+                if (r.hasStop(stop1) && r.hasStop(stop2)){
                     int index1 = r.getStops().indexOf(stop1);
                     int index2 = r.getStops().indexOf(stop2);
                     result = index2 - index1;
