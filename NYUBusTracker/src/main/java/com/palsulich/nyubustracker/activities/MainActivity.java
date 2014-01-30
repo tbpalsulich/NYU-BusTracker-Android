@@ -600,7 +600,7 @@ public class MainActivity extends Activity {
             // Check there is a route between these stops.
             ArrayList<Route> routes = new ArrayList<Route>();               // All the routes connecting the two.
             for (Route r : startStop.getRoutes()) {
-                if (r.hasStop(stop.getName())) {
+                if (r.hasStop(stop)) {
                     routes.add(r);
                 }
             }
@@ -632,7 +632,7 @@ public class MainActivity extends Activity {
                 if (endStop != null) {
                     // Loop through all connected Routes.
                     for (Route r : startStop.getRoutes()) {
-                        if (r.hasStop(endStop.getName()) && endStop.getTimesOfRoute(r.getLongName()).size() > 0) {  // If the current endStop is connected, we don't have to change endStop.
+                        if (r.hasStop(endStop) && endStop.getTimesOfRoute(r.getLongName()).size() > 0) {  // If the current endStop is connected, we don't have to change endStop.
                             setNextBusTime();
                             updateMapWithNewStartOrEnd();
                             return;

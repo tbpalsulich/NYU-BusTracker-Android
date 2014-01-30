@@ -53,19 +53,8 @@ public class Route {
         return routeID;
     }
 
-    public boolean hasStop(String stop){
-        for (Stop s : stops){
-            if (s.name.equals(stop)) return true;
-        }
-
-        return false;
-    }
-
-    public boolean hasStopByID(String stopID){
-        for (Stop s : stops){
-            if (s.getID().equals(stopID)) return true;
-        }
-        return false;
+    public boolean hasStop(Stop stop){
+        return stops.contains(stop);
     }
 
     public ArrayList<Stop> getStops(){
