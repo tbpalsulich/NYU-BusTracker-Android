@@ -14,7 +14,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -109,10 +108,10 @@ public class MainActivity extends Activity {
                 fos.write(jsonObject.toString().getBytes());
                 fos.close();
             } catch (JSONException e) {
-                Log.e("JSON", "Error parsing Stop JSON.");
+                //Log.e("JSON", "Error parsing Stop JSON.");
                 e.printStackTrace();
             } catch (IOException e) {
-                Log.e("JSON", "Error with Stop JSON IO.");
+                //Log.e("JSON", "Error with Stop JSON IO.");
                 e.printStackTrace();
             }
         }
@@ -127,10 +126,10 @@ public class MainActivity extends Activity {
                 fos.write(jsonObject.toString().getBytes());
                 fos.close();
             } catch (JSONException e) {
-                Log.e("JSON", "Error parsing Route JSON.");
+                //Log.e("JSON", "Error parsing Route JSON.");
                 e.printStackTrace();
             } catch (IOException e) {
-                Log.e("JSON", "Error with Route JSON IO.");
+                //Log.e("JSON", "Error with Route JSON IO.");
                 e.printStackTrace();
             }
         }
@@ -145,10 +144,10 @@ public class MainActivity extends Activity {
                 fos.write(jsonObject.toString().getBytes());
                 fos.close();
             } catch (JSONException e) {
-                Log.e("JSON", "Error parsing Segment JSON.");
+                //Log.e("JSON", "Error parsing Segment JSON.");
                 e.printStackTrace();
             } catch (IOException e) {
-                Log.e("JSON", "Error with Segment JSON IO.");
+                //Log.e("JSON", "Error with Segment JSON IO.");
                 e.printStackTrace();
             }
         }
@@ -162,7 +161,7 @@ public class MainActivity extends Activity {
                 for (String timeURL : BusManager.getTimesToDownload()){
                     SharedPreferences preferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
                     String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
-                    Log.v("Refactor", "Time to download: " + stopID);
+                    //Log.v("Refactor", "Time to download: " + stopID);
                     int newestStopTimeVersion = BusManager.getTimesVersions().get(stopID);
                     if (preferences.getInt(stopID, 0) != newestStopTimeVersion){
                         new Downloader(timeDownloaderHelper).execute(timeURL);
@@ -173,10 +172,10 @@ public class MainActivity extends Activity {
                 fos.write(jsonObject.toString().getBytes());
                 fos.close();
             } catch (JSONException e) {
-                Log.e("JSON", "Error parsing Version JSON.");
+                //Log.e("JSON", "Error parsing Version JSON.");
                 e.printStackTrace();
             } catch (IOException e) {
-                Log.e("JSON", "Error with Version JSON IO.");
+                //Log.e("JSON", "Error with Version JSON IO.");
                 e.printStackTrace();
             }
         }
@@ -189,7 +188,7 @@ public class MainActivity extends Activity {
                 Bus.parseJSON(jsonObject);
                 updateMapWithNewBusLocations();
             } catch (JSONException e) {
-                Log.e("JSON", "Error parsing Vehicle JSON.");
+                //Log.e("JSON", "Error parsing Vehicle JSON.");
                 e.printStackTrace();
             }
         }
@@ -200,15 +199,15 @@ public class MainActivity extends Activity {
         public void parse(JSONObject jsonObject) {
             try {
                 BusManager.parseTime(jsonObject);
-                Log.v("Refactor", "Creating time cache file: " + jsonObject.getString("stop_id"));
+                //Log.v("Refactor", "Creating time cache file: " + jsonObject.getString("stop_id"));
                 FileOutputStream fos = openFileOutput(jsonObject.getString("stop_id"), MODE_PRIVATE);
                 fos.write(jsonObject.toString().getBytes());
                 fos.close();
             } catch (JSONException e) {
-                Log.e("JSON", "Error parsing Time JSON.");
+                //Log.e("JSON", "Error parsing Time JSON.");
                 e.printStackTrace();
             } catch (IOException e) {
-                Log.e("JSON", "Error with Time JSON IO.");
+                //Log.e("JSON", "Error with Time JSON IO.");
                 e.printStackTrace();
             }
         }
@@ -238,7 +237,7 @@ public class MainActivity extends Activity {
     }
 
     public String readSavedData (String fileName) {
-        Log.v("Refactor", "Reading saved data from " + fileName);
+        //Log.v("Refactor", "Reading saved data from " + fileName);
         StringBuilder buffer = new StringBuilder("");
         try {
             FileInputStream inputStream = openFileInput(fileName);
@@ -319,7 +318,7 @@ public class MainActivity extends Activity {
                                     setStartStop(broadway);
                                     setEndStop(lafayette);
                                     broadway.setFavorite(true);
-                                    Log.v("Refactor", "End: " + endStop.getName());
+                                    //Log.v("Refactor", "End: " + endStop.getName());
                                     // Update the map to show the corresponding stops, buses, and segments.
                                     if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
                                     renewBusRefreshTimer();
@@ -355,7 +354,7 @@ public class MainActivity extends Activity {
             }
         } else {
             if (!sharedManager.hasRoutes() || !sharedManager.hasStops()){
-                Log.v("Refactor", "Parsing cached files...");
+                //Log.v("Refactor", "Parsing cached files...");
                 try{
                     Stop.parseJSON(new JSONObject(readSavedData(STOP_JSON_FILE)));
                     Route.parseJSON(new JSONObject(readSavedData(ROUTE_JSON_FILE)));
@@ -363,19 +362,19 @@ public class MainActivity extends Activity {
                     BusManager.parseVersion(new JSONObject(readSavedData(VERSION_JSON_FILE)));
                     for (String timeURL : BusManager.getTimesToDownload()){
                         String timeFileName = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
-                        Log.v("Refactor", "Trying to parse " + timeFileName);
+                        //Log.v("Refactor", "Trying to parse " + timeFileName);
                         BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
                     }
                     preferences = getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE);
-                    Log.v("Refactor", "Done parsing...");
+                    //Log.v("Refactor", "Done parsing...");
                     for (Stop s : sharedManager.getStops()){
                         boolean result = preferences.getBoolean(s.getID(), false);
-                        Log.v("Refactor", s.getName() + " is " + result);
+                        //Log.v("Refactor", s.getName() + " is " + result);
                         s.setFavorite(result);
                     }
                     //TODO: Make network call to check version. But, should ask the user how often they want to check for updates.
                 } catch (JSONException e){
-                    Log.e("RefactorJSON", "Error with JSON parsing cached file.");
+                    //Log.e("RefactorJSON", "Error with JSON parsing cached file.");
                     e.printStackTrace();
                 }
             }
@@ -597,7 +596,7 @@ public class MainActivity extends Activity {
                             mMap.addPolyline(p);
                             //Log.v("MapDebugging", "Success!");
                         }
-                        //else Log.v("MapDebugging", "Segment was null for " + r.getID());
+                        //else //Log.v("MapDebugging", "Segment was null for " + r.getID());
                     }
                 }
             }
@@ -835,10 +834,10 @@ public class MainActivity extends Activity {
             try {
                 return new JSONObject(downloadUrl(urls[0]));
             } catch (IOException e) {
-                Log.e("JSON", "DownloadURL IO error.");
+                //Log.e("JSON", "DownloadURL IO error.");
                 e.printStackTrace();
             } catch (JSONException e) {
-                Log.e("JSON", "DownloadURL JSON error.");
+                //Log.e("JSON", "DownloadURL JSON error.");
                 e.printStackTrace();
             }
             return null;

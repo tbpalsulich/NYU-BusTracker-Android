@@ -72,7 +72,7 @@ public class Time {
             case Weekend:
                 return "Weekend";
         }
-        Log.e("Time Debugging", "Invalid timeOfWeek");
+        //Log.e("Time Debugging", "Invalid timeOfWeek");
         return "";      // Should never reach here.
     }
 

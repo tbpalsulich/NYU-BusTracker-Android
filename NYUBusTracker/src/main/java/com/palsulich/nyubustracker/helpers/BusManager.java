@@ -180,7 +180,7 @@ public final class BusManager {
         if (stop != null){
             ArrayList<Route> stopRoutes = stop.getRoutes();
             for (Route route : stopRoutes) {       // For every route servicing this stop:
-                Log.v("Route Debugging", route.toString() + " services this stop.");
+                //Log.v("Route Debugging", route.toString() + " services this stop.");
                 for (Stop connectedStop : route.getStops()){    // add all of that route's stops.
                     if (connectedStop != null && !connectedStop.getUltimateName().equals(stop.getName()) &&
                             !result.contains(connectedStop) &&
@@ -212,7 +212,7 @@ public final class BusManager {
     public void addStop(Stop stop) {
         if (!stop.isHidden()){
             stops.add(stop);
-            Log.v("Debugging", "Added " + stop.toString() + " to list of stops (" + stops.size() + ")");
+            //Log.v("Debugging", "Added " + stop.toString() + " to list of stops (" + stops.size() + ")");
         }
     }
 
@@ -233,7 +233,7 @@ public final class BusManager {
      */
     public void addRoute(Route route) {
         if (!hideRoutes.contains(route.getID())){
-            Log.v("JSONDebug", "Adding route: " + route.getID());
+            //Log.v("JSONDebug", "Adding route: " + route.getID());
             routes.add(route);
         }
     }
@@ -287,12 +287,12 @@ public final class BusManager {
      */
     public static void parseVersion(JSONObject versionJson) throws JSONException {
         ArrayList<Stop> stops = sharedBusManager.getStops();
-        Log.v("Debugging", "Looking for times for " + stops.size() + " stops.");
+        //Log.v("Debugging", "Looking for times for " + stops.size() + " stops.");
         JSONArray jHides = new JSONArray();
         if (versionJson != null) jHides = versionJson.getJSONArray("hideroutes");
         for (int j = 0; j < jHides.length(); j++){      // For each element of our list of hideroutes.
             String hideMeID = jHides.getString(j);      // ID of the route to hide.
-            Log.v("JSONDebug", "Hiding a route... " + hideMeID);
+            //Log.v("JSONDebug", "Hiding a route... " + hideMeID);
             Route r = sharedBusManager.getRouteByID(hideMeID);
             hideRoutes.add(hideMeID);           // In case we "hide" the route before it exists.
             if (r != null){
@@ -300,7 +300,7 @@ public final class BusManager {
                 for (Stop s : stops){   // But, we must update any stops that have this route.
                     if (s.hasRouteByString(hideMeID)){
                         s.getRoutes().remove(r);
-                        Log.v("JSONDebug", "Removing route " + r.getID() + " from " + s.getName());
+                        //Log.v("JSONDebug", "Removing route " + r.getID() + " from " + s.getName());
                     }
                 }
             }
@@ -310,7 +310,7 @@ public final class BusManager {
         if (versionJson != null) jHideStops = versionJson.getJSONArray("hidestops");
         for (int j = 0; j < jHideStops.length(); j++){
             String hideMeID = jHideStops.getString(j);
-            Log.v("JSONDebug", "Hiding a stop... " + hideMeID);
+            //Log.v("JSONDebug", "Hiding a stop... " + hideMeID);
             Stop s = sharedBusManager.getStopByID(hideMeID);
             if (s != null) s.setHidden(true);
         }
@@ -351,7 +351,7 @@ public final class BusManager {
         for (int j = 0; j < jVersion.length(); j++) {
             JSONObject stopObject = jVersion.getJSONObject(j);
             String file = stopObject.getString("file");
-            Log.v("Debugging", "Looking for times for " + file);
+            //Log.v("Debugging", "Looking for times for " + file);
             timesToDownload.add("https://s3.amazonaws.com/nyubustimes/1.0/" + file);
             timesVersions.put(file.substring(0, file.indexOf(".json")), stopObject.getInt("version"));
         }
@@ -366,7 +366,7 @@ public final class BusManager {
                 JSONObject routeTimes = routes.getJSONObject(s.getRoutes().get(i).getID());
                 if (routeTimes.has(BusManager.TAG_WEEKDAY)) {
                     JSONArray weekdayTimesJson = routeTimes.getJSONArray(BusManager.TAG_WEEKDAY);
-                    Log.v("Debugging", "Found " + weekdayTimesJson.length() + " weekday times.");
+                    //Log.v("Debugging", "Found " + weekdayTimesJson.length() + " weekday times.");
                     if (weekdayTimesJson != null) {
                         String weekdayRoute = routeTimes.getString(BusManager.TAG_ROUTE);
                         weekdayRoute = weekdayRoute.substring(weekdayRoute.indexOf("Route ") + "Route ".length());
@@ -377,7 +377,7 @@ public final class BusManager {
                 }
                 if (routeTimes.has(BusManager.TAG_FRIDAY)) {
                     JSONArray fridayTimesJson = routeTimes.getJSONArray(BusManager.TAG_FRIDAY);
-                    Log.v("Debugging", "Found " + fridayTimesJson.length() + " friday times.");
+                    //Log.v("Debugging", "Found " + fridayTimesJson.length() + " friday times.");
                     if (fridayTimesJson != null) {
                         String fridayRoute = routeTimes.getString(BusManager.TAG_ROUTE);
                         fridayRoute = fridayRoute.substring(fridayRoute.indexOf("Route ") + "Route ".length());
@@ -388,7 +388,7 @@ public final class BusManager {
                 }
                 if (routeTimes.has(BusManager.TAG_WEEKEND)) {
                     JSONArray weekendTimesJson = routeTimes.getJSONArray(BusManager.TAG_WEEKEND);
-                    Log.v("Debugging", "Found " + weekendTimesJson.length() + " weekend times.");
+                    //Log.v("Debugging", "Found " + weekendTimesJson.length() + " weekend times.");
                     if (weekendTimesJson != null) {
                         String weekendRoute = routeTimes.getString(BusManager.TAG_ROUTE);
                         weekendRoute = weekendRoute.substring(weekendRoute.indexOf("Route ") + "Route ".length());
@@ -410,9 +410,9 @@ public final class BusManager {
         while(keys.hasNext()){
             String key = keys.next();
             String line = jSegments.getString(key);
-            Log.v("MapDebugging", "Key: " + key);
+            //Log.v("MapDebugging", "Key: " + key);
             segments.put(key, new PolylineOptions().addAll(PolyUtil.decode(line)));
-            Log.v("MapDebugging", "*Adding segment: " + key + " | " + line);
+            //Log.v("MapDebugging", "*Adding segment: " + key + " | " + line);
         }
     }
 }

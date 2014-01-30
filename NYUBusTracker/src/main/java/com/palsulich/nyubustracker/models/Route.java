@@ -29,7 +29,7 @@ public class Route {
         for (Stop s : stops){
             s.addRoute(this);
         }
-        Log.v("Debugging", longName + "'s number of stops:" + stops.size());
+        //Log.v("Debugging", longName + "'s number of stops:" + stops.size());
     }
 
     public String toString(){
