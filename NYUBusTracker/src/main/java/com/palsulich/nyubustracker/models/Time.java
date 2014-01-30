@@ -109,8 +109,8 @@ public class Time {
     // Return a nice string saying the difference between this time and the argument.
     public String getTimeAsStringUntil(Time t){
         Time difference = this.getTimeAsTimeUntil(t);
-        Log.v("Time Debugging", "this: " + this.toString() + " | that: " + t.toString());
-        Log.v("Time Debugging", "Difference: " + difference.hour + ":" + difference.min);
+        //Log.v("Time Debugging", "this: " + this.toString() + " | that: " + t.toString());
+        //Log.v("Time Debugging", "Difference: " + difference.hour + ":" + difference.min);
         if (difference != null){
             if (this.getTimeOfWeek() != t.getTimeOfWeek()){
                 BusManager.getBusManager().setOnline(false);
@@ -140,11 +140,11 @@ public class Time {
                 BusManager.getBusManager().setOnline(true);
                 return difference.hour + " hour";
             }
-            if (difference.hour > 0 && difference.min == 1){
+            if (difference.hour > 1 && difference.min == 1){
                 BusManager.getBusManager().setOnline(true);
                 return difference.hour + " hours and " + difference.min + " minute";
             }
-            if (difference.hour > 0 && difference.min > 1){
+            if (difference.hour > 1 && difference.min > 1){
                 BusManager.getBusManager().setOnline(true);
                 return difference.hour + " hours and " + difference.min + " minutes";
             }
@@ -169,7 +169,7 @@ public class Time {
     // Return a Time object who represents the difference in time between the two Times.
     public Time getTimeAsTimeUntil(Time t){
         if (this.isStrictlyBefore(t)){
-            Log.v("Time Debugging", this + " is strictly before " + t);
+            //Log.v("Time Debugging", this + " is strictly before " + t);
             int hourDifference = t.hour - this.hour;
             int minDifference = t.min - this.min;
             if (minDifference < 0){
@@ -179,7 +179,7 @@ public class Time {
             return new Time(hourDifference, minDifference);
         }
         else{
-            Log.v("Time Debugging", t.toString() + " isn't after " + this.toString());
+            //Log.v("Time Debugging", t.toString() + " isn't after " + this.toString());
             return new Time(0, 0);
         }
     }

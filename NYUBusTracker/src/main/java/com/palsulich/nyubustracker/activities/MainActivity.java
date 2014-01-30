@@ -162,6 +162,7 @@ public class MainActivity extends Activity {
                 for (String timeURL : BusManager.getTimesToDownload()){
                     SharedPreferences preferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
                     String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
+                    Log.v("Refactor", "Time to download: " + stopID);
                     int newestStopTimeVersion = BusManager.getTimesVersions().get(stopID);
                     if (preferences.getInt(stopID, 0) != newestStopTimeVersion){
                         new Downloader(timeDownloaderHelper).execute(timeURL);
@@ -199,6 +200,7 @@ public class MainActivity extends Activity {
         public void parse(JSONObject jsonObject) {
             try {
                 BusManager.parseTime(jsonObject);
+                Log.v("Refactor", "Creating time cache file: " + jsonObject.getString("stop_id"));
                 FileOutputStream fos = openFileOutput(jsonObject.getString("stop_id"), MODE_PRIVATE);
                 fos.write(jsonObject.toString().getBytes());
                 fos.close();
@@ -236,6 +238,7 @@ public class MainActivity extends Activity {
     }
 
     public String readSavedData (String fileName) {
+        Log.v("Refactor", "Reading saved data from " + fileName);
         StringBuilder buffer = new StringBuilder("");
         try {
             FileInputStream inputStream = openFileInput(fileName);
@@ -269,8 +272,6 @@ public class MainActivity extends Activity {
             GooglePlayServicesUtil.getErrorDialog(retCode, this, 1).show();
         }
 
-        renewTimeUntilTimer();       // Creates and starts the timer to refresh time until next bus.
-
         setUpMapIfNeeded(); // Instantiates mMap, if it needs to be.
 
         if (haveAMap) mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
@@ -297,6 +298,7 @@ public class MainActivity extends Activity {
                 routeDownloader.execute(routesURL);
                 segmentDownloader.execute(segmentsURL);
                 versionDownloader.execute(versionURL);
+                final AsyncTask busTask = new Downloader(busDownloaderHelper).execute(vehiclesURL);
 
                 new Timer().scheduleAtFixedRate(new TimerTask() {
                     @Override
@@ -304,7 +306,8 @@ public class MainActivity extends Activity {
                         if (stopDownloader.getStatus() == AsyncTask.Status.FINISHED &&
                             routeDownloader.getStatus() == AsyncTask.Status.FINISHED &&
                             segmentDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-                            versionDownloader.getStatus() == AsyncTask.Status.FINISHED){
+                            versionDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+                            busTask.getStatus() == AsyncTask.Status.FINISHED){
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -360,13 +363,23 @@ public class MainActivity extends Activity {
                     BusManager.parseVersion(new JSONObject(readSavedData(VERSION_JSON_FILE)));
                     for (String timeURL : BusManager.getTimesToDownload()){
                         String timeFileName = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
+                        Log.v("Refactor", "Trying to parse " + timeFileName);
                         BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
+                    }
+                    preferences = getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE);
+                    Log.v("Refactor", "Done parsing...");
+                    for (Stop s : sharedManager.getStops()){
+                        boolean result = preferences.getBoolean(s.getID(), false);
+                        Log.v("Refactor", s.getName() + " is " + result);
+                        s.setFavorite(result);
                     }
                     //TODO: Make network call to check version. But, should ask the user how often they want to check for updates.
                 } catch (JSONException e){
-                    Log.e("JSON", "Error with JSON parsing cached file.");
+                    Log.e("RefactorJSON", "Error with JSON parsing cached file.");
+                    e.printStackTrace();
                 }
             }
+            preferences = getSharedPreferences(STOP_PREF, MODE_PRIVATE);
             setStartStop(sharedManager.getStopByName(preferences.getString(START_STOP_PREF, "715 Broadway @ Washington Square")));
             setEndStop(sharedManager.getStopByName(preferences.getString(END_STOP_PREF, "80 Lafayette St")));
 
@@ -547,13 +560,13 @@ public class MainActivity extends Activity {
             boolean validBuilder = false;
             for (Route r : routesBetweenStartAndEnd) {
                 if (r.isActive()) {
-                    Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
+                    //Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
                     for (Stop s : r.getStops()) {
                         for (Stop f : s.getFamily()) {
                             if ((!f.isHidden() && !f.isRelatedTo(startStop) && !f.isRelatedTo(endStop))
                                     || (f == startStop || f == endStop)) {
                                 // Only put one representative from a family of stops on the p
-                                Log.v("MapDebugging", "Not hiding " + f);
+                                //Log.v("MapDebugging", "Not hiding " + f);
                                 Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
                                         .position(f.getLocation())
                                         .title(f.getName())
@@ -565,8 +578,8 @@ public class MainActivity extends Activity {
                                                                 R.drawable.ic_map_stop))));
                                 clickableMapMarkers.put(mMarker.getId(), true);
                             } else {
-                                Log.v("MapDebugging", "** Hiding " + f);
-                                Log.v("MapDebugging", "      " + f.isHidden());// && !s.isRelatedTo(startStop) && !s.isRelatedTo(endStop)));
+                                //Log.v("MapDebugging", "** Hiding " + f);
+                                //Log.v("MapDebugging", "      " + f.isHidden());// && !s.isRelatedTo(startStop) && !s.isRelatedTo(endStop)));
                             }
                         }
                     }

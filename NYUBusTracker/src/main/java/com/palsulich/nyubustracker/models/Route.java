@@ -96,13 +96,13 @@ public class Route {
                 r.addStop(i, sharedManager.getStopByID(stops.getString(i)));
             }
             JSONArray segments = routeObject.getJSONArray(BusManager.TAG_SEGMENTS);
-            Log.v("MapDebugging", "Found " + segments.length() + " segments for route " + routeID);
+            //Log.v("MapDebugging", "Found " + segments.length() + " segments for route " + routeID);
             for (int i = 0; i < segments.length(); i++){
-                Log.v("MapDebugging", "parseJSON of Route adding segment ID " + segments.getJSONArray(i).getString(0) + " for " + routeID + "(" + r.getSegmentIDs().size() + " total)");
+                //Log.v("MapDebugging", "parseJSON of Route adding segment ID " + segments.getJSONArray(i).getString(0) + " for " + routeID + "(" + r.getSegmentIDs().size() + " total)");
                 r.getSegmentIDs().add(segments.getJSONArray(i).getString(0));
             }
             sharedManager.addRoute(r);
-            Log.v("JSONDebug", "Route name: " + routeLongName + " | ID:" + routeID + " | Number of stops: " + sharedManager.getRouteByID(routeID).getStops().size());
+            //Log.v("JSONDebug", "Route name: " + routeLongName + " | ID:" + routeID + " | Number of stops: " + sharedManager.getRouteByID(routeID).getStops().size());
         }
     }
 }
