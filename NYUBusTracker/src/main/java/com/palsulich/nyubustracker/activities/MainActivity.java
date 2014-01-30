@@ -321,7 +321,18 @@ public class MainActivity extends Activity {
                                     if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
                                     renewBusRefreshTimer();
                                     renewTimeUntilTimer();
-                                    progressDialog.dismiss();
+                                    new Timer().schedule(new TimerTask() {
+                                        @Override
+                                        public void run() {
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    setNextBusTime();
+                                                    progressDialog.dismiss();
+                                                }
+                                            });
+                                        }
+                                    }, 750L);
                                 }
 
                             });

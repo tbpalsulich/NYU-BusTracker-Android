@@ -182,7 +182,7 @@ public final class BusManager {
             for (Route route : stopRoutes) {       // For every route servicing this stop:
                 Log.v("Route Debugging", route.toString() + " services this stop.");
                 for (Stop connectedStop : route.getStops()){    // add all of that route's stops.
-                    if (!connectedStop.getUltimateName().equals(stop.getName()) &&
+                    if (connectedStop != null && !connectedStop.getUltimateName().equals(stop.getName()) &&
                             !result.contains(connectedStop) &&
                             (!connectedStop.isHidden() || !connectedStop.isRelatedTo(stop))){
                         while (connectedStop.getParent() != null){
