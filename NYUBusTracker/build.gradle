@@ -33,7 +33,13 @@ android {
 
     buildTypes {
         release {
-            signingConfigs.release
+            zipAlign true
+            debuggable false
+            jniDebugBuild false
+            signingConfig signingConfigs.release
+        }
+        debugrelease {
+            signingConfig signingConfigs.release
         }
     }
 

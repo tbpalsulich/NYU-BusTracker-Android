@@ -89,6 +89,7 @@ public class MainActivity extends Activity {
     private static final String ROUTE_JSON_FILE = "routeJson";
     private static final String SEGMENT_JSON_FILE = "segmentJson";
     private static final String VERSION_JSON_FILE = "versionJson";
+    private static boolean offline = true;
 
     private static String makeQuery(String param, String value, String charset) {
         try {
@@ -290,6 +291,7 @@ public class MainActivity extends Activity {
                     getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
             if (networkInfo != null && networkInfo.isConnected()) {
+                offline = false;
                 // Download and parse everything, put it all in persistent memory, continue.
                 progressDialog = ProgressDialog.show(this, "Downloading Data", "Please wait...", true, false);
 
@@ -342,7 +344,8 @@ public class MainActivity extends Activity {
                         }
                     }
                 }, 0L, 500L);
-            } else {
+            } else if (!offline){
+                offline = true;
                 Context context = getApplicationContext();
                 CharSequence text = "Unable to connect to the network.";
                 int duration = Toast.LENGTH_SHORT;
@@ -428,9 +431,11 @@ public class MainActivity extends Activity {
                                     getSystemService(Context.CONNECTIVITY_SERVICE);
                             NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
                             if (networkInfo != null && networkInfo.isConnected()) {
+                                offline = false;
                                 new Downloader(busDownloaderHelper).execute(vehiclesURL);
                             }
-                            else{
+                            else if (!offline){
+                                offline = true;
                                 Context context = getApplicationContext();
                                 CharSequence text = "Unable to connect to the network.";
                                 int duration = Toast.LENGTH_SHORT;
