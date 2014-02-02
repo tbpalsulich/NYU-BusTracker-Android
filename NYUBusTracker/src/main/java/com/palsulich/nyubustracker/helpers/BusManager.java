@@ -1,7 +1,5 @@
 package com.palsulich.nyubustracker.helpers;
 
-import android.util.Log;
-
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
 import com.palsulich.nyubustracker.models.Bus;
@@ -83,7 +81,7 @@ public final class BusManager {
     public ArrayList<Stop> getStops() {
         ArrayList<Stop> result = new ArrayList<Stop>(stops);
         for (Stop stop : stops){
-            if (stop.isHidden()){
+            if (stop.isHidden() || !stop.hasTimes()){
                 result.remove(stop);
             }
         }

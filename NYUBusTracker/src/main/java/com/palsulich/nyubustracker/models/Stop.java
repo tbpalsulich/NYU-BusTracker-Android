@@ -1,7 +1,6 @@
 package com.palsulich.nyubustracker.models;
 
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.palsulich.nyubustracker.helpers.BusManager;
@@ -67,6 +66,10 @@ public class Stop {
 
     public boolean isHidden(){
         return hidden;
+    }
+
+    public boolean hasTimes(){
+        return times.size() > 0;
     }
 
     public void setParentStop(Stop parent){

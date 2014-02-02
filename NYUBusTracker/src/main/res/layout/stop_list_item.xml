@@ -17,7 +17,7 @@
     <TextView
         android:id="@+id/stop_text"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:singleLine="true"
         android:text="Stop Name"
         android:layout_alignParentTop="true"
@@ -26,6 +26,6 @@
         android:clickable="true"
         android:layout_alignBottom="@+id/stop_checkbox"
         android:gravity="center_vertical"
-        android:textSize="18dp"/>
+        android:textSize="18sp"/>
 
 </RelativeLayout>
