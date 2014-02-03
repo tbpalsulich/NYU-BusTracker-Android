@@ -45,7 +45,7 @@ public final class BusManager {
     public static final String TAG_SEGMENTS = "segments";
     public static final String TAG_STOPS = "stops";
 
-    private BusManager(){
+    private BusManager() {
         stops = new ArrayList<Stop>();
         routes = new ArrayList<Route>();
         hideRoutes = new ArrayList<String>();
@@ -63,25 +63,26 @@ public final class BusManager {
         return sharedBusManager;
     }
 
-    public boolean isOnline(){
+    public boolean isOnline() {
         return online;
     }
-    public void setOnline(boolean state){
+
+    public void setOnline(boolean state) {
         online = state;
     }
 
-    public static PolylineOptions getSegment(String id){
+    public static PolylineOptions getSegment(String id) {
         return segments.get(id);
     }
 
-    public static ArrayList<String> getTimesToDownload(){
+    public static ArrayList<String> getTimesToDownload() {
         return timesToDownload;
     }
 
     public ArrayList<Stop> getStops() {
         ArrayList<Stop> result = new ArrayList<Stop>(stops);
-        for (Stop stop : stops){
-            if (stop.isHidden() || !stop.hasTimes()){
+        for (Stop stop : stops) {
+            if (stop.isHidden() || !stop.hasTimes()) {
                 result.remove(stop);
             }
         }
@@ -89,7 +90,7 @@ public final class BusManager {
         return result;
     }
 
-    public static HashMap<String, Integer> getTimesVersions(){
+    public static HashMap<String, Integer> getTimesVersions() {
         return timesVersions;
     }
 
@@ -97,16 +98,17 @@ public final class BusManager {
         return stops != null && stops.size() > 0;
     }
 
-    public ArrayList<Bus> getBuses(){
+    public ArrayList<Bus> getBuses() {
         return buses;
     }
+
     /*
     Given a bus ID, getBus returns either the existing Bus with that ID, or a new bus with that ID.
     This is used to parse the Bus JSON over and over to update location (called from Bus.parseJSON()).
      */
-    public Bus getBus(String busID){
-        for (Bus b : buses){
-            if (b.getID().equals(busID)){
+    public Bus getBus(String busID) {
+        for (Bus b : buses) {
+            if (b.getID().equals(busID)) {
                 return b;
             }
         }
@@ -159,7 +161,7 @@ public final class BusManager {
     Given an ID (e.g. "81374"), returns the Route with that ID.
      */
     public Route getRouteByID(String id) {
-        if (routes != null){
+        if (routes != null) {
             for (Route route : routes) {
                 if (route.getID().equals(id)) {
                     return route;
@@ -173,26 +175,26 @@ public final class BusManager {
     Given a Stop, getConnectedStops returns an array of Strings corresponding to every stop which has
     some route between it and the given stop.
      */
-    public ArrayList<Stop> getConnectedStops(Stop stop){
+    public ArrayList<Stop> getConnectedStops(Stop stop) {
         ArrayList<Stop> result = new ArrayList<Stop>();
-        if (stop != null){
+        if (stop != null) {
             ArrayList<Route> stopRoutes = stop.getRoutes();
             for (Route route : stopRoutes) {       // For every route servicing this stop:
                 //Log.v("Route Debugging", route.toString() + " services this stop.");
-                for (Stop connectedStop : route.getStops()){    // add all of that route's stops.
+                for (Stop connectedStop : route.getStops()) {    // add all of that route's stops.
                     if (connectedStop != null && !connectedStop.getUltimateName().equals(stop.getName()) &&
-                            !result.contains(connectedStop) &&
-                            (!connectedStop.isHidden() || !connectedStop.isRelatedTo(stop))){
-                        while (connectedStop.getParent() != null){
+                        !result.contains(connectedStop) &&
+                        (!connectedStop.isHidden() || !connectedStop.isRelatedTo(stop))) {
+                        while (connectedStop.getParent() != null) {
                             connectedStop = connectedStop.getParent();
                         }
                         boolean repeatStop = false;
-                        for (Stop resultStop : result){
-                            if (resultStop.getName().equals(connectedStop.getName())){
+                        for (Stop resultStop : result) {
+                            if (resultStop.getName().equals(connectedStop.getName())) {
                                 repeatStop = true;
                             }
                         }
-                        if (!repeatStop){
+                        if (!repeatStop) {
                             result.add(connectedStop);
                             //Log.v("Route Debugging","'" + connectedStop.getName() + "' is connected to '" + stop.getName() + "'");
                         }
@@ -208,18 +210,18 @@ public final class BusManager {
     addStop will add a Stop to our ArrayList of Stops, unless we're supposed to hide it.
      */
     public void addStop(Stop stop) {
-        if (!stop.isHidden()){
+        if (!stop.isHidden()) {
             stops.add(stop);
             //Log.v("Debugging", "Added " + stop.toString() + " to list of stops (" + stops.size() + ")");
         }
     }
 
-    public Stop getStop(String stopName, String stopLat, String stopLng, String stopID, String[] routes){
+    public Stop getStop(String stopName, String stopLat, String stopLng, String stopID, String[] routes) {
         Stop s = getStopByID(stopID);
-        if (s == null){
+        if (s == null) {
             s = new Stop(stopName, stopLat, stopLng, stopID, routes);
         }
-        else{
+        else {
             s.setValues(stopName, stopLat, stopLng, stopID, routes);
         }
         return s;
@@ -230,26 +232,26 @@ public final class BusManager {
     addRoute will add a Route to our ArrayList of Routes, unless we're supposed to hide it.
      */
     public void addRoute(Route route) {
-        if (!hideRoutes.contains(route.getID())){
+        if (!hideRoutes.contains(route.getID())) {
             //Log.v("JSONDebug", "Adding route: " + route.getID());
             routes.add(route);
         }
     }
 
-    public Route getRoute(String name, String id){
+    public Route getRoute(String name, String id) {
         Route r;
-        if ((r = getRouteByID(id)) == null){
+        if ((r = getRouteByID(id)) == null) {
             return new Route(name, id);
         }
         else return r.setName(name);
     }
 
-    public static int distanceBetween(Stop stop1, Stop stop2){
+    public static int distanceBetween(Stop stop1, Stop stop2) {
         // Check these stops and their children.
         int result = 100;
-        if (stop1 != null && stop2 != null){
-            for (Route r : routes){
-                if (r.hasStop(stop1) && r.hasStop(stop2)){
+        if (stop1 != null && stop2 != null) {
+            for (Route r : routes) {
+                if (r.hasStop(stop1) && r.hasStop(stop2)) {
                     int index1 = r.getStops().indexOf(stop1);
                     int index2 = r.getStops().indexOf(stop2);
                     result = index2 - index1;
@@ -257,14 +259,14 @@ public final class BusManager {
                 }
             }
             int children = 100;
-            for (Stop s : stop1.getChildStops()){
+            for (Stop s : stop1.getChildStops()) {
                 int test = distanceBetween(s, stop2);
                 if (test < children) children = test;
             }
             if (children < result) result = children;
 
             children = 100;
-            for (Stop s : stop2.getChildStops()){
+            for (Stop s : stop2.getChildStops()) {
                 int test = distanceBetween(stop1, s);
                 if (test < children) children = test;
             }
@@ -288,15 +290,15 @@ public final class BusManager {
         //Log.v("Debugging", "Looking for times for " + stops.size() + " stops.");
         JSONArray jHides = new JSONArray();
         if (versionJson != null) jHides = versionJson.getJSONArray("hideroutes");
-        for (int j = 0; j < jHides.length(); j++){      // For each element of our list of hideroutes.
+        for (int j = 0; j < jHides.length(); j++) {      // For each element of our list of hideroutes.
             String hideMeID = jHides.getString(j);      // ID of the route to hide.
             //Log.v("JSONDebug", "Hiding a route... " + hideMeID);
             Route r = sharedBusManager.getRouteByID(hideMeID);
             hideRoutes.add(hideMeID);           // In case we "hide" the route before it exists.
-            if (r != null){
+            if (r != null) {
                 routes.remove(r);       // If we already parsed this route, remove it.
-                for (Stop s : stops){   // But, we must update any stops that have this route.
-                    if (s.hasRouteByString(hideMeID)){
+                for (Stop s : stops) {   // But, we must update any stops that have this route.
+                    if (s.hasRouteByString(hideMeID)) {
                         s.getRoutes().remove(r);
                         //Log.v("JSONDebug", "Removing route " + r.getID() + " from " + s.getName());
                     }
@@ -306,7 +308,7 @@ public final class BusManager {
 
         JSONArray jHideStops = new JSONArray();
         if (versionJson != null) jHideStops = versionJson.getJSONArray("hidestops");
-        for (int j = 0; j < jHideStops.length(); j++){
+        for (int j = 0; j < jHideStops.length(); j++) {
             String hideMeID = jHideStops.getString(j);
             //Log.v("JSONDebug", "Hiding a stop... " + hideMeID);
             Stop s = sharedBusManager.getStopByID(hideMeID);
@@ -315,7 +317,7 @@ public final class BusManager {
 
         JSONArray jCombine = new JSONArray();
         if (versionJson != null) jCombine = versionJson.getJSONArray("combine");
-        for (int j = 0; j < jCombine.length(); j++){
+        for (int j = 0; j < jCombine.length(); j++) {
             JSONObject combineObject = jCombine.getJSONObject(j);
             String name = Stop.cleanName(combineObject.getString("name"));
             String first = combineObject.getString("first");
@@ -330,7 +332,7 @@ public final class BusManager {
 
         JSONArray jOpposites = new JSONArray();
         if (versionJson != null) jOpposites = versionJson.getJSONArray("opposite");
-        for (int j = 0; j < jOpposites.length(); j++){
+        for (int j = 0; j < jOpposites.length(); j++) {
             JSONObject oppositeObject = jOpposites.getJSONObject(j);
             String name = Stop.cleanName(oppositeObject.getString("name"));
             String first = oppositeObject.getString("first");
@@ -345,7 +347,7 @@ public final class BusManager {
         }
 
         JSONArray jVersion = new JSONArray();
-        if(versionJson != null) jVersion = versionJson.getJSONArray("versions");
+        if (versionJson != null) jVersion = versionJson.getJSONArray("versions");
         for (int j = 0; j < jVersion.length(); j++) {
             JSONObject stopObject = jVersion.getJSONObject(j);
             String file = stopObject.getString("file");
@@ -355,7 +357,7 @@ public final class BusManager {
         }
     }
 
-    public static void parseTime(JSONObject timesJson) throws JSONException{
+    public static void parseTime(JSONObject timesJson) throws JSONException {
         JSONObject routes = timesJson.getJSONObject(BusManager.TAG_ROUTES);
         String stopID = timesJson.getString("stop_id");
         Stop s = sharedBusManager.getStopByID(stopID);
@@ -368,7 +370,7 @@ public final class BusManager {
                     if (weekdayTimesJson != null) {
                         String weekdayRoute = routeTimes.getString(BusManager.TAG_ROUTE);
                         weekdayRoute = weekdayRoute.substring(weekdayRoute.indexOf("Route ") + "Route ".length());
-                        for (int k = 0; k < weekdayTimesJson.length(); k++){
+                        for (int k = 0; k < weekdayTimesJson.length(); k++) {
                             s.addTime(new Time(weekdayTimesJson.getString(k), Time.TimeOfWeek.Weekday, weekdayRoute));
                         }
                     }
@@ -379,7 +381,7 @@ public final class BusManager {
                     if (fridayTimesJson != null) {
                         String fridayRoute = routeTimes.getString(BusManager.TAG_ROUTE);
                         fridayRoute = fridayRoute.substring(fridayRoute.indexOf("Route ") + "Route ".length());
-                        for (int k = 0; k < fridayTimesJson.length(); k++){
+                        for (int k = 0; k < fridayTimesJson.length(); k++) {
                             s.addTime(new Time(fridayTimesJson.getString(k), Time.TimeOfWeek.Friday, fridayRoute));
                         }
                     }
@@ -390,7 +392,7 @@ public final class BusManager {
                     if (weekendTimesJson != null) {
                         String weekendRoute = routeTimes.getString(BusManager.TAG_ROUTE);
                         weekendRoute = weekendRoute.substring(weekendRoute.indexOf("Route ") + "Route ".length());
-                        for (int k = 0; k < weekendTimesJson.length(); k++){
+                        for (int k = 0; k < weekendTimesJson.length(); k++) {
                             s.addTime(new Time(weekendTimesJson.getString(k), Time.TimeOfWeek.Weekend, weekendRoute));
                         }
                     }
@@ -399,18 +401,19 @@ public final class BusManager {
         }
     }
 
-    public static void parseSegments(JSONObject segmentsJSON) throws JSONException{
-        final BusManager sharedManager = BusManager.getBusManager();
+    public static void parseSegments(JSONObject segmentsJSON) throws JSONException {
         JSONObject jSegments = new JSONObject();
         if (segmentsJSON != null) jSegments = segmentsJSON.getJSONObject("data");
-        Iterator<String> keys = jSegments.keys();
+        Iterator<?> keys = jSegments.keys();
 
-        while(keys.hasNext()){
-            String key = keys.next();
-            String line = jSegments.getString(key);
-            //Log.v("MapDebugging", "Key: " + key);
-            segments.put(key, new PolylineOptions().addAll(PolyUtil.decode(line)));
-            //Log.v("MapDebugging", "*Adding segment: " + key + " | " + line);
+        while (keys.hasNext()) {
+            Object key = keys.next();
+            if (key instanceof String) {
+                String line = jSegments.getString((String) key);
+                //Log.v("MapDebugging", "Key: " + key);
+                segments.put((String) key, new PolylineOptions().addAll(PolyUtil.decode(line)));
+                //Log.v("MapDebugging", "*Adding segment: " + key + " | " + line);
+            }
         }
     }
 }

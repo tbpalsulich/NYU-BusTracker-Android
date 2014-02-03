@@ -18,28 +18,28 @@ public class Route {
     ArrayList<PolylineOptions> segments;
     boolean active = true;
 
-    public Route(String mLongName, String mRouteID){
+    public Route(String mLongName, String mRouteID) {
         segmentIDs = new ArrayList<String>();
         segments = new ArrayList<PolylineOptions>();
         longName = mLongName;
         routeID = mRouteID;
         sharedManager = BusManager.getBusManager();
         stops = sharedManager.getStopsByRouteID(routeID);
-        for (Stop s : stops){
+        for (Stop s : stops) {
             s.addRoute(this);
         }
         //Log.v("Debugging", longName + "'s number of stops:" + stops.size());
     }
 
-    public String toString(){
+    public String toString() {
         return longName;
     }
 
-    public void setActive(boolean active){
+    public void setActive(boolean active) {
         this.active = active;
     }
 
-    public Route setName(String name){
+    public Route setName(String name) {
         longName = name;
         return this;
     }
@@ -48,57 +48,58 @@ public class Route {
         return segmentIDs;
     }
 
-    public String getLongName(){
+    public String getLongName() {
         return longName;
     }
 
-    public String getID(){
+    public String getID() {
         return routeID;
     }
 
-    public boolean hasStop(Stop stop){
+    public boolean hasStop(Stop stop) {
         return stops.contains(stop);
     }
 
-    public ArrayList<Stop> getStops(){
+    public ArrayList<Stop> getStops() {
         return stops;
     }
 
-    public void addStop(Stop stop){
-        if(!stops.contains(stop)) stops.add(stop);
+    public void addStop(Stop stop) {
+        if (!stops.contains(stop)) stops.add(stop);
     }
 
-    public void addStop(int index, Stop stop){
-        if(stops.contains(stop)) stops.remove(stop);
+    public void addStop(int index, Stop stop) {
+        if (stops.contains(stop)) stops.remove(stop);
         if (stops.size() == index) stops.add(stop);
         else stops.add(index, stop);
     }
 
-    public boolean isActive(Stop s){
+    public boolean isActive(Stop s) {
         Time currentTime = Time.getCurrentTime();
-        for (Time t : s.getTimesOfRoute(this.getLongName())){
+        for (Time t : s.getTimesOfRoute(this.getLongName())) {
             if (t.isStrictlyBefore(currentTime)) return active;
         }
         return false;
     }
 
-    public static void parseJSON(JSONObject routesJson) throws JSONException{
+    public static void parseJSON(JSONObject routesJson) throws JSONException {
         JSONArray jRoutes = new JSONArray();
         BusManager sharedManager = BusManager.getBusManager();
-        if (routesJson != null) jRoutes = routesJson.getJSONObject(BusManager.TAG_DATA).getJSONArray("72");
+        if (routesJson != null)
+            jRoutes = routesJson.getJSONObject(BusManager.TAG_DATA).getJSONArray("72");
         for (int j = 0; j < jRoutes.length(); j++) {
             JSONObject routeObject = jRoutes.getJSONObject(j);
             String routeLongName = routeObject.getString(BusManager.TAG_LONG_NAME);
             String routeID = routeObject.getString(BusManager.TAG_ROUTE_ID);
             Route r = sharedManager.getRoute(routeLongName, routeID);
             JSONArray stops = routeObject.getJSONArray(BusManager.TAG_STOPS);
-            for (int i = 0; i < stops.length(); i++){
+            for (int i = 0; i < stops.length(); i++) {
                 r.addStop(i, sharedManager.getStopByID(stops.getString(i)));
             }
             r.setActive(routeObject.getBoolean("is_active"));
             JSONArray segments = routeObject.getJSONArray(BusManager.TAG_SEGMENTS);
             //Log.v("MapDebugging", "Found " + segments.length() + " segments for route " + routeID);
-            for (int i = 0; i < segments.length(); i++){
+            for (int i = 0; i < segments.length(); i++) {
                 //Log.v("MapDebugging", "parseJSON of Route adding segment ID " + segments.getJSONArray(i).getString(0) + " for " + routeID + "(" + r.getSegmentIDs().size() + " total)");
                 r.getSegmentIDs().add(segments.getJSONArray(i).getString(0));
             }

@@ -23,7 +23,7 @@ public class Stop {
     Stop oppositeStop;
     boolean hidden;
 
-    public Stop(String mName, String mLat, String mLng, String mID, String[] mRoutes){
+    public Stop(String mName, String mLat, String mLng, String mID, String[] mRoutes) {
         name = cleanName(mName);
         loc = new LatLng(Double.parseDouble(mLat), Double.parseDouble(mLng));
         id = mID;
@@ -32,13 +32,13 @@ public class Stop {
         routes = new ArrayList<Route>();
         childStops = new ArrayList<Stop>();
         BusManager sharedManager = BusManager.getBusManager();
-        for (String s : mRoutes){
+        for (String s : mRoutes) {
             Route r = sharedManager.getRouteByID(s);
             if (r != null && !r.getStops().contains(this)) r.addStop(this);
         }
     }
 
-    public static String cleanName(String name){
+    public static String cleanName(String name) {
         name = name.replaceAll("at", "@");
         name = name.replaceAll("[Aa]venue", "Ave");
         name = name.replaceAll("bound", "");
@@ -46,153 +46,154 @@ public class Stop {
         return name;
     }
 
-    public void setOppositeStop(Stop stop){
+    public void setOppositeStop(Stop stop) {
         oppositeStop = stop;
     }
 
-    public Stop getOppositeStop(){
+    public Stop getOppositeStop() {
         return oppositeStop;
     }
 
-    public void setName(String name){
+    public void setName(String name) {
         this.name = name;
     }
 
-    public void setHidden(boolean hidden){
+    public void setHidden(boolean hidden) {
         this.hidden = hidden;
     }
 
-    public boolean isHidden(){
+    public boolean isHidden() {
         return hidden;
     }
 
-    public boolean hasTimes(){
+    public boolean hasTimes() {
         if (times.size() > 0) return true;
-        for (Stop childStop : childStops){
+        for (Stop childStop : childStops) {
             if (childStop.hasTimes()) return true;
         }
         return false;
     }
 
-    public void setParentStop(Stop parent){
+    public void setParentStop(Stop parent) {
         this.parent = parent;
     }
 
-    public Stop getParent(){
+    public Stop getParent() {
         return parent;
     }
 
-    public Stop getUltimateParent(){
+    public Stop getUltimateParent() {
         Stop result = this;
-        while (result.getParent() != null){
+        while (result.getParent() != null) {
             result = result.getParent();
         }
         return result;
     }
 
-    public void addChildStop(Stop stop){
-        if (!childStops.contains(stop)){
+    public void addChildStop(Stop stop) {
+        if (!childStops.contains(stop)) {
             childStops.add(stop);
         }
     }
 
-    public String getUltimateName(){
+    public String getUltimateName() {
         Stop s = this;
-        while (s.getParent() != null){
+        while (s.getParent() != null) {
             s = s.getParent();
         }
         return s.getName();
     }
 
-    public ArrayList<Stop> getFamily(){
+    public ArrayList<Stop> getFamily() {
         ArrayList<Stop> result = new ArrayList<Stop>(childStops);
-        if (parent != null){
+        if (parent != null) {
             result.add(parent);
-            if (parent.oppositeStop != null){
+            if (parent.oppositeStop != null) {
                 result.add(parent.oppositeStop);
             }
         }
-        if (oppositeStop != null){
+        if (oppositeStop != null) {
             result.add(oppositeStop);
         }
         result.add(this);
         return result;
     }
 
-    public ArrayList<Stop> getChildStops(){
+    public ArrayList<Stop> getChildStops() {
         return childStops;
     }
 
-    public void setValues(String mName, String mLat, String mLng, String mID, String[] mRoutes){
-        if(name.equals("")) name = cleanName(mName);
-        if(loc == null) loc = new LatLng(Double.parseDouble(mLat), Double.parseDouble(mLng));
+    public void setValues(String mName, String mLat, String mLng, String mID, String[] mRoutes) {
+        if (name.equals("")) name = cleanName(mName);
+        if (loc == null) loc = new LatLng(Double.parseDouble(mLat), Double.parseDouble(mLng));
         id = mID;
-        if(routesString == null) routesString = mRoutes;
+        if (routesString == null) routesString = mRoutes;
         BusManager sharedManager = BusManager.getBusManager();
-        for (String s : mRoutes){
+        for (String s : mRoutes) {
             Route r = sharedManager.getRouteByID(s);
             if (r != null && !r.getStops().contains(this)) r.addStop(this);
         }
     }
 
-    public LatLng getLocation(){
+    public LatLng getLocation() {
         return loc;
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 
-    public String toString(){
+    public String toString() {
         return name;
     }
 
-    public boolean getFavorite(){
+    public boolean getFavorite() {
         return favorite;
     }
 
-    public void setFavorite(boolean checked){
+    public void setFavorite(boolean checked) {
         favorite = checked;
     }
 
-    public boolean hasRouteByString(String routeID){
-        for (String route : routesString){
+    public boolean hasRouteByString(String routeID) {
+        for (String route : routesString) {
             if (route.equals(routeID)) {
                 return true;
             }
         }
         return false;
     }
-    public ArrayList<Route> getRoutes(){
+
+    public ArrayList<Route> getRoutes() {
         ArrayList<Route> result = new ArrayList<Route>(routes);
-        for (Stop child : childStops){
-            for (Route childRoute : child.getRoutes()){
-                if (!result.contains(childRoute)){
+        for (Stop child : childStops) {
+            for (Route childRoute : child.getRoutes()) {
+                if (!result.contains(childRoute)) {
                     result.add(childRoute);
                 }
             }
         }
-        if (parent != null){
-            for (Stop child : parent.getChildStops()){
-                if (child != this){
-                    for (Route childRoute : child.getRoutes()){
-                        if (!result.contains(childRoute)){
+        if (parent != null) {
+            for (Stop child : parent.getChildStops()) {
+                if (child != this) {
+                    for (Route childRoute : child.getRoutes()) {
+                        if (!result.contains(childRoute)) {
                             result.add(childRoute);
                         }
                     }
                 }
             }
         }
-        if (oppositeStop != null){
-            for (Route r : oppositeStop.routes){
-                if (!result.contains(r)){
+        if (oppositeStop != null) {
+            for (Route r : oppositeStop.routes) {
+                if (!result.contains(r)) {
                     result.add(r);
                 }
             }
-            for (Stop child : oppositeStop.getChildStops()){
-                if (child != this){
-                    for (Route childRoute : child.getRoutes()){
-                        if (!result.contains(childRoute)){
+            for (Stop child : oppositeStop.getChildStops()) {
+                if (child != this) {
+                    for (Route childRoute : child.getRoutes()) {
+                        if (!result.contains(childRoute)) {
                             result.add(childRoute);
                         }
                     }
@@ -201,57 +202,58 @@ public class Stop {
         }
         return result;
     }
-    public void addRoute(Route route){
+
+    public void addRoute(Route route) {
         routes.add(route);
     }
 
-    public String getID(){
+    public String getID() {
         return id;
     }
 
-    public void addTime(Time t){
+    public void addTime(Time t) {
         times.add(t);
     }
 
     public static Comparator<Stop> compare = new Comparator<Stop>() {
         @Override
         public int compare(Stop stop, Stop stop2) {
-            if (stop.getFavorite()){
-                if (stop2.getFavorite()){
+            if (stop.getFavorite()) {
+                if (stop2.getFavorite()) {
                     return Integer.signum(stop.getName().compareTo(stop2.getName()));
                 }
                 else return -1;
             }
-            else if(stop2.getFavorite()) return 1;
+            else if (stop2.getFavorite()) return 1;
             else return Integer.signum(stop.getName().compareTo(stop2.getName()));
         }
     };
 
-    public ArrayList<Time> getTimesOfRoute(String route){
+    public ArrayList<Time> getTimesOfRoute(String route) {
         ArrayList<Time> result = new ArrayList<Time>();
-        for (Time t : times){
-            if (t.getRoute().equals(route)){
+        for (Time t : times) {
+            if (t.getRoute().equals(route)) {
                 result.add(t);
             }
         }
-        for (Stop childStop : childStops){
+        for (Stop childStop : childStops) {
             result.addAll(childStop.getTimesOfRoute(route));
         }
         return result;
     }
 
-    public boolean isRelatedTo(Stop stop){
+    public boolean isRelatedTo(Stop stop) {
         boolean result = (this.getUltimateName().equals(stop.getUltimateName()));
-        if (result){
+        if (result) {
             return true;
         }
-        else{
+        else {
             //Log.v("Combine Debugging", this + " is not related to " + stop);
             return false;
         }
     }
 
-    public static void parseJSON(JSONObject stopsJson) throws JSONException{
+    public static void parseJSON(JSONObject stopsJson) throws JSONException {
         JSONArray jStops = new JSONArray();
         BusManager sharedManager = BusManager.getBusManager();
         if (stopsJson != null) jStops = stopsJson.getJSONArray(BusManager.TAG_DATA);

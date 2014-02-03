@@ -22,7 +22,7 @@ public class StopAdapter extends BaseAdapter {
     CompoundButton.OnCheckedChangeListener checkBoxOnCLickListener;
 
     // Constructor. Just used to initialize variables.
-    public StopAdapter(Context context, ArrayList<Stop> mStops, View.OnClickListener listener, CompoundButton.OnCheckedChangeListener cbListener){
+    public StopAdapter(Context context, ArrayList<Stop> mStops, View.OnClickListener listener, CompoundButton.OnCheckedChangeListener cbListener) {
         textOnClickListener = listener;
         checkBoxOnCLickListener = cbListener;
         // Cache the LayoutInflate to avoid asking for a new one each time.
@@ -51,7 +51,7 @@ public class StopAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
-        if (convertView == null){
+        if (convertView == null) {
             convertView = mInflater.inflate(R.layout.stop_list_item, null);
             holder = new ViewHolder();
             // Get the specific views and store them in a ViewHolder.
@@ -63,7 +63,7 @@ public class StopAdapter extends BaseAdapter {
             holder.text.setOnClickListener(textOnClickListener);
             convertView.setTag(holder);
         }
-        else{
+        else {
             holder = (ViewHolder) convertView.getTag();
         }
 

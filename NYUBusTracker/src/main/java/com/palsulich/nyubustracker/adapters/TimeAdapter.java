@@ -14,12 +14,12 @@ import java.util.ArrayList;
 
 import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 
-public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter{
+public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter {
 
     private LayoutInflater inflater;
     private ArrayList<Time> times;
 
-    public TimeAdapter(Context context, ArrayList<Time> mTimes){
+    public TimeAdapter(Context context, ArrayList<Time> mTimes) {
         // Cache the LayoutInflate to avoid asking for a new one each time.
         inflater = LayoutInflater.from(context);
         times = mTimes;
@@ -40,18 +40,20 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
-        if (convertView == null){
+        if (convertView == null) {
             viewHolder = new ViewHolder();
             convertView = inflater.inflate(R.layout.time_list_item, null);
             viewHolder.timeText = (TextView) convertView.findViewById(R.id.time_text);
             viewHolder.viaRouteText = (TextView) convertView.findViewById(R.id.route_text);
             convertView.setTag(viewHolder);
         }
-        else{
+        else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        if (viewHolder.timeText != null) viewHolder.timeText.setText(times.get(position).toString());
-        if (viewHolder.viaRouteText != null) viewHolder.viaRouteText.setText("Route " + times.get(position).getRoute());
+        if (viewHolder.timeText != null)
+            viewHolder.timeText.setText(times.get(position).toString());
+        if (viewHolder.viaRouteText != null)
+            viewHolder.viaRouteText.setText("Route " + times.get(position).getRoute());
         return convertView;
     }
 
@@ -63,7 +65,8 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
             convertView = inflater.inflate(R.layout.time_list_header, parent, false);
             holder.text = (TextView) convertView.findViewById(R.id.time_text);
             convertView.setTag(holder);
-        } else {
+        }
+        else {
             holder = (HeaderViewHolder) convertView.getTag();
         }
         // Set the header text to the time of week of this chunk of times.

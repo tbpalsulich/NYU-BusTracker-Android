@@ -13,25 +13,25 @@ public class Bus {
     String heading = "";
     String route;
 
-    public Bus(String mVehicleID){
+    public Bus(String mVehicleID) {
         vehicleID = mVehicleID;
     }
 
-    public Bus setLocation(String lat, String lng){
+    public Bus setLocation(String lat, String lng) {
         loc = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
         return this;
     }
 
-    public LatLng getLocation(){
+    public LatLng getLocation() {
         return loc;
     }
 
-    public Bus setHeading(String mHeading){
-        if (heading.equals("null")) heading = "0";
-        else heading = mHeading;
+    public Bus setHeading(String mHeading) {
+        heading = mHeading;
         return this;
     }
-    public Bus setRoute(String mRoute){
+
+    public Bus setRoute(String mRoute) {
         route = mRoute;
         return this;
     }
@@ -41,16 +41,21 @@ public class Bus {
     }
 
     public Float getHeading() {
-        return Float.parseFloat(heading);
+        try {
+            return Float.parseFloat(heading);
+        } catch (Exception e) {
+            return 0f;
+        }
     }
 
-    public String getID(){
+    public String getID() {
         return vehicleID;
     }
-    public static void parseJSON(JSONObject vehiclesJson) throws JSONException{
+
+    public static void parseJSON(JSONObject vehiclesJson) throws JSONException {
         BusManager sharedManager = BusManager.getBusManager();
         JSONObject jVehiclesData = null;
-        if(vehiclesJson != null) jVehiclesData = vehiclesJson.getJSONObject(BusManager.TAG_DATA);
+        if (vehiclesJson != null) jVehiclesData = vehiclesJson.getJSONObject(BusManager.TAG_DATA);
         JSONArray jVehicles = new JSONArray();
         if (jVehiclesData != null) jVehicles = jVehiclesData.getJSONArray("72");
         for (int j = 0; j < jVehicles.length(); j++) {

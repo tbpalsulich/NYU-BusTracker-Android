@@ -242,7 +242,8 @@ public class MainActivity extends Activity {
                 mMap.getUiSettings().setRotateGesturesEnabled(false);
                 mMap.getUiSettings().setZoomControlsEnabled(false);
                 haveAMap = true;
-            } else haveAMap = false;
+            }
+            else haveAMap = false;
         }
     }
 
@@ -317,8 +318,7 @@ public class MainActivity extends Activity {
         SharedPreferences preferences = getSharedPreferences(RUN_ONCE_PREF, MODE_PRIVATE);
         if (preferences.getBoolean(FIRST_TIME, true)) {
             preferences.edit().putBoolean(FIRST_TIME, false).commit();
-            ConnectivityManager connMgr = (ConnectivityManager)
-                    getSystemService(Context.CONNECTIVITY_SERVICE);
+            ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
             if (networkInfo != null && networkInfo.isConnected()) {
                 offline = false;
@@ -335,18 +335,16 @@ public class MainActivity extends Activity {
                     @Override
                     public void run() {
                         if (stopDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-                                routeDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-                                segmentDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-                                versionDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-                                busTask.getStatus() == AsyncTask.Status.FINISHED) {
+                            routeDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+                            segmentDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+                            versionDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+                            busTask.getStatus() == AsyncTask.Status.FINISHED) {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     Stop broadway = sharedManager.getStopByName("715 Broadway @ Washington Square");
                                     Stop lafayette = sharedManager.getStopByName("80 Lafayette St");
-                                    getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE)
-                                            .edit()
-                                            .putBoolean(broadway.getID(), true).commit();
+                                    getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).commit();
                                     setStartStop(broadway);
                                     setEndStop(lafayette);
                                     broadway.setFavorite(true);
@@ -375,7 +373,8 @@ public class MainActivity extends Activity {
                         }
                     }
                 }, 0L, 500L);
-            } else if (!offline) {
+            }
+            else if (!offline) {
                 offline = true;
                 Context context = getApplicationContext();
                 CharSequence text = "Unable to connect to the network.";
@@ -386,7 +385,8 @@ public class MainActivity extends Activity {
                     toast.show();
                 }
             }
-        } else {
+        }
+        else {
             if (!sharedManager.hasRoutes() || !sharedManager.hasStops()) {
                 //Log.v("Refactor", "Parsing cached files...");
                 try {
@@ -484,13 +484,13 @@ public class MainActivity extends Activity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            ConnectivityManager connMgr = (ConnectivityManager)
-                                    getSystemService(Context.CONNECTIVITY_SERVICE);
+                            ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                             NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
                             if (networkInfo != null && networkInfo.isConnected()) {
                                 offline = false;
                                 new Downloader(busDownloaderHelper).execute(vehiclesURL);
-                            } else if (!offline) {
+                            }
+                            else if (!offline) {
                                 offline = true;
                                 Context context = getApplicationContext();
                                 CharSequence text = "Unable to connect to the network.";
@@ -593,17 +593,7 @@ public class MainActivity extends Activity {
                     for (Bus b : sharedManager.getBuses()) {
                         //Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
                         if (b.getRoute().equals(r.getID())) {
-                            Marker mMarker = mMap.addMarker(new MarkerOptions()
-                                    .position(b.getLocation())
-                                    .icon(BitmapDescriptorFactory
-                                            .fromBitmap(
-                                                    rotateBitmap(
-                                                            BitmapFactory.decodeResource(
-                                                                    this.getResources(),
-                                                                    R.drawable.ic_bus_arrow),
-                                                            b.getHeading())
-                                            ))
-                                    .anchor(0.5f, 0.5f));
+                            Marker mMarker = mMap.addMarker(new MarkerOptions().position(b.getLocation()).icon(BitmapDescriptorFactory.fromBitmap(rotateBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_bus_arrow), b.getHeading()))).anchor(0.5f, 0.5f));
                             clickableMapMarkers.put(mMarker.getId(), false);    // Unable to click on buses.
                             busesOnMap.add(mMarker);
                         }
@@ -632,21 +622,14 @@ public class MainActivity extends Activity {
                     //Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
                     for (Stop s : r.getStops()) {
                         for (Stop f : s.getFamily()) {
-                            if ((!f.isHidden() && !f.isRelatedTo(startStop) && !f.isRelatedTo(endStop))
-                                    || (f == startStop || f == endStop)) {
+                            if ((!f.isHidden() && !f.isRelatedTo(startStop) && !f.isRelatedTo(endStop)) || (f == startStop || f == endStop)) {
                                 // Only put one representative from a family of stops on the p
                                 //Log.v("MapDebugging", "Not hiding " + f);
                                 Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
-                                        .position(f.getLocation())
-                                        .title(f.getName())
-                                        .anchor(0.5f, 0.5f)
-                                        .icon(BitmapDescriptorFactory
-                                                .fromBitmap(
-                                                        BitmapFactory.decodeResource(
-                                                                this.getResources(),
-                                                                R.drawable.ic_map_stop))));
+                                                                        .position(f.getLocation()).title(f.getName()).anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_map_stop))));
                                 clickableMapMarkers.put(mMarker.getId(), true);
-                            } else {
+                            }
+                            else {
                                 //Log.v("MapDebugging", "** Hiding " + f);
                                 //Log.v("MapDebugging", "      " + f.isHidden());// && !s.isRelatedTo(startStop) && !s.isRelatedTo(endStop)));
                             }
@@ -676,13 +659,7 @@ public class MainActivity extends Activity {
                     mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 30));
                 } catch (IllegalStateException e) {      // In case the view is not done being created.
                     //e.printStackTrace();
-                    mMap.moveCamera(
-                            CameraUpdateFactory
-                                    .newLatLngBounds(
-                                            bounds,
-                                            this.getResources().getDisplayMetrics().widthPixels,
-                                            this.getResources().getDisplayMetrics().heightPixels,
-                                            100));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, this.getResources().getDisplayMetrics().widthPixels, this.getResources().getDisplayMetrics().heightPixels, 100));
                 }
             }
         }
@@ -704,7 +681,8 @@ public class MainActivity extends Activity {
                     setNextBusTime();    // Don't set the next bus if we don't have a valid route.
                     if (routesBetweenStartAndEnd != null && haveAMap) updateMapWithNewStartOrEnd();
                 }
-            } else {
+            }
+            else {
                 ArrayList<Route> startRoutes = startStop.getRoutes();
                 if (startRoutes.size() > 0) {
                     ArrayList<Stop> someConnectedStops = startStop.getRoutes().get(0).getStops();
@@ -727,7 +705,8 @@ public class MainActivity extends Activity {
                 ((Button) findViewById(R.id.to_button)).setText(endStop.getUltimateName());
                 setNextBusTime();
                 updateMapWithNewStartOrEnd();
-            } else { // We have a new start. So, we must ensure the end is actually connected. If not, pick a random connected stop.
+            }
+            else { // We have a new start. So, we must ensure the end is actually connected. If not, pick a random connected stop.
                 startStop = stop;
                 ((Button) findViewById(R.id.from_button)).setText(stop.getUltimateName());
                 if (endStop != null) {
@@ -816,12 +795,14 @@ public class MainActivity extends Activity {
                     ((TextView) findViewById(R.id.next_route)).setText("via Route " + nextBusTime.getRoute());
                     ((TextView) findViewById(R.id.next_bus)).setText("Next Bus In:");
                     findViewById(R.id.safe_ride_button).setVisibility(View.GONE);
-                } else {
+                }
+                else {
                     ((TextView) findViewById(R.id.next_route)).setText("");
                     ((TextView) findViewById(R.id.next_bus)).setText("");
-                    if (rightNow.get(Calendar.HOUR) < 7){
+                    if (rightNow.get(Calendar.HOUR) < 7) {
                         findViewById(R.id.safe_ride_button).setVisibility(View.VISIBLE);
-                    } else {
+                    }
+                    else {
                         findViewById(R.id.safe_ride_button).setVisibility(View.GONE);
                     }
                 }
@@ -837,13 +818,11 @@ public class MainActivity extends Activity {
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             Stop s = (Stop) buttonView.getTag();
             s.setFavorite(isChecked);
-            getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE)
-                    .edit().putBoolean(s.getID(), isChecked)
-                    .commit();
+            getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(s.getID(), isChecked).commit();
         }
     };
 
-    public void callSafeRide(View view){
+    public void callSafeRide(View view) {
         Intent callIntent = new Intent(Intent.ACTION_CALL);
         callIntent.setData(Uri.parse("tel:12129928267"));
         startActivity(callIntent);
@@ -860,16 +839,15 @@ public class MainActivity extends Activity {
         // the list view. So, in this case, we supply the StopAdapter with a list of stops, and it gives us back the nice
         // views with a heart button to signify favorites and a TextView with the name of the stop.
         // We provide the onClickListeners to the adapter, which then attaches them to the respective views.
-        StopAdapter adapter = new StopAdapter(getApplicationContext(), connectedStops,
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        // Clicked on a Stop. So, make it the end and dismiss the dialog.
-                        Stop s = (Stop) view.getTag();
-                        setEndStop(s);  // Actually set the end stop.
-                        dialog.dismiss();
-                    }
-                }, cbListener);
+        StopAdapter adapter = new StopAdapter(getApplicationContext(), connectedStops, new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Clicked on a Stop. So, make it the end and dismiss the dialog.
+                Stop s = (Stop) view.getTag();
+                setEndStop(s);  // Actually set the end stop.
+                dialog.dismiss();
+            }
+        }, cbListener);
         listView.setAdapter(adapter);
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();  // Dismissed when a stop is clicked.
@@ -881,15 +859,14 @@ public class MainActivity extends Activity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(listView);
         final Dialog dialog = builder.create();
-        StopAdapter adapter = new StopAdapter(getApplicationContext(), stops,
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Stop s = (Stop) view.getTag();
-                        setStartStop(s);    // Actually set the start stop.
-                        dialog.dismiss();
-                    }
-                }, cbListener);
+        StopAdapter adapter = new StopAdapter(getApplicationContext(), stops, new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Stop s = (Stop) view.getTag();
+                setStartStop(s);    // Actually set the start stop.
+                dialog.dismiss();
+            }
+        }, cbListener);
         listView.setAdapter(adapter);
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
@@ -977,8 +954,7 @@ public class MainActivity extends Activity {
 
     // Reads an InputStream and converts it to a String.
     public static String readIt(InputStream stream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(
-                stream, "iso-8859-1"), 128);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "iso-8859-1"), 128);
         StringBuilder sb = new StringBuilder();
         String line;
         while ((line = reader.readLine()) != null) {
