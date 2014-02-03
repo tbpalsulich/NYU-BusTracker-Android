@@ -16,13 +16,18 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ListView;
+import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.android.gms.common.ConnectionResult;
@@ -92,6 +97,8 @@ public class MainActivity extends Activity {
     private static final String SEGMENT_JSON_FILE = "segmentJson";
     private static final String VERSION_JSON_FILE = "versionJson";
     private static boolean offline = true;
+
+    TextSwitcher mSwitcher;
 
     private static String makeQuery(String param, String value, String charset) {
         try {
@@ -285,6 +292,27 @@ public class MainActivity extends Activity {
 
         // Singleton BusManager to keep track of all stops, routes, etc.
         final BusManager sharedManager = BusManager.getBusManager();
+
+        mSwitcher = (TextSwitcher) findViewById(R.id.next_time);
+
+        // Set the ViewFactory of the TextSwitcher that will create TextView object when asked
+        mSwitcher.setFactory(new ViewSwitcher.ViewFactory() {
+            public View makeView() {
+                TextView myText = new TextView(MainActivity.this);
+                myText.setTextSize(35);
+                myText.setTextColor(getResources().getColor(R.color.white));
+                myText.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
+                return myText;
+            }
+        });
+
+        // Declare the in and out animations and initialize them
+        Animation in = AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_out_right);
+        Animation out = AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_in_left);
+
+        // set the animation type of textSwitcher
+        mSwitcher.setInAnimation(in);
+        mSwitcher.setOutAnimation(out);
 
         SharedPreferences preferences = getSharedPreferences(RUN_ONCE_PREF, MODE_PRIVATE);
         if (preferences.getBoolean(FIRST_TIME, true)) {
@@ -782,7 +810,8 @@ public class MainActivity extends Activity {
                 Collections.sort(timesBetweenStartAndEnd, Time.compare);
                 int index = tempTimesBetweenStartAndEnd.indexOf(currentTime);
                 nextBusTime = tempTimesBetweenStartAndEnd.get((index + 1) % tempTimesBetweenStartAndEnd.size());
-                ((TextView) findViewById(R.id.next_time)).setText(currentTime.getTimeAsStringUntil(nextBusTime));
+                mSwitcher.setText(currentTime.getTimeAsStringUntil(nextBusTime));
+
                 if (BusManager.getBusManager().isOnline()) {
                     ((TextView) findViewById(R.id.next_route)).setText("via Route " + nextBusTime.getRoute());
                     ((TextView) findViewById(R.id.next_bus)).setText("Next Bus In:");
