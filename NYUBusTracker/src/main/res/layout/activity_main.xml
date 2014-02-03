@@ -104,11 +104,22 @@
         android:textSize="16sp"
         android:textColor="#ffffff" />
 
+    <Button
+        android:id="@+id/safe_ride_button"
+        style="?android:attr/borderlessButtonStyle"
+        android:text="@string/call_safe_ride"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/times_button"
+        android:onClick="callSafeRide"
+        android:visibility="gone"
+        android:gravity="center"/>
+
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@+id/times_button"
+        android:layout_below="@+id/safe_ride_button"
         android:name="com.google.android.gms.maps.MapFragment"/>
 
 </RelativeLayout>

@@ -9,5 +9,6 @@
     <string name="no_stops">No stops available</string>
     <string name="no_routes">No routes available</string>
     <string name="no_times">No times available</string>
+    <string name="call_safe_ride">Tap to call Safe Ride</string>
 
 </resources>

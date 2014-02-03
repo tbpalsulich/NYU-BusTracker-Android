@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,6 +13,7 @@ import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -582,7 +584,6 @@ public class MainActivity extends Activity {
     // Clear the map, because we may have just changed what route we wish to display. Then, add everything back onto the map.
     private void updateMapWithNewStartOrEnd() {
         if (haveAMap) {
-            BusManager sharedManager = BusManager.getBusManager();
             setUpMapIfNeeded();
             mMap.clear();
             clickableMapMarkers = new HashMap<String, Boolean>();
@@ -590,7 +591,7 @@ public class MainActivity extends Activity {
             boolean validBuilder = false;
             boolean somethingActive = false;    // Used to make sure we put at least one set of segments on the map.
             for (Route r : routesBetweenStartAndEnd) {
-                somethingActive = r.isActive();
+                somethingActive = somethingActive || r.isActive();
             }
             for (Route r : routesBetweenStartAndEnd) {
                 if (r.isActive() || !somethingActive) {
@@ -780,9 +781,15 @@ public class MainActivity extends Activity {
                 if (BusManager.getBusManager().isOnline()) {
                     ((TextView) findViewById(R.id.next_route)).setText("via Route " + nextBusTime.getRoute());
                     ((TextView) findViewById(R.id.next_bus)).setText("Next Bus In:");
+                    findViewById(R.id.safe_ride_button).setVisibility(View.GONE);
                 } else {
                     ((TextView) findViewById(R.id.next_route)).setText("");
                     ((TextView) findViewById(R.id.next_bus)).setText("");
+                    if (rightNow.get(Calendar.HOUR) < 7){
+                        findViewById(R.id.safe_ride_button).setVisibility(View.VISIBLE);
+                    } else {
+                        findViewById(R.id.safe_ride_button).setVisibility(View.GONE);
+                    }
                 }
                 updateMapWithNewStartOrEnd();
             }
@@ -801,6 +808,12 @@ public class MainActivity extends Activity {
                     .commit();
         }
     };
+
+    public void callSafeRide(View view){
+        Intent callIntent = new Intent(Intent.ACTION_CALL);
+        callIntent.setData(Uri.parse("tel:12129928267"));
+        startActivity(callIntent);
+    }
 
     public void createEndDialog(View view) {
         // Get all stops connected to the start stop.
