@@ -1,7 +1,5 @@
 package com.palsulich.nyubustracker.models;
 
-import android.content.SharedPreferences;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.palsulich.nyubustracker.helpers.BusManager;
 
@@ -119,10 +117,6 @@ public class Stop {
 
     public ArrayList<Stop> getChildStops(){
         return childStops;
-    }
-
-    public void setFavorite(SharedPreferences preferences){
-        favorite = preferences.getBoolean(id, false);
     }
 
     public void setValues(String mName, String mLat, String mLng, String mID, String[] mRoutes){

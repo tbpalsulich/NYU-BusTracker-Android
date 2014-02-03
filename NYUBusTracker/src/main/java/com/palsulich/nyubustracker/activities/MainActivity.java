@@ -159,12 +159,12 @@ public class MainActivity extends Activity {
         public void parse(JSONObject jsonObject) {
             try {
                 BusManager.parseVersion(jsonObject);
-                for (String timeURL : BusManager.getTimesToDownload()){
+                for (String timeURL : BusManager.getTimesToDownload()) {
                     SharedPreferences preferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
                     String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
                     //Log.v("Refactor", "Time to download: " + stopID);
                     int newestStopTimeVersion = BusManager.getTimesVersions().get(stopID);
-                    if (preferences.getInt(stopID, 0) != newestStopTimeVersion){
+                    if (preferences.getInt(stopID, 0) != newestStopTimeVersion) {
                         new Downloader(timeDownloaderHelper).execute(timeURL);
                         preferences.edit().putInt(stopID, newestStopTimeVersion);
                     }
@@ -237,7 +237,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    public String readSavedData (String fileName) {
+    public String readSavedData(String fileName) {
         //Log.v("Refactor", "Reading saved data from " + fileName);
         StringBuilder buffer = new StringBuilder("");
         try {
@@ -255,7 +255,7 @@ public class MainActivity extends Activity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return buffer.toString() ;
+        return buffer.toString();
     }
 
     @Override
@@ -305,10 +305,10 @@ public class MainActivity extends Activity {
                     @Override
                     public void run() {
                         if (stopDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-                            routeDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-                            segmentDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-                            versionDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-                            busTask.getStatus() == AsyncTask.Status.FINISHED){
+                                routeDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+                                segmentDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+                                versionDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+                                busTask.getStatus() == AsyncTask.Status.FINISHED) {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -322,7 +322,8 @@ public class MainActivity extends Activity {
                                     broadway.setFavorite(true);
                                     //Log.v("Refactor", "End: " + endStop.getName());
                                     // Update the map to show the corresponding stops, buses, and segments.
-                                    if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
+                                    if (routesBetweenStartAndEnd != null)
+                                        updateMapWithNewStartOrEnd();
                                     renewBusRefreshTimer();
                                     renewTimeUntilTimer();
                                     new Timer().schedule(new TimerTask() {
@@ -433,14 +434,13 @@ public class MainActivity extends Activity {
                             if (networkInfo != null && networkInfo.isConnected()) {
                                 offline = false;
                                 new Downloader(busDownloaderHelper).execute(vehiclesURL);
-                            }
-                            else if (!offline){
+                            } else if (!offline) {
                                 offline = true;
                                 Context context = getApplicationContext();
                                 CharSequence text = "Unable to connect to the network.";
                                 int duration = Toast.LENGTH_SHORT;
 
-                                if (context != null){
+                                if (context != null) {
                                     Toast toast = Toast.makeText(context, text, duration);
                                     toast.show();
                                 }
@@ -601,7 +601,7 @@ public class MainActivity extends Activity {
                             mMap.addPolyline(p);
                             //Log.v("MapDebugging", "Success!");
                         }
-                        //else //Log.v("MapDebugging", "Segment was null for " + r.getID());
+                        //else Log.v("MapDebugging", "Segment was null for " + r.getID());
                     }
                 }
             }
@@ -610,7 +610,7 @@ public class MainActivity extends Activity {
                 try {
                     mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 30));
                 } catch (IllegalStateException e) {      // In case the view is not done being created.
-                    e.printStackTrace();
+                    //e.printStackTrace();
                     mMap.moveCamera(
                             CameraUpdateFactory
                                     .newLatLngBounds(
