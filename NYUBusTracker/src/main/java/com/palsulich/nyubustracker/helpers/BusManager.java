@@ -400,17 +400,17 @@ public final class BusManager {
     }
 
     public static void parseSegments(JSONObject segmentsJSON) throws JSONException{
-        final BusManager sharedManager = BusManager.getBusManager();
         JSONObject jSegments = new JSONObject();
-        if (segmentsJSON != null) jSegments = segmentsJSON.getJSONObject("data");
-        Iterator<String> keys = jSegments.keys();
+        Iterator keys = jSegments.keys();
 
         while(keys.hasNext()){
-            String key = keys.next();
-            String line = jSegments.getString(key);
-            //Log.v("MapDebugging", "Key: " + key);
-            segments.put(key, new PolylineOptions().addAll(PolyUtil.decode(line)));
-            //Log.v("MapDebugging", "*Adding segment: " + key + " | " + line);
+            Object key = keys.next();
+            if (key instanceof String){
+                String line = jSegments.getString((String) key);
+                //Log.v("MapDebugging", "Key: " + key);
+                segments.put((String) key, new PolylineOptions().addAll(PolyUtil.decode(line)));
+                //Log.v("MapDebugging", "*Adding segment: " + key + " | " + line);
+            }
         }
     }
 }
