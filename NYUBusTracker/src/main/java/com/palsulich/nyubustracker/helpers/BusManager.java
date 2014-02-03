@@ -364,38 +364,24 @@ public final class BusManager {
         for (int i = 0; i < s.getRoutes().size(); i++) {
             if (routes.has(s.getRoutes().get(i).getID())) {
                 JSONObject routeTimes = routes.getJSONObject(s.getRoutes().get(i).getID());
-                if (routeTimes.has(BusManager.TAG_WEEKDAY)) {
-                    JSONArray weekdayTimesJson = routeTimes.getJSONArray(BusManager.TAG_WEEKDAY);
-                    //Log.v("Debugging", "Found " + weekdayTimesJson.length() + " weekday times.");
-                    if (weekdayTimesJson != null) {
-                        String weekdayRoute = routeTimes.getString(BusManager.TAG_ROUTE);
-                        weekdayRoute = weekdayRoute.substring(weekdayRoute.indexOf("Route ") + "Route ".length());
-                        for (int k = 0; k < weekdayTimesJson.length(); k++) {
-                            s.addTime(new Time(weekdayTimesJson.getString(k), Time.TimeOfWeek.Weekday, weekdayRoute));
-                        }
-                    }
+                getTimes(routeTimes, TAG_WEEKDAY, s, Time.TimeOfWeek.Weekday);
+                getTimes(routeTimes, TAG_FRIDAY, s, Time.TimeOfWeek.Friday);
+                getTimes(routeTimes, TAG_WEEKDAY, s, Time.TimeOfWeek.Weekend);
+            }
+        }
+    }
+
+    private static void getTimes(JSONObject routeTimes, String tag, Stop s, Time.TimeOfWeek timeOfWeek) throws JSONException{
+        if (routeTimes.has(tag)){
+            JSONArray timesJson = routeTimes.getJSONArray(tag);
+            //Log.v("Debugging", "Found " + weekendTimesJson.length() + " weekend times.");
+            if (timesJson != null) {
+                String route = routeTimes.getString(BusManager.TAG_ROUTE);
+                if (route.contains("Route ")){
+                    route = route.substring(route.indexOf("Route ") + "Route ".length());
                 }
-                if (routeTimes.has(BusManager.TAG_FRIDAY)) {
-                    JSONArray fridayTimesJson = routeTimes.getJSONArray(BusManager.TAG_FRIDAY);
-                    //Log.v("Debugging", "Found " + fridayTimesJson.length() + " friday times.");
-                    if (fridayTimesJson != null) {
-                        String fridayRoute = routeTimes.getString(BusManager.TAG_ROUTE);
-                        fridayRoute = fridayRoute.substring(fridayRoute.indexOf("Route ") + "Route ".length());
-                        for (int k = 0; k < fridayTimesJson.length(); k++) {
-                            s.addTime(new Time(fridayTimesJson.getString(k), Time.TimeOfWeek.Friday, fridayRoute));
-                        }
-                    }
-                }
-                if (routeTimes.has(BusManager.TAG_WEEKEND)) {
-                    JSONArray weekendTimesJson = routeTimes.getJSONArray(BusManager.TAG_WEEKEND);
-                    //Log.v("Debugging", "Found " + weekendTimesJson.length() + " weekend times.");
-                    if (weekendTimesJson != null) {
-                        String weekendRoute = routeTimes.getString(BusManager.TAG_ROUTE);
-                        weekendRoute = weekendRoute.substring(weekendRoute.indexOf("Route ") + "Route ".length());
-                        for (int k = 0; k < weekendTimesJson.length(); k++) {
-                            s.addTime(new Time(weekendTimesJson.getString(k), Time.TimeOfWeek.Weekend, weekendRoute));
-                        }
-                    }
+                for (int k = 0; k < timesJson.length(); k++) {
+                    s.addTime(new Time(timesJson.getString(k), timeOfWeek, route));
                 }
             }
         }

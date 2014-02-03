@@ -17,7 +17,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Gravity;
-import android.view.Menu;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -559,19 +558,11 @@ public class MainActivity extends Activity {
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
     public static Bitmap rotateBitmap(Bitmap source, float angle) {
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
-
 
     // Clear the map of all buses and put them all back on in their new locations.
     private void updateMapWithNewBusLocations() {
@@ -676,7 +667,7 @@ public class MainActivity extends Activity {
             }
             if (routes.size() > 0 && stop != startStop) {
                 endStop = stop;
-                ((Button) findViewById(R.id.to_button)).setText(stop.getUltimateName());
+                ((Button) findViewById(R.id.end_button)).setText(stop.getUltimateName());
                 if (startStop != null) {
                     setNextBusTime();    // Don't set the next bus if we don't have a valid route.
                     if (routesBetweenStartAndEnd != null && haveAMap) updateMapWithNewStartOrEnd();
@@ -700,15 +691,15 @@ public class MainActivity extends Activity {
                 // Swap the start and end stops.
                 Stop temp = startStop;
                 startStop = endStop;
-                ((Button) findViewById(R.id.from_button)).setText(startStop.getUltimateName());
+                ((Button) findViewById(R.id.start_button)).setText(startStop.getUltimateName());
                 endStop = temp;
-                ((Button) findViewById(R.id.to_button)).setText(endStop.getUltimateName());
+                ((Button) findViewById(R.id.end_button)).setText(endStop.getUltimateName());
                 setNextBusTime();
                 updateMapWithNewStartOrEnd();
             }
             else { // We have a new start. So, we must ensure the end is actually connected. If not, pick a random connected stop.
                 startStop = stop;
-                ((Button) findViewById(R.id.from_button)).setText(stop.getUltimateName());
+                ((Button) findViewById(R.id.start_button)).setText(stop.getUltimateName());
                 if (endStop != null) {
                     // Loop through all connected Routes.
                     for (Route r : startStop.getRoutes()) {
