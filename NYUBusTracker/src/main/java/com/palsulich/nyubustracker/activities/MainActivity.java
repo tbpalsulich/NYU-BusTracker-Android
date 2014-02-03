@@ -16,7 +16,6 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -556,8 +555,13 @@ public class MainActivity extends Activity {
             busesOnMap = new ArrayList<Marker>();
             if (clickableMapMarkers == null)
                 clickableMapMarkers = new HashMap<String, Boolean>();  // New set of buses means new set of clickable markers!
+            boolean somethingActive = false;    // Used to make sure we put at least one set of segments on the map.
             for (Route r : routesBetweenStartAndEnd) {
-                if (r.isActive()) {
+                somethingActive = somethingActive || r.isActive(startStop);
+            }
+            for (Route r : routesBetweenStartAndEnd) {
+                if (r.isActive(startStop) || !somethingActive) {
+                    somethingActive = true;
                     for (Bus b : sharedManager.getBuses()) {
                         //Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
                         if (b.getRoute().equals(r.getID())) {
@@ -592,10 +596,10 @@ public class MainActivity extends Activity {
             boolean validBuilder = false;
             boolean somethingActive = false;    // Used to make sure we put at least one set of segments on the map.
             for (Route r : routesBetweenStartAndEnd) {
-                somethingActive = somethingActive || r.isActive();
+                somethingActive = somethingActive || r.isActive(startStop);
             }
             for (Route r : routesBetweenStartAndEnd) {
-                if (r.isActive() || !somethingActive) {
+                if (r.isActive(startStop) || !somethingActive) {
                     somethingActive = true;
                     //Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
                     for (Stop s : r.getStops()) {

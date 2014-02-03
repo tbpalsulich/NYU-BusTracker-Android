@@ -1,7 +1,5 @@
 package com.palsulich.nyubustracker.models;
 
-import android.util.Log;
-
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.palsulich.nyubustracker.helpers.BusManager;
 
@@ -18,6 +16,7 @@ public class Route {
     BusManager sharedManager;
     ArrayList<String> segmentIDs;
     ArrayList<PolylineOptions> segments;
+    boolean active = true;
 
     public Route(String mLongName, String mRouteID){
         segmentIDs = new ArrayList<String>();
@@ -34,6 +33,10 @@ public class Route {
 
     public String toString(){
         return longName;
+    }
+
+    public void setActive(boolean active){
+        this.active = active;
     }
 
     public Route setName(String name){
@@ -71,13 +74,10 @@ public class Route {
         else stops.add(index, stop);
     }
 
-    public boolean isActive(){
-        ArrayList<Time> times = sharedManager.getStopByName("715 Broadway @ Washington Square").getTimesOfRoute(longName);
+    public boolean isActive(Stop s){
         Time currentTime = Time.getCurrentTime();
-        for (Time t : times){
-            if (!t.isStrictlyBefore(currentTime) && currentTime.getTimeOfWeek() == t.getTimeOfWeek()){
-                return true;
-            }
+        for (Time t : s.getTimesOfRoute(this.getLongName())){
+            if (t.isStrictlyBefore(currentTime)) return active;
         }
         return false;
     }
@@ -95,6 +95,7 @@ public class Route {
             for (int i = 0; i < stops.length(); i++){
                 r.addStop(i, sharedManager.getStopByID(stops.getString(i)));
             }
+            r.setActive(routeObject.getBoolean("is_active"));
             JSONArray segments = routeObject.getJSONArray(BusManager.TAG_SEGMENTS);
             //Log.v("MapDebugging", "Found " + segments.length() + " segments for route " + routeID);
             for (int i = 0; i < segments.length(); i++){
