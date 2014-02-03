@@ -345,39 +345,65 @@ public class MainActivity extends Activity {
                         }
                     }
                 }, 0L, 500L);
-            } else if (!offline){
+            } else if (!offline) {
                 offline = true;
                 Context context = getApplicationContext();
                 CharSequence text = "Unable to connect to the network.";
                 int duration = Toast.LENGTH_SHORT;
 
-                if (context != null){
+                if (context != null) {
                     Toast toast = Toast.makeText(context, text, duration);
                     toast.show();
                 }
             }
         } else {
-            if (!sharedManager.hasRoutes() || !sharedManager.hasStops()){
+            if (!sharedManager.hasRoutes() || !sharedManager.hasStops()) {
                 //Log.v("Refactor", "Parsing cached files...");
-                try{
+                try {
                     Stop.parseJSON(new JSONObject(readSavedData(STOP_JSON_FILE)));
                     Route.parseJSON(new JSONObject(readSavedData(ROUTE_JSON_FILE)));
                     BusManager.parseSegments(new JSONObject(readSavedData(SEGMENT_JSON_FILE)));
                     BusManager.parseVersion(new JSONObject(readSavedData(VERSION_JSON_FILE)));
-                    for (String timeURL : BusManager.getTimesToDownload()){
+                    for (String timeURL : BusManager.getTimesToDownload()) {
                         String timeFileName = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
                         //Log.v("Refactor", "Trying to parse " + timeFileName);
                         BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
                     }
                     preferences = getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE);
                     //Log.v("Refactor", "Done parsing...");
-                    for (Stop s : sharedManager.getStops()){
+                    for (Stop s : sharedManager.getStops()) {
                         boolean result = preferences.getBoolean(s.getID(), false);
                         //Log.v("Refactor", s.getName() + " is " + result);
                         s.setFavorite(result);
                     }
-                    //TODO: Make network call to check version. But, should ask the user how often they want to check for updates.
-                } catch (JSONException e){
+                    new Downloader(new DownloaderHelper() {
+                        @Override
+                        public void parse(JSONObject jsonObject) {
+                            try {
+                                BusManager.parseVersion(jsonObject);
+                                for (String timeURL : BusManager.getTimesToDownload()) {
+                                    SharedPreferences preferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
+                                    String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
+                                    //Log.v("Refactor", "Time to download: " + stopID);
+                                    int newestStopTimeVersion = BusManager.getTimesVersions().get(stopID);
+                                    if (preferences.getInt(stopID, 0) != newestStopTimeVersion) {
+                                        new Downloader(timeDownloaderHelper).execute(timeURL);
+                                        preferences.edit().putInt(stopID, newestStopTimeVersion).commit();
+                                    }
+                                }
+                                FileOutputStream fos = openFileOutput(VERSION_JSON_FILE, MODE_PRIVATE);
+                                fos.write(jsonObject.toString().getBytes());
+                                fos.close();
+                            } catch (JSONException e) {
+                                //Log.e("JSON", "Error parsing Version JSON.");
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                //Log.e("JSON", "Error with Version JSON IO.");
+                                e.printStackTrace();
+                            }
+                        }
+                    }).execute(versionURL);
+                } catch (JSONException e) {
                     //Log.e("RefactorJSON", "Error with JSON parsing cached file.");
                     e.printStackTrace();
                 }
