@@ -11,7 +11,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:paddingLeft="2dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="2dp"
         android:focusable="false"/>
 
     <TextView

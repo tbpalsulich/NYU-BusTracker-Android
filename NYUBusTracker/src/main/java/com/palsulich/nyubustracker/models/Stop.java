@@ -67,7 +67,11 @@ public class Stop {
     }
 
     public boolean hasTimes(){
-        return times.size() > 0;
+        if (times.size() > 0) return true;
+        for (Stop childStop : childStops){
+            if (childStop.hasTimes()) return true;
+        }
+        return false;
     }
 
     public void setParentStop(Stop parent){

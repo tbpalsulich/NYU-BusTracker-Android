@@ -588,8 +588,13 @@ public class MainActivity extends Activity {
             clickableMapMarkers = new HashMap<String, Boolean>();
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             boolean validBuilder = false;
+            boolean somethingActive = false;    // Used to make sure we put at least one set of segments on the map.
             for (Route r : routesBetweenStartAndEnd) {
-                if (r.isActive()) {
+                somethingActive = r.isActive();
+            }
+            for (Route r : routesBetweenStartAndEnd) {
+                if (r.isActive() || !somethingActive) {
+                    somethingActive = true;
                     //Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
                     for (Stop s : r.getStops()) {
                         for (Stop f : s.getFamily()) {
@@ -665,6 +670,14 @@ public class MainActivity extends Activity {
                     setNextBusTime();    // Don't set the next bus if we don't have a valid route.
                     if (routesBetweenStartAndEnd != null && haveAMap) updateMapWithNewStartOrEnd();
                 }
+            } else {
+                ArrayList<Route> startRoutes = startStop.getRoutes();
+                if (startRoutes.size() > 0) {
+                    ArrayList<Stop> someConnectedStops = startStop.getRoutes().get(0).getStops();
+                    if (someConnectedStops.size() > 0) {
+                        setEndStop(someConnectedStops.get((someConnectedStops.indexOf(startStop) + 1) % someConnectedStops.size()));
+                    }
+                }
             }
         }
     }
@@ -686,7 +699,7 @@ public class MainActivity extends Activity {
                 if (endStop != null) {
                     // Loop through all connected Routes.
                     for (Route r : startStop.getRoutes()) {
-                        if (r.hasStop(endStop) && endStop.getTimesOfRoute(r.getLongName()).size() > 0) {  // If the current endStop is connected, we don't have to change endStop.
+                        if (r.hasStop(endStop) && startStop.getTimesOfRoute(r.getLongName()).size() > 0) {  // If the current endStop is connected, we don't have to change endStop.
                             setNextBusTime();
                             updateMapWithNewStartOrEnd();
                             return;
