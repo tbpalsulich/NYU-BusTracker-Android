@@ -70,7 +70,6 @@ public class Bus {
             Bus b = sharedManager.getBus(vehicleID);
             b.setHeading(busHeading).setLocation(busLat, busLng).setRoute(busRoute);
             //Log.v("BusLocations", "Parsing buses: bus id: " + vehicleID + " | bus' route: " + busRoute);
-
             //Log.v("JSONDebug", "Bus ID: " + vehicleID + " | Heading: " + busHeading + " | (" + busLat + ", " + busLng + ")");
         }
     }

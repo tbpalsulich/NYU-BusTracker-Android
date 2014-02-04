@@ -22,7 +22,6 @@ public final class BusManager {
     private static ArrayList<String> hideRoutes = null;     // Routes to not show the user.
     private static ArrayList<Bus> buses = null;
     private static ArrayList<String> timesToDownload = null;
-    private static ArrayList<String> segments = null;
     private static HashMap<String, Integer> timesVersions = null;
     private static boolean online;
 
@@ -44,17 +43,12 @@ public final class BusManager {
     public static final String TAG_SEGMENTS = "segments";
     public static final String TAG_STOPS = "stops";
 
-    public static ArrayList<Route> getRoutes() {
-        return routes;
-    }
-
     private BusManager() {
         stops = new ArrayList<Stop>();
         routes = new ArrayList<Route>();
         hideRoutes = new ArrayList<String>();
         buses = new ArrayList<Bus>();
         timesToDownload = new ArrayList<String>();
-        segments = new ArrayList<String>();
         timesVersions = new HashMap<String, Integer>();
         online = false;
     }
@@ -66,8 +60,8 @@ public final class BusManager {
         return sharedBusManager;
     }
 
-    public static ArrayList<String> getSegments() {
-        return segments;
+    public ArrayList<Route> getRoutes() {
+        return routes;
     }
 
     public boolean isOnline() {
@@ -78,7 +72,7 @@ public final class BusManager {
         online = state;
     }
 
-    public static ArrayList<String> getTimesToDownload() {
+    public ArrayList<String> getTimesToDownload() {
         return timesToDownload;
     }
 
@@ -93,7 +87,7 @@ public final class BusManager {
         return result;
     }
 
-    public static HashMap<String, Integer> getTimesVersions() {
+    public HashMap<String, Integer> getTimesVersions() {
         return timesVersions;
     }
 
@@ -249,7 +243,7 @@ public final class BusManager {
         else return r.setName(name);
     }
 
-    public static int distanceBetween(Stop stop1, Stop stop2) {
+    public int distanceBetween(Stop stop1, Stop stop2) {
         // Check these stops and their children.
         int result = 100;
         if (stop1 != null && stop2 != null) {
@@ -369,18 +363,18 @@ public final class BusManager {
                 JSONObject routeTimes = routes.getJSONObject(s.getRoutes().get(i).getID());
                 getTimes(routeTimes, TAG_WEEKDAY, s, Time.TimeOfWeek.Weekday);
                 getTimes(routeTimes, TAG_FRIDAY, s, Time.TimeOfWeek.Friday);
-                getTimes(routeTimes, TAG_WEEKDAY, s, Time.TimeOfWeek.Weekend);
+                getTimes(routeTimes, TAG_WEEKEND, s, Time.TimeOfWeek.Weekend);
             }
         }
     }
 
-    private static void getTimes(JSONObject routeTimes, String tag, Stop s, Time.TimeOfWeek timeOfWeek) throws JSONException{
-        if (routeTimes.has(tag)){
+    private static void getTimes(JSONObject routeTimes, String tag, Stop s, Time.TimeOfWeek timeOfWeek) throws JSONException {
+        if (routeTimes.has(tag)) {
             JSONArray timesJson = routeTimes.getJSONArray(tag);
             //Log.v("Debugging", "Found " + weekendTimesJson.length() + " weekend times.");
             if (timesJson != null) {
                 String route = routeTimes.getString(BusManager.TAG_ROUTE);
-                if (route.contains("Route ")){
+                if (route.contains("Route ")) {
                     route = route.substring(route.indexOf("Route ") + "Route ".length());
                 }
                 for (int k = 0; k < timesJson.length(); k++) {
@@ -394,10 +388,10 @@ public final class BusManager {
         JSONObject jSegments = new JSONObject();
         if (segmentsJSON != null) jSegments = segmentsJSON.getJSONObject("data");
         BusManager sharedManager = BusManager.getBusManager();
-        if (jSegments != null){
-            for (Route r : sharedManager.getRoutes()){
-                for (String seg : r.getSegmentIDs()){
-                    if (jSegments.has(seg)){
+        if (jSegments != null) {
+            for (Route r : sharedManager.getRoutes()) {
+                for (String seg : r.getSegmentIDs()) {
+                    if (jSegments.has(seg)) {
                         r.getSegments().add(new PolylineOptions().addAll(PolyUtil.decode(jSegments.getString(seg))));
                     }
                 }

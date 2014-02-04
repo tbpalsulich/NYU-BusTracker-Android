@@ -243,14 +243,7 @@ public class Stop {
     }
 
     public boolean isRelatedTo(Stop stop) {
-        boolean result = (this.getUltimateName().equals(stop.getUltimateName()));
-        if (result) {
-            return true;
-        }
-        else {
-            //Log.v("Combine Debugging", this + " is not related to " + stop);
-            return false;
-        }
+        return (this.getUltimateName().equals(stop.getUltimateName()));
     }
 
     public static void parseJSON(JSONObject stopsJson) throws JSONException {
@@ -267,11 +260,11 @@ public class Stop {
             String stopLng = location.getString(BusManager.TAG_LNG);
             JSONArray stopRoutes = stopObject.getJSONArray(BusManager.TAG_ROUTES);
             String[] routes = new String[stopRoutes.length()];
-            String routesString = "";
+            //String routesString = "";
             for (int j = 0; j < stopRoutes.length(); j++) {
                 routes[j] = stopRoutes.getString(j);
-                routesString += routes[j];
-                if (j != stopRoutes.length() - 1) routesString += ", ";
+                //routesString += routes[j];
+                //if (j != stopRoutes.length() - 1) routesString += ", ";
             }
             Stop s = sharedManager.getStop(stopName, stopLat, stopLng, stopID, routes);
             sharedManager.addStop(s);

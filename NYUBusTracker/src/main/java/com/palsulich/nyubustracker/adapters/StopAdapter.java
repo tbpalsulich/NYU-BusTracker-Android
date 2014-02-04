@@ -53,15 +53,18 @@ public class StopAdapter extends BaseAdapter {
         ViewHolder holder;
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.stop_list_item, null);
-            holder = new ViewHolder();
-            // Get the specific views and store them in a ViewHolder.
-            holder.text = (TextView) convertView.findViewById(R.id.stop_text);
-            holder.checkbox = (CheckBox) convertView.findViewById(R.id.stop_checkbox);
+            if (convertView != null) {
+                holder = new ViewHolder();
+                // Get the specific views and store them in a ViewHolder.
+                holder.text = (TextView) convertView.findViewById(R.id.stop_text);
+                holder.checkbox = (CheckBox) convertView.findViewById(R.id.stop_checkbox);
 
-            // Set their onClickListeners to the ones provided in the constructor.
-            holder.checkbox.setOnCheckedChangeListener(checkBoxOnCLickListener);
-            holder.text.setOnClickListener(textOnClickListener);
-            convertView.setTag(holder);
+                // Set their onClickListeners to the ones provided in the constructor.
+                holder.checkbox.setOnCheckedChangeListener(checkBoxOnCLickListener);
+                holder.text.setOnClickListener(textOnClickListener);
+                convertView.setTag(holder);
+            }
+            else return new View(null);   // Should never reach here.
         }
         else {
             holder = (ViewHolder) convertView.getTag();

@@ -166,12 +166,13 @@ public class MainActivity extends Activity {
         @Override
         public void parse(JSONObject jsonObject) {
             try {
+                BusManager sharedManager = BusManager.getBusManager();
                 BusManager.parseVersion(jsonObject);
-                for (String timeURL : BusManager.getTimesToDownload()) {
+                for (String timeURL : sharedManager.getTimesToDownload()) {
                     SharedPreferences preferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
                     String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
                     //Log.v("Refactor", "Time to download: " + stopID);
-                    int newestStopTimeVersion = BusManager.getTimesVersions().get(stopID);
+                    int newestStopTimeVersion = sharedManager.getTimesVersions().get(stopID);
                     if (preferences.getInt(stopID, 0) != newestStopTimeVersion) {
                         new Downloader(timeDownloaderHelper).execute(timeURL);
                         preferences.edit().putInt(stopID, newestStopTimeVersion);
@@ -393,7 +394,7 @@ public class MainActivity extends Activity {
                     Route.parseJSON(new JSONObject(readSavedData(ROUTE_JSON_FILE)));
                     BusManager.parseSegments(new JSONObject(readSavedData(SEGMENT_JSON_FILE)));
                     BusManager.parseVersion(new JSONObject(readSavedData(VERSION_JSON_FILE)));
-                    for (String timeURL : BusManager.getTimesToDownload()) {
+                    for (String timeURL : sharedManager.getTimesToDownload()) {
                         String timeFileName = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
                         //Log.v("Refactor", "Trying to parse " + timeFileName);
                         BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
@@ -410,11 +411,11 @@ public class MainActivity extends Activity {
                         public void parse(JSONObject jsonObject) {
                             try {
                                 BusManager.parseVersion(jsonObject);
-                                for (String timeURL : BusManager.getTimesToDownload()) {
+                                for (String timeURL : sharedManager.getTimesToDownload()) {
                                     SharedPreferences preferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
                                     String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
                                     //Log.v("Refactor", "Time to download: " + stopID);
-                                    int newestStopTimeVersion = BusManager.getTimesVersions().get(stopID);
+                                    int newestStopTimeVersion = sharedManager.getTimesVersions().get(stopID);
                                     if (preferences.getInt(stopID, 0) != newestStopTimeVersion) {
                                         new Downloader(timeDownloaderHelper).execute(timeURL);
                                         preferences.edit().putInt(stopID, newestStopTimeVersion).commit();
@@ -620,10 +621,6 @@ public class MainActivity extends Activity {
                                                                         .position(f.getLocation()).title(f.getName()).anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_map_stop))));
                                 clickableMapMarkers.put(mMarker.getId(), true);
                             }
-                            else {
-                                //Log.v("MapDebugging", "** Hiding " + f);
-                                //Log.v("MapDebugging", "      " + f.isHidden());// && !s.isRelatedTo(startStop) && !s.isRelatedTo(endStop)));
-                            }
                         }
                     }
                     updateMapWithNewBusLocations();
@@ -740,20 +737,21 @@ public class MainActivity extends Activity {
                 availableRoutes.add(r);
             }
         }
-        int bestDistance = BusManager.distanceBetween(startStop, endStop);
+        BusManager sharedManager = BusManager.getBusManager();
+        int bestDistance = sharedManager.distanceBetween(startStop, endStop);
 
-        int testDistance = BusManager.distanceBetween(startStop.getOppositeStop(), endStop.getOppositeStop());
+        int testDistance = sharedManager.distanceBetween(startStop.getOppositeStop(), endStop.getOppositeStop());
         if (testDistance < bestDistance) {
             startStop = startStop.getOppositeStop();
             endStop = endStop.getOppositeStop();
         }
 
-        testDistance = BusManager.distanceBetween(startStop, endStop.getOppositeStop());
+        testDistance = sharedManager.distanceBetween(startStop, endStop.getOppositeStop());
         if (testDistance < bestDistance) {
             endStop = endStop.getOppositeStop();
         }
 
-        testDistance = BusManager.distanceBetween(startStop.getOppositeStop(), endStop);
+        testDistance = sharedManager.distanceBetween(startStop.getOppositeStop(), endStop);
         if (testDistance < bestDistance) {
             startStop = startStop.getOppositeStop();
         }
@@ -926,7 +924,7 @@ public class MainActivity extends Activity {
             conn.setDoInput(true);
             // Starts the query
             conn.connect();
-            int response = conn.getResponseCode();
+            //int response = conn.getResponseCode();
             //Log.d("JSON", "The response is: " + response);
             is = conn.getInputStream();
 

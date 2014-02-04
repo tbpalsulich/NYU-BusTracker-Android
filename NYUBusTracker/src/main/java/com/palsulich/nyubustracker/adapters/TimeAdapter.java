@@ -41,19 +41,29 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
         if (convertView == null) {
-            viewHolder = new ViewHolder();
             convertView = inflater.inflate(R.layout.time_list_item, null);
-            viewHolder.timeText = (TextView) convertView.findViewById(R.id.time_text);
-            viewHolder.viaRouteText = (TextView) convertView.findViewById(R.id.route_text);
-            convertView.setTag(viewHolder);
+            if (convertView != null) {
+                viewHolder = new ViewHolder();
+                viewHolder.timeText = (TextView) convertView.findViewById(R.id.time_text);
+                viewHolder.viaRouteText = (TextView) convertView.findViewById(R.id.route_text);
+                convertView.setTag(viewHolder);
+            }
+            else return new View(null);
         }
         else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
         if (viewHolder.timeText != null)
             viewHolder.timeText.setText(times.get(position).toString());
-        if (viewHolder.viaRouteText != null)
-            viewHolder.viaRouteText.setText("Route " + times.get(position).getRoute());
+        if (viewHolder.viaRouteText != null) {
+            String route = times.get(position).getRoute();
+            if (route.length() == 1) {
+                viewHolder.viaRouteText.setText("Route " + route);
+            }
+            else {
+                viewHolder.viaRouteText.setText(route);
+            }
+        }
         return convertView;
     }
 
@@ -61,10 +71,13 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
     public View getHeaderView(int position, View convertView, ViewGroup parent) {
         HeaderViewHolder holder;
         if (convertView == null) {
-            holder = new HeaderViewHolder();
             convertView = inflater.inflate(R.layout.time_list_header, parent, false);
-            holder.text = (TextView) convertView.findViewById(R.id.time_text);
-            convertView.setTag(holder);
+            if (convertView != null) {
+                holder = new HeaderViewHolder();
+                holder.text = (TextView) convertView.findViewById(R.id.time_text);
+                convertView.setTag(holder);
+            }
+            else return new View(null); // Should never reach here.
         }
         else {
             holder = (HeaderViewHolder) convertView.getTag();
