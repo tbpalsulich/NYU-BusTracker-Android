@@ -35,6 +35,10 @@ public class Route {
         return longName;
     }
 
+    public ArrayList<PolylineOptions> getSegments(){
+        return segments;
+    }
+
     public void setActive(boolean active) {
         this.active = active;
     }

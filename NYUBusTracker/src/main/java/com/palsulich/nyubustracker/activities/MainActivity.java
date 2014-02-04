@@ -628,9 +628,8 @@ public class MainActivity extends Activity {
                     }
                     updateMapWithNewBusLocations();
                     // Adds the segments of every Route to the map.
-                    for (String id : r.getSegmentIDs()) {
+                    for (PolylineOptions p : r.getSegments()) {
                         //Log.v("MapDebugging", "Trying to add a segment to the map: " + id);
-                        PolylineOptions p = BusManager.getSegment(id);
                         if (p != null) {
                             for (LatLng loc : p.getPoints()) {
                                 validBuilder = true;

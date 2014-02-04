@@ -14,7 +14,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 
 public final class BusManager {
     private static BusManager sharedBusManager = null;      // Singleton instance.
@@ -23,8 +22,8 @@ public final class BusManager {
     private static ArrayList<String> hideRoutes = null;     // Routes to not show the user.
     private static ArrayList<Bus> buses = null;
     private static ArrayList<String> timesToDownload = null;
+    private static ArrayList<String> segments = null;
     private static HashMap<String, Integer> timesVersions = null;
-    private static HashMap<String, PolylineOptions> segments;
     private static boolean online;
 
     public static final String TAG_DATA = "data";
@@ -45,14 +44,18 @@ public final class BusManager {
     public static final String TAG_SEGMENTS = "segments";
     public static final String TAG_STOPS = "stops";
 
+    public static ArrayList<Route> getRoutes() {
+        return routes;
+    }
+
     private BusManager() {
         stops = new ArrayList<Stop>();
         routes = new ArrayList<Route>();
         hideRoutes = new ArrayList<String>();
         buses = new ArrayList<Bus>();
         timesToDownload = new ArrayList<String>();
+        segments = new ArrayList<String>();
         timesVersions = new HashMap<String, Integer>();
-        segments = new HashMap<String, PolylineOptions>();
         online = false;
     }
 
@@ -63,16 +66,16 @@ public final class BusManager {
         return sharedBusManager;
     }
 
+    public static ArrayList<String> getSegments() {
+        return segments;
+    }
+
     public boolean isOnline() {
         return online;
     }
 
     public void setOnline(boolean state) {
         online = state;
-    }
-
-    public static PolylineOptions getSegment(String id) {
-        return segments.get(id);
     }
 
     public static ArrayList<String> getTimesToDownload() {
@@ -390,15 +393,14 @@ public final class BusManager {
     public static void parseSegments(JSONObject segmentsJSON) throws JSONException {
         JSONObject jSegments = new JSONObject();
         if (segmentsJSON != null) jSegments = segmentsJSON.getJSONObject("data");
-        Iterator<?> keys = jSegments.keys();
-
-        while (keys.hasNext()) {
-            Object key = keys.next();
-            if (key instanceof String) {
-                String line = jSegments.getString((String) key);
-                //Log.v("MapDebugging", "Key: " + key);
-                segments.put((String) key, new PolylineOptions().addAll(PolyUtil.decode(line)));
-                //Log.v("MapDebugging", "*Adding segment: " + key + " | " + line);
+        BusManager sharedManager = BusManager.getBusManager();
+        if (jSegments != null){
+            for (Route r : sharedManager.getRoutes()){
+                for (String seg : r.getSegmentIDs()){
+                    if (jSegments.has(seg)){
+                        r.getSegments().add(new PolylineOptions().addAll(PolyUtil.decode(jSegments.getString(seg))));
+                    }
+                }
             }
         }
     }
