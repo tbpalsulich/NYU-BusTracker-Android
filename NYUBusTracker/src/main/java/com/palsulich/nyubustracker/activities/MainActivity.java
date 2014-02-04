@@ -16,6 +16,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
@@ -513,8 +514,8 @@ public class MainActivity extends Activity {
         super.onDestroy();
         //Log.v("General Debugging", "onDestroy!");
         cacheToAndStartStop();      // Remember user's preferences across lifetimes.
-        timeUntilTimer.cancel();           // Don't need a timer anymore -- must be recreated onResume.
-        busRefreshTimer.cancel();
+        if (timeUntilTimer != null) timeUntilTimer.cancel();           // Don't need a timer anymore -- must be recreated onResume.
+        if (busRefreshTimer != null) busRefreshTimer.cancel();
     }
 
     @Override
@@ -626,7 +627,7 @@ public class MainActivity extends Activity {
                     updateMapWithNewBusLocations();
                     // Adds the segments of every Route to the map.
                     for (PolylineOptions p : r.getSegments()) {
-                        //Log.v("MapDebugging", "Trying to add a segment to the map: " + id);
+                        //Log.v("MapDebugging", "Trying to add a segment to the map");
                         if (p != null) {
                             for (LatLng loc : p.getPoints()) {
                                 validBuilder = true;
@@ -733,7 +734,9 @@ public class MainActivity extends Activity {
         ArrayList<Route> endRoutes = endStop.getUltimateParent().getRoutes();
         ArrayList<Route> availableRoutes = new ArrayList<Route>();               // All the routes connecting the two.
         for (Route r : startRoutes) {
+            //Log.v("Routes", "Start Route: " + r);
             if (endRoutes.contains(r)) {
+                //Log.v("Routes", "*  is available.");
                 availableRoutes.add(r);
             }
         }
