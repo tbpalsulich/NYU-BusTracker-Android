@@ -25,8 +25,7 @@ a list of Times corresponding to that particular route. Data accesses from the a
 BusManager. Tests for connection between stops generally go through BusManager, as well.
 
 * Every JSON file (segments, routes, stops, times) is cached when retrieved (except for bus
-locations). But, background network calls should be made after returning the cached data to ensure
-data shown to the user is up to date.
+locations). Background network calls are made to ensure data is up to date.
 
 * [Adapters](https://github.com/tpalsulich/NYU-BusTracker-Android/tree/master/NYUBusTracker/src/main/java/com/palsulich/nyubustracker/adapters)
 are required to display the list of stops and times. Stops can be selected as the start or end, or
@@ -35,5 +34,5 @@ correspond to (sometimes, more than one route travels between stops A and B).
 
 * There is only one activity: [MainActivity]
 (https://github.com/tpalsulich/NYU-BusTracker-Android/blob/master/NYUBusTracker/src/main/java/com/palsulich/nyubustracker/activities/MainActivity.java).
-We could create more to provide a full listing of times by route/stop instead of just between the
-selected two stops.
+In the future, we may add additional activities to access times in an alternate format (like by
+route + stop, instead of stop + stop).
