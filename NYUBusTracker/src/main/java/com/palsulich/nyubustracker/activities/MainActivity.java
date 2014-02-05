@@ -16,7 +16,6 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
@@ -109,7 +108,7 @@ public class MainActivity extends Activity {
         return "";
     }
 
-    private Downloader stopDownloader = new Downloader(new DownloaderHelper() {
+    private DownloaderHelper stopDownloaderHelper = new DownloaderHelper() {
         @Override
         public void parse(JSONObject jsonObject) {
             try {
@@ -125,9 +124,9 @@ public class MainActivity extends Activity {
                 e.printStackTrace();
             }
         }
-    });
+    };
 
-    private Downloader routeDownloader = new Downloader(new DownloaderHelper() {
+    private DownloaderHelper routeDownloaderHelper = new DownloaderHelper() {
         @Override
         public void parse(JSONObject jsonObject) {
             try {
@@ -143,9 +142,9 @@ public class MainActivity extends Activity {
                 e.printStackTrace();
             }
         }
-    });
+    };
 
-    private Downloader segmentDownloader = new Downloader(new DownloaderHelper() {
+    private DownloaderHelper segmentDownloaderHelper = new DownloaderHelper() {
         @Override
         public void parse(JSONObject jsonObject) {
             try {
@@ -161,9 +160,9 @@ public class MainActivity extends Activity {
                 e.printStackTrace();
             }
         }
-    });
+    };
 
-    private Downloader versionDownloader = new Downloader(new DownloaderHelper() {
+    private DownloaderHelper versionDownloaderHelper = new DownloaderHelper() {
         @Override
         public void parse(JSONObject jsonObject) {
             try {
@@ -190,7 +189,7 @@ public class MainActivity extends Activity {
                 e.printStackTrace();
             }
         }
-    });
+    };
 
     private DownloaderHelper busDownloaderHelper = new DownloaderHelper() {
         @Override
@@ -231,6 +230,11 @@ public class MainActivity extends Activity {
 
     private GoogleMap mMap;     // Map to display all stops, segments, and buses.
     private boolean haveAMap = false;   // Flag to see if the device can display a map.
+
+    AsyncTask stopDownloader;
+    AsyncTask routeDownloader;
+    AsyncTask segmentDownloader;
+    AsyncTask versionDownloader;
 
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
@@ -326,10 +330,10 @@ public class MainActivity extends Activity {
                 // Download and parse everything, put it all in persistent memory, continue.
                 progressDialog = ProgressDialog.show(this, "Downloading Data", "Please wait...", true, false);
 
-                stopDownloader.execute(stopsURL);
-                routeDownloader.execute(routesURL);
-                segmentDownloader.execute(segmentsURL);
-                versionDownloader.execute(versionURL);
+                stopDownloader = new Downloader(stopDownloaderHelper).execute(stopsURL);
+                routeDownloader = new Downloader(routeDownloaderHelper).execute(routesURL);
+                segmentDownloader = new Downloader(segmentDownloaderHelper).execute(segmentsURL);
+                versionDownloader = new Downloader(versionDownloaderHelper).execute(versionURL);
                 final AsyncTask busTask = new Downloader(busDownloaderHelper).execute(vehiclesURL);
 
                 new Timer().scheduleAtFixedRate(new TimerTask() {
@@ -867,7 +871,7 @@ public class MainActivity extends Activity {
         if (timesBetweenStartAndEnd != null) {
             // Library provided ListView with headers that (gasp) stick to the top.
             StickyListHeadersListView listView = new StickyListHeadersListView(this);
-            listView.setDivider(new ColorDrawable(0xffffff));
+            listView.setDivider(new ColorDrawable(getResources().getColor(R.color.white)));
             listView.setDividerHeight(1);
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             TimeAdapter adapter = new TimeAdapter(getApplicationContext(), timesBetweenStartAndEnd);
