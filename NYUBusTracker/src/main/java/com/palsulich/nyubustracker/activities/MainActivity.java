@@ -110,116 +110,71 @@ public class MainActivity extends Activity {
 
     private DownloaderHelper stopDownloaderHelper = new DownloaderHelper() {
         @Override
-        public void parse(JSONObject jsonObject) {
-            try {
-                Stop.parseJSON(jsonObject);
-                FileOutputStream fos = openFileOutput(STOP_JSON_FILE, MODE_PRIVATE);
-                fos.write(jsonObject.toString().getBytes());
-                fos.close();
-            } catch (JSONException e) {
-                //Log.e("JSON", "Error parsing Stop JSON.");
-                e.printStackTrace();
-            } catch (IOException e) {
-                //Log.e("JSON", "Error with Stop JSON IO.");
-                e.printStackTrace();
-            }
+        public void parse(JSONObject jsonObject) throws JSONException, IOException{
+            Stop.parseJSON(jsonObject);
+            FileOutputStream fos = openFileOutput(STOP_JSON_FILE, MODE_PRIVATE);
+            fos.write(jsonObject.toString().getBytes());
+            fos.close();
         }
     };
 
     private DownloaderHelper routeDownloaderHelper = new DownloaderHelper() {
         @Override
-        public void parse(JSONObject jsonObject) {
-            try {
-                Route.parseJSON(jsonObject);
-                FileOutputStream fos = openFileOutput(ROUTE_JSON_FILE, MODE_PRIVATE);
-                fos.write(jsonObject.toString().getBytes());
-                fos.close();
-            } catch (JSONException e) {
-                //Log.e("JSON", "Error parsing Route JSON.");
-                e.printStackTrace();
-            } catch (IOException e) {
-                //Log.e("JSON", "Error with Route JSON IO.");
-                e.printStackTrace();
-            }
+        public void parse(JSONObject jsonObject) throws JSONException, IOException{
+            Route.parseJSON(jsonObject);
+            FileOutputStream fos = openFileOutput(ROUTE_JSON_FILE, MODE_PRIVATE);
+            fos.write(jsonObject.toString().getBytes());
+            fos.close();
         }
     };
 
     private DownloaderHelper segmentDownloaderHelper = new DownloaderHelper() {
         @Override
-        public void parse(JSONObject jsonObject) {
-            try {
-                BusManager.parseSegments(jsonObject);
-                FileOutputStream fos = openFileOutput(SEGMENT_JSON_FILE, MODE_PRIVATE);
-                fos.write(jsonObject.toString().getBytes());
-                fos.close();
-            } catch (JSONException e) {
-                //Log.e("JSON", "Error parsing Segment JSON.");
-                e.printStackTrace();
-            } catch (IOException e) {
-                //Log.e("JSON", "Error with Segment JSON IO.");
-                e.printStackTrace();
-            }
+        public void parse(JSONObject jsonObject)  throws JSONException, IOException{
+            BusManager.parseSegments(jsonObject);
+            FileOutputStream fos = openFileOutput(SEGMENT_JSON_FILE, MODE_PRIVATE);
+            fos.write(jsonObject.toString().getBytes());
+            fos.close();
         }
     };
 
     private DownloaderHelper versionDownloaderHelper = new DownloaderHelper() {
         @Override
-        public void parse(JSONObject jsonObject) {
-            try {
-                BusManager sharedManager = BusManager.getBusManager();
-                BusManager.parseVersion(jsonObject);
-                for (String timeURL : sharedManager.getTimesToDownload()) {
-                    SharedPreferences preferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
-                    String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
-                    //Log.v("Refactor", "Time to download: " + stopID);
-                    int newestStopTimeVersion = sharedManager.getTimesVersions().get(stopID);
-                    if (preferences.getInt(stopID, 0) != newestStopTimeVersion) {
-                        new Downloader(timeDownloaderHelper).execute(timeURL);
-                        preferences.edit().putInt(stopID, newestStopTimeVersion);
-                    }
+        public void parse(JSONObject jsonObject) throws JSONException, IOException{
+            BusManager sharedManager = BusManager.getBusManager();
+            BusManager.parseVersion(jsonObject);
+            for (String timeURL : sharedManager.getTimesToDownload()) {
+                SharedPreferences preferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
+                String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
+                //Log.v("Refactor", "Time to download: " + stopID);
+                int newestStopTimeVersion = sharedManager.getTimesVersions().get(stopID);
+                if (preferences.getInt(stopID, 0) != newestStopTimeVersion) {
+                    new Downloader(timeDownloaderHelper).execute(timeURL);
+                    preferences.edit().putInt(stopID, newestStopTimeVersion);
                 }
-                FileOutputStream fos = openFileOutput(VERSION_JSON_FILE, MODE_PRIVATE);
-                fos.write(jsonObject.toString().getBytes());
-                fos.close();
-            } catch (JSONException e) {
-                //Log.e("JSON", "Error parsing Version JSON.");
-                e.printStackTrace();
-            } catch (IOException e) {
-                //Log.e("JSON", "Error with Version JSON IO.");
-                e.printStackTrace();
             }
+            FileOutputStream fos = openFileOutput(VERSION_JSON_FILE, MODE_PRIVATE);
+            fos.write(jsonObject.toString().getBytes());
+            fos.close();
         }
     };
 
     private DownloaderHelper busDownloaderHelper = new DownloaderHelper() {
         @Override
-        public void parse(JSONObject jsonObject) {
-            try {
-                Bus.parseJSON(jsonObject);
-                updateMapWithNewBusLocations();
-            } catch (JSONException e) {
-                //Log.e("JSON", "Error parsing Vehicle JSON.");
-                e.printStackTrace();
-            }
+        public void parse(JSONObject jsonObject) throws JSONException, IOException {
+            Bus.parseJSON(jsonObject);
+            updateMapWithNewBusLocations();
         }
     };
 
     private DownloaderHelper timeDownloaderHelper = new DownloaderHelper() {
         @Override
-        public void parse(JSONObject jsonObject) {
-            try {
-                BusManager.parseTime(jsonObject);
-                //Log.v("Refactor", "Creating time cache file: " + jsonObject.getString("stop_id"));
-                FileOutputStream fos = openFileOutput(jsonObject.getString("stop_id"), MODE_PRIVATE);
-                fos.write(jsonObject.toString().getBytes());
-                fos.close();
-            } catch (JSONException e) {
-                //Log.e("JSON", "Error parsing Time JSON.");
-                e.printStackTrace();
-            } catch (IOException e) {
-                //Log.e("JSON", "Error with Time JSON IO.");
-                e.printStackTrace();
-            }
+        public void parse(JSONObject jsonObject) throws JSONException, IOException {
+            BusManager.parseTime(jsonObject);
+            //Log.v("Refactor", "Creating time cache file: " + jsonObject.getString("stop_id"));
+            FileOutputStream fos = openFileOutput(jsonObject.getString("stop_id"), MODE_PRIVATE);
+            fos.write(jsonObject.toString().getBytes());
+            fos.close();
         }
     };
 
@@ -827,6 +782,8 @@ public class MainActivity extends Activity {
         // Get all stops connected to the start stop.
         final ArrayList<Stop> connectedStops = BusManager.getBusManager().getConnectedStops(startStop);
         ListView listView = new ListView(this);     // ListView to populate the dialog.
+        listView.setDivider(new ColorDrawable(getResources().getColor(R.color.list_divider)));
+        listView.setDividerHeight(1);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);    // Used to build the dialog with the list of connected Stops.
         builder.setView(listView);
         final Dialog dialog = builder.create();
@@ -851,6 +808,8 @@ public class MainActivity extends Activity {
     public void createStartDialog(View view) {
         final ArrayList<Stop> stops = BusManager.getBusManager().getStops();    // Show every stop as an option to start.
         ListView listView = new ListView(this);
+        listView.setDivider(new ColorDrawable(getResources().getColor(R.color.list_divider)));
+        listView.setDividerHeight(1);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(listView);
         final Dialog dialog = builder.create();
@@ -871,7 +830,7 @@ public class MainActivity extends Activity {
         if (timesBetweenStartAndEnd != null) {
             // Library provided ListView with headers that (gasp) stick to the top.
             StickyListHeadersListView listView = new StickyListHeadersListView(this);
-            listView.setDivider(new ColorDrawable(getResources().getColor(R.color.white)));
+            listView.setDivider(new ColorDrawable(getResources().getColor(R.color.list_divider)));
             listView.setDividerHeight(1);
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             TimeAdapter adapter = new TimeAdapter(getApplicationContext(), timesBetweenStartAndEnd);
@@ -908,12 +867,16 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPostExecute(JSONObject result) {
-            helper.parse(result);
+            try{
+                helper.parse(result);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 
     public abstract class DownloaderHelper {
-        public abstract void parse(JSONObject jsonObject);
+        public abstract void parse(JSONObject jsonObject) throws JSONException, IOException;
     }
 
     // Given a URL, establishes an HttpUrlConnection and retrieves

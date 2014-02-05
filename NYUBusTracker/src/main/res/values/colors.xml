@@ -2,6 +2,7 @@
 <resources>
     <color name="purple">#6B21A8</color>
     <color name="white">#FFFFFF</color>
+    <color name="list_divider">#80677F</color>
     <color name="list_background">#6837A3</color>
     <color name="list_contrast_background">#A774FF</color>
 </resources>
