@@ -43,7 +43,12 @@ android {
             versionNameSuffix "-debug"
         }
     }
+}
 
+sourceSets {
+    instrumentTest {
+        java.srcDirs = ['instrumentTest/java']
+    }
 }
 
 dependencies {
