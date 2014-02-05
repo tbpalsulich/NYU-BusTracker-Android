@@ -739,11 +739,11 @@ public class MainActivity extends Activity {
                 Collections.sort(timesBetweenStartAndEnd, Time.compare);
                 int index = tempTimesBetweenStartAndEnd.indexOf(currentTime);
                 nextBusTime = tempTimesBetweenStartAndEnd.get((index + 1) % tempTimesBetweenStartAndEnd.size());
-                mSwitcher.setText(currentTime.getTimeAsStringUntil(nextBusTime));
+                mSwitcher.setText(currentTime.getTimeAsStringUntil(nextBusTime, getResources()));
 
                 if (BusManager.getBusManager().isOnline()) {
-                    ((TextView) findViewById(R.id.next_route)).setText("via Route " + nextBusTime.getRoute());
-                    ((TextView) findViewById(R.id.next_bus)).setText("Next Bus In:");
+                    ((TextView) findViewById(R.id.next_route)).setText(getString(R.string.via_route) + nextBusTime.getRoute());
+                    ((TextView) findViewById(R.id.next_bus)).setText(getString(R.string.next_bus_in));
                     findViewById(R.id.safe_ride_button).setVisibility(View.GONE);
                 }
                 else {

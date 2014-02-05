@@ -15,5 +15,16 @@
     <string name="unable_to_connect">Unable to connect to the network.</string>
     <string name="downloading">Downloading Data</string>
     <string name="wait">Please Wait&#8230;</string>
+    <string name="offline">Bus currently offline.</string>
+    <string name="less_one_minute">Less than 1 minute</string>
+    <string name="one_minute">1 minute</string>
+    <string name="minutes">" minutes"</string>
+    <string name="hour">1 hour</string>
+    <string name="hours">" hours"</string>
+    <string name="hours_and">" hours and "</string>
+    <string name="hour_and_one_min">1 hour and 1 minute</string>
+    <string name="hour_and">"1 hour and "</string>
+    <string name="via_route">"via route "</string>
+    <string name="next_bus_in">Next Bus In:</string>
 
 </resources>

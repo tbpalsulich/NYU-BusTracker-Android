@@ -1,5 +1,8 @@
 package com.palsulich.nyubustracker.models;
 
+import android.content.res.Resources;
+
+import com.palsulich.nyubustracker.R;
 import com.palsulich.nyubustracker.helpers.BusManager;
 
 import java.util.Calendar;
@@ -107,54 +110,54 @@ public class Time {
     }
 
     // Return a nice string saying the difference between this time and the argument.
-    public String getTimeAsStringUntil(Time t) {
+    public String getTimeAsStringUntil(Time t, Resources resources) {
         Time difference = this.getTimeAsTimeUntil(t);
         //Log.v("Time Debugging", "this: " + this.toString() + " | that: " + t.toString());
         //Log.v("Time Debugging", "Difference: " + difference.hour + ":" + difference.min);
         if (difference != null) {
             if (this.getTimeOfWeek() != t.getTimeOfWeek()) {
                 BusManager.getBusManager().setOnline(false);
-                return "Bus currently offline.";
+                return resources.getString(R.string.offline);
             }
             if (difference.hour >= 3) {
                 BusManager.getBusManager().setOnline(false);
-                return "Bus currently offline.";
+                return resources.getString(R.string.offline);
             }
             if (difference.hour == 0 && difference.min == 0) {
                 BusManager.getBusManager().setOnline(true);
-                return "Less than 1 minute";
+                return resources.getString(R.string.less_one_minute);
             }
             if (difference.hour == 0 && difference.min == 1) {
                 BusManager.getBusManager().setOnline(true);
-                return "1 minute";
+                return resources.getString(R.string.one_minute);
             }
             if (difference.hour == 0 && difference.min > 1) {
                 BusManager.getBusManager().setOnline(true);
-                return difference.min + " minutes";
+                return difference.min + resources.getString(R.string.minutes);
             }
             if (difference.hour > 1 && difference.min == 0) {
                 BusManager.getBusManager().setOnline(true);
-                return difference.hour + " hours";
+                return difference.hour + resources.getString(R.string.hours);
             }
             if (difference.hour == 1 && difference.min == 0) {
                 BusManager.getBusManager().setOnline(true);
-                return difference.hour + " hour";
+                return difference.hour + resources.getString(R.string.hour);
             }
             if (difference.hour > 1 && difference.min == 1) {
                 BusManager.getBusManager().setOnline(true);
-                return difference.hour + " hours and " + difference.min + " minute";
+                return difference.hour + resources.getString(R.string.hours_and) + difference.min + resources.getString(R.string.one_minute);
             }
             if (difference.hour > 1 && difference.min > 1) {
                 BusManager.getBusManager().setOnline(true);
-                return difference.hour + " hours and " + difference.min + " minutes";
+                return difference.hour + resources.getString(R.string.hours_and) + difference.min + resources.getString(R.string.minutes);
             }
             if (difference.hour == 1 && difference.min == 1) {
                 BusManager.getBusManager().setOnline(true);
-                return difference.hour + " hour and " + difference.min + " minute";
+                return resources.getString(R.string.hour_and_one_min);
             }
             if (difference.hour == 1 && difference.min > 1) {
                 BusManager.getBusManager().setOnline(true);
-                return difference.hour + " hour and " + difference.min + " minutes";
+                return resources.getString(R.string.hour_and) + difference.min + resources.getString(R.string.minutes);
             }
         }
         return "";
