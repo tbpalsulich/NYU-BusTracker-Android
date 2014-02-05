@@ -95,13 +95,19 @@
         android:textSize="16sp"
         android:textColor="@color/white" />
 
+    <ImageView
+        android:id="@+id/under_times_button_divider"
+        style="@style/Separator"
+        android:layout_below="@id/times_button"
+        android:layout_alignParentLeft="true" />
+
     <Button
         android:id="@+id/safe_ride_button"
         style="?android:attr/borderlessButtonStyle"
         android:text="@string/call_safe_ride"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/times_button"
+        android:layout_below="@id/under_times_button_divider"
         android:onClick="callSafeRide"
         android:visibility="gone"
         android:gravity="center"/>
