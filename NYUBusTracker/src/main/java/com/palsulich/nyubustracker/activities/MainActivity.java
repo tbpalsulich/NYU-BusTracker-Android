@@ -275,9 +275,8 @@ public class MainActivity extends Activity {
         mSwitcher.setInAnimation(in);
         mSwitcher.setOutAnimation(out);
 
-        SharedPreferences preferences = getSharedPreferences(RUN_ONCE_PREF, MODE_PRIVATE);
+        final SharedPreferences preferences = getSharedPreferences(RUN_ONCE_PREF, MODE_PRIVATE);
         if (preferences.getBoolean(FIRST_TIME, true)) {
-            preferences.edit().putBoolean(FIRST_TIME, false).commit();
             ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
             if (networkInfo != null && networkInfo.isConnected()) {
@@ -299,6 +298,7 @@ public class MainActivity extends Activity {
                             segmentDownloader.getStatus() == AsyncTask.Status.FINISHED &&
                             versionDownloader.getStatus() == AsyncTask.Status.FINISHED &&
                             busTask.getStatus() == AsyncTask.Status.FINISHED) {
+                            preferences.edit().putBoolean(FIRST_TIME, false).commit();
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -359,10 +359,10 @@ public class MainActivity extends Activity {
                         //Log.v("Refactor", "Trying to parse " + timeFileName);
                         BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
                     }
-                    preferences = getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE);
+                    SharedPreferences favoritePreferences = getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE);
                     //Log.v("Refactor", "Done parsing...");
                     for (Stop s : sharedManager.getStops()) {
-                        boolean result = preferences.getBoolean(s.getID(), false);
+                        boolean result = favoritePreferences.getBoolean(s.getID(), false);
                         //Log.v("Refactor", s.getName() + " is " + result);
                         s.setFavorite(result);
                     }
@@ -372,13 +372,13 @@ public class MainActivity extends Activity {
                             try {
                                 BusManager.parseVersion(jsonObject);
                                 for (String timeURL : sharedManager.getTimesToDownload()) {
-                                    SharedPreferences preferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
+                                    SharedPreferences timeVersionPreferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
                                     String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
                                     //Log.v("Refactor", "Time to download: " + stopID);
                                     int newestStopTimeVersion = sharedManager.getTimesVersions().get(stopID);
-                                    if (preferences.getInt(stopID, 0) != newestStopTimeVersion) {
+                                    if (timeVersionPreferences.getInt(stopID, 0) != newestStopTimeVersion) {
                                         new Downloader(timeDownloaderHelper).execute(timeURL);
-                                        preferences.edit().putInt(stopID, newestStopTimeVersion).commit();
+                                        timeVersionPreferences.edit().putInt(stopID, newestStopTimeVersion).commit();
                                     }
                                 }
                                 FileOutputStream fos = openFileOutput(VERSION_JSON_FILE, MODE_PRIVATE);
@@ -398,9 +398,9 @@ public class MainActivity extends Activity {
                     e.printStackTrace();
                 }
             }
-            preferences = getSharedPreferences(STOP_PREF, MODE_PRIVATE);
-            setStartStop(sharedManager.getStopByName(preferences.getString(START_STOP_PREF, "715 Broadway @ Washington Square")));
-            setEndStop(sharedManager.getStopByName(preferences.getString(END_STOP_PREF, "80 Lafayette St")));
+            SharedPreferences stopPreferences = getSharedPreferences(STOP_PREF, MODE_PRIVATE);
+            setStartStop(sharedManager.getStopByName(stopPreferences.getString(START_STOP_PREF, "715 Broadway @ Washington Square")));
+            setEndStop(sharedManager.getStopByName(stopPreferences.getString(END_STOP_PREF, "80 Lafayette St")));
 
             // Update the map to show the corresponding stops, buses, and segments.
             if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
@@ -772,12 +772,14 @@ public class MainActivity extends Activity {
         }
     };
 
+    @SuppressWarnings("UnusedParameters")
     public void callSafeRide(View view) {
         Intent callIntent = new Intent(Intent.ACTION_CALL);
         callIntent.setData(Uri.parse("tel:12129928267"));
         startActivity(callIntent);
     }
 
+    @SuppressWarnings("UnusedParameters")
     public void createEndDialog(View view) {
         // Get all stops connected to the start stop.
         final ArrayList<Stop> connectedStops = BusManager.getBusManager().getConnectedStops(startStop);
@@ -805,6 +807,7 @@ public class MainActivity extends Activity {
         dialog.show();  // Dismissed when a stop is clicked.
     }
 
+    @SuppressWarnings("UnusedParameters")
     public void createStartDialog(View view) {
         final ArrayList<Stop> stops = BusManager.getBusManager().getStops();    // Show every stop as an option to start.
         ListView listView = new ListView(this);
@@ -826,6 +829,7 @@ public class MainActivity extends Activity {
         dialog.show();
     }
 
+    @SuppressWarnings("UnusedParameters")
     public void createTimesDialog(View view) {
         if (timesBetweenStartAndEnd != null) {
             // Library provided ListView with headers that (gasp) stick to the top.
