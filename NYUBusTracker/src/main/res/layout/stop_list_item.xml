@@ -20,7 +20,6 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:singleLine="true"
-        android:text="Stop Name"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/stop_checkbox"
         android:paddingTop="2dp"

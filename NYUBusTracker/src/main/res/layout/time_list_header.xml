@@ -12,11 +12,10 @@
         android:id="@+id/time_text"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:text="Time Separation"
         android:layout_alignParentTop="true"
         android:paddingTop="2dp"
         android:gravity="center_vertical|center_horizontal"
         android:textIsSelectable="false"
-        android:textColor="#ffffff"
-        android:textSize="20dp" />
+        android:textColor="@color/white"
+        android:textSize="20sp" />
 </RelativeLayout>

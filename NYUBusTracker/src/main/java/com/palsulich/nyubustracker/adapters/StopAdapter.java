@@ -16,10 +16,10 @@ import java.util.ArrayList;
 
 public class StopAdapter extends BaseAdapter {
 
-    private LayoutInflater mInflater;
-    ArrayList<Stop> stops = new ArrayList<Stop>();
-    View.OnClickListener textOnClickListener;
-    CompoundButton.OnCheckedChangeListener checkBoxOnCLickListener;
+    private final LayoutInflater mInflater;
+    private ArrayList<Stop> stops = new ArrayList<Stop>();
+    private final View.OnClickListener textOnClickListener;
+    private final CompoundButton.OnCheckedChangeListener checkBoxOnCLickListener;
 
     // Constructor. Just used to initialize variables.
     public StopAdapter(Context context, ArrayList<Stop> mStops, View.OnClickListener listener, CompoundButton.OnCheckedChangeListener cbListener) {

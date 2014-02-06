@@ -34,11 +34,11 @@ public final class BusManager {
     public static final String TAG_STOP_NAME = "name";
     public static final String TAG_STOP_ID = "stop_id";
     public static final String TAG_ROUTES = "routes";
-    public static final String TAG_ROUTE = "route";
+    private static final String TAG_ROUTE = "route";
     public static final String TAG_ROUTE_ID = "route_id";
-    public static final String TAG_WEEKDAY = "Weekday";
-    public static final String TAG_FRIDAY = "Friday";
-    public static final String TAG_WEEKEND = "Weekend";
+    private static final String TAG_WEEKDAY = "Weekday";
+    private static final String TAG_FRIDAY = "Friday";
+    private static final String TAG_WEEKEND = "Weekend";
     public static final String TAG_VEHICLE_ID = "vehicle_id";
     public static final String TAG_SEGMENTS = "segments";
     public static final String TAG_STOPS = "stops";
@@ -60,7 +60,7 @@ public final class BusManager {
         return sharedBusManager;
     }
 
-    public ArrayList<Route> getRoutes() {
+    ArrayList<Route> getRoutes() {
         return routes;
     }
 

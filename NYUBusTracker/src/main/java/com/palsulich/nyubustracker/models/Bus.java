@@ -8,16 +8,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Bus {
-    String vehicleID = "";
-    LatLng loc;
-    String heading = "";
-    String route;
+    private String vehicleID = "";
+    private LatLng loc;
+    private String heading = "";
+    private String route;
 
     public Bus(String mVehicleID) {
         vehicleID = mVehicleID;
     }
 
-    public Bus setLocation(String lat, String lng) {
+    Bus setLocation(String lat, String lng) {
         loc = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
         return this;
     }
@@ -26,12 +26,12 @@ public class Bus {
         return loc;
     }
 
-    public Bus setHeading(String mHeading) {
+    Bus setHeading(String mHeading) {
         heading = mHeading;
         return this;
     }
 
-    public Bus setRoute(String mRoute) {
+    Bus setRoute(String mRoute) {
         route = mRoute;
         return this;
     }

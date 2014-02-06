@@ -2,13 +2,6 @@
 <resources>
 
     <string name="app_name">NYU Bus Tracker</string>
-    <string name="action_settings">Settings</string>
-    <string name="title_activity_route">Stops</string>
-    <string name="title_activity_day">Day</string>
-    <string name="title_activity_time">Schedule</string>
-    <string name="no_stops">No stops available</string>
-    <string name="no_routes">No routes available</string>
-    <string name="no_times">No times available</string>
     <string name="call_safe_ride">Tap to call Safe Ride</string>
     <string name="start">Start:</string>
     <string name="end">End:</string>

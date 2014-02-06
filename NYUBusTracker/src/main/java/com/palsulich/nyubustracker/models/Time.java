@@ -16,10 +16,10 @@ public class Time {
     private int min;
     private boolean AM;         // Used for parsing the input string ("8:04 PM") => 20:04, AM = true
     private String route;       // What route this time corresponds to.
-    private TimeOfWeek timeOfWeek;  // Either Weekday, Friday, Weekend.
+    private final TimeOfWeek timeOfWeek;  // Either Weekday, Friday, Weekend.
 
     // compare is used to sort the list of times being checked for the "nextBusTime" in MainActivity.
-    public static Comparator<Time> compare = new Comparator<Time>() {
+    public static final Comparator<Time> compare = new Comparator<Time>() {
         // Return a negative number if Time1 is before, positive number if time2 is before, and 0 otherwise.
         @Override
         public int compare(Time time1, Time time2) {
@@ -170,7 +170,7 @@ public class Time {
     }
 
     // Return a Time object who represents the difference in time between the two Times.
-    public Time getTimeAsTimeUntil(Time t) {
+    Time getTimeAsTimeUntil(Time t) {
         if (this.isStrictlyBefore(t)) {
             //Log.v("Time Debugging", this + " is strictly before " + t);
             int hourDifference = t.hour - this.hour;

@@ -17,8 +17,8 @@ public class Stop {
     ArrayList<Route> routes = null;
     ArrayList<Time> times = null;
     boolean favorite;
-    public static String FAVORITES_PREF = "favorites";
-    ArrayList<Stop> childStops;
+    public static final String FAVORITES_PREF = "favorites";
+    final ArrayList<Stop> childStops;
     Stop parent;
     Stop oppositeStop;
     boolean hidden;
@@ -215,7 +215,7 @@ public class Stop {
         times.add(t);
     }
 
-    public static Comparator<Stop> compare = new Comparator<Stop>() {
+    public static final Comparator<Stop> compare = new Comparator<Stop>() {
         @Override
         public int compare(Stop stop, Stop stop2) {
             if (stop.getFavorite()) {

@@ -72,12 +72,12 @@ import java.util.TimerTask;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 public class MainActivity extends Activity {
-    Stop startStop;     // Stop object to keep track of the start location of the desired route.
-    Stop endStop;       // Keep track of the desired end location.
-    ArrayList<Route> routesBetweenStartAndEnd;        // List of all routes between start and end.
-    ArrayList<Time> timesBetweenStartAndEnd;        // List of all times between start and end.
-    HashMap<String, Boolean> clickableMapMarkers;   // Hash of all markers which are clickable (so we don't zoom in on buses).
-    ArrayList<Marker> busesOnMap = new ArrayList<Marker>();
+    private Stop startStop;     // Stop object to keep track of the start location of the desired route.
+    private Stop endStop;       // Keep track of the desired end location.
+    private ArrayList<Route> routesBetweenStartAndEnd;        // List of all routes between start and end.
+    private ArrayList<Time> timesBetweenStartAndEnd;        // List of all times between start and end.
+    private HashMap<String, Boolean> clickableMapMarkers;   // Hash of all markers which are clickable (so we don't zoom in on buses).
+    private ArrayList<Marker> busesOnMap = new ArrayList<Marker>();
 
     private static final String query = makeQuery("agencies", "72", "UTF-8");
     private static final String stopsURL = "http://api.transloc.com/1.2/stops.json?" + query;
@@ -97,7 +97,7 @@ public class MainActivity extends Activity {
     private static final String VERSION_JSON_FILE = "versionJson";
     private static boolean offline = true;
 
-    TextSwitcher mSwitcher;
+    private TextSwitcher mSwitcher;
 
     private static String makeQuery(String param, String value, String charset) {
         try {
@@ -108,7 +108,7 @@ public class MainActivity extends Activity {
         return "";
     }
 
-    private DownloaderHelper stopDownloaderHelper = new DownloaderHelper() {
+    private final DownloaderHelper stopDownloaderHelper = new DownloaderHelper() {
         @Override
         public void parse(JSONObject jsonObject) throws JSONException, IOException{
             Stop.parseJSON(jsonObject);
@@ -118,7 +118,7 @@ public class MainActivity extends Activity {
         }
     };
 
-    private DownloaderHelper routeDownloaderHelper = new DownloaderHelper() {
+    private final DownloaderHelper routeDownloaderHelper = new DownloaderHelper() {
         @Override
         public void parse(JSONObject jsonObject) throws JSONException, IOException{
             Route.parseJSON(jsonObject);
@@ -128,7 +128,7 @@ public class MainActivity extends Activity {
         }
     };
 
-    private DownloaderHelper segmentDownloaderHelper = new DownloaderHelper() {
+    private final DownloaderHelper segmentDownloaderHelper = new DownloaderHelper() {
         @Override
         public void parse(JSONObject jsonObject)  throws JSONException, IOException{
             BusManager.parseSegments(jsonObject);
@@ -138,7 +138,7 @@ public class MainActivity extends Activity {
         }
     };
 
-    private DownloaderHelper versionDownloaderHelper = new DownloaderHelper() {
+    private final DownloaderHelper versionDownloaderHelper = new DownloaderHelper() {
         @Override
         public void parse(JSONObject jsonObject) throws JSONException, IOException{
             BusManager sharedManager = BusManager.getBusManager();
@@ -159,7 +159,7 @@ public class MainActivity extends Activity {
         }
     };
 
-    private DownloaderHelper busDownloaderHelper = new DownloaderHelper() {
+    private final DownloaderHelper busDownloaderHelper = new DownloaderHelper() {
         @Override
         public void parse(JSONObject jsonObject) throws JSONException, IOException {
             Bus.parseJSON(jsonObject);
@@ -167,7 +167,7 @@ public class MainActivity extends Activity {
         }
     };
 
-    private DownloaderHelper timeDownloaderHelper = new DownloaderHelper() {
+    private final DownloaderHelper timeDownloaderHelper = new DownloaderHelper() {
         @Override
         public void parse(JSONObject jsonObject) throws JSONException, IOException {
             BusManager.parseTime(jsonObject);
@@ -178,18 +178,18 @@ public class MainActivity extends Activity {
         }
     };
 
-    Time nextBusTime;
+    private Time nextBusTime;
 
-    Timer timeUntilTimer;  // Timer used to refresh the "time until next bus" every minute, on the minute.
-    Timer busRefreshTimer; // Timer used to refresh the bus locations every few seconds.
+    private Timer timeUntilTimer;  // Timer used to refresh the "time until next bus" every minute, on the minute.
+    private Timer busRefreshTimer; // Timer used to refresh the bus locations every few seconds.
 
     private GoogleMap mMap;     // Map to display all stops, segments, and buses.
     private boolean haveAMap = false;   // Flag to see if the device can display a map.
 
-    AsyncTask stopDownloader;
-    AsyncTask routeDownloader;
-    AsyncTask segmentDownloader;
-    AsyncTask versionDownloader;
+    private AsyncTask stopDownloader;
+    private AsyncTask routeDownloader;
+    private AsyncTask segmentDownloader;
+    private AsyncTask versionDownloader;
 
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
@@ -207,7 +207,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    public String readSavedData(String fileName) {
+    String readSavedData(String fileName) {
         //Log.v("Refactor", "Reading saved data from " + fileName);
         StringBuilder buffer = new StringBuilder("");
         try {
@@ -282,7 +282,7 @@ public class MainActivity extends Activity {
             if (networkInfo != null && networkInfo.isConnected()) {
                 offline = false;
                 // Download and parse everything, put it all in persistent memory, continue.
-                progressDialog = ProgressDialog.show(this, "Downloading Data", "Please wait...", true, false);
+                progressDialog = ProgressDialog.show(this, getString(R.string.downloading), getString(R.string.wait), true, false);
 
                 stopDownloader = new Downloader(stopDownloaderHelper).execute(stopsURL);
                 routeDownloader = new Downloader(routeDownloaderHelper).execute(routesURL);
@@ -337,7 +337,7 @@ public class MainActivity extends Activity {
             else if (!offline) {
                 offline = true;
                 Context context = getApplicationContext();
-                CharSequence text = "Unable to connect to the network.";
+                CharSequence text = getString(R.string.unable_to_connect);
                 int duration = Toast.LENGTH_SHORT;
 
                 if (context != null) {
@@ -453,7 +453,7 @@ public class MainActivity extends Activity {
                             else if (!offline) {
                                 offline = true;
                                 Context context = getApplicationContext();
-                                CharSequence text = "Unable to connect to the network.";
+                                CharSequence text = getString(R.string.unable_to_connect);
                                 int duration = Toast.LENGTH_SHORT;
 
                                 if (context != null) {
@@ -472,7 +472,7 @@ public class MainActivity extends Activity {
     public void onDestroy() {
         super.onDestroy();
         //Log.v("General Debugging", "onDestroy!");
-        cacheToAndStartStop();      // Remember user's preferences across lifetimes.
+        cacheStartAndEndStops();      // Remember user's preferences across lifetimes.
         if (timeUntilTimer != null) timeUntilTimer.cancel();           // Don't need a timer anymore -- must be recreated onResume.
         if (busRefreshTimer != null) busRefreshTimer.cancel();
     }
@@ -481,7 +481,7 @@ public class MainActivity extends Activity {
     public void onPause() {
         super.onPause();
         //Log.v("General Debugging", "onPause!");
-        cacheToAndStartStop();
+        cacheStartAndEndStops();
         if (timeUntilTimer != null) timeUntilTimer.cancel();
         if (busRefreshTimer != null) busRefreshTimer.cancel();
     }
@@ -511,7 +511,7 @@ public class MainActivity extends Activity {
         EasyTracker.getInstance(this).activityStop(this);
     }
 
-    public void cacheToAndStartStop() {
+    void cacheStartAndEndStops() {
         if (endStop != null)
             getSharedPreferences(STOP_PREF, MODE_PRIVATE).edit().putString(END_STOP_PREF, endStop.getName()).commit();         // Creates or updates cache file.
         if (startStop != null)
@@ -519,7 +519,7 @@ public class MainActivity extends Activity {
 
     }
 
-    public static Bitmap rotateBitmap(Bitmap source, float angle) {
+    private static Bitmap rotateBitmap(Bitmap source, float angle) {
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
@@ -763,7 +763,7 @@ public class MainActivity extends Activity {
         renewTimeUntilTimer();
     }
 
-    CompoundButton.OnCheckedChangeListener cbListener = new CompoundButton.OnCheckedChangeListener() {
+    private final CompoundButton.OnCheckedChangeListener cbListener = new CompoundButton.OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             Stop s = (Stop) buttonView.getTag();
@@ -849,7 +849,7 @@ public class MainActivity extends Activity {
     }
 
     private class Downloader extends AsyncTask<String, Integer, JSONObject> {
-        DownloaderHelper helper;
+        final DownloaderHelper helper;
 
         public Downloader(DownloaderHelper helper) {
             this.helper = helper;
@@ -886,7 +886,7 @@ public class MainActivity extends Activity {
     // Given a URL, establishes an HttpUrlConnection and retrieves
 // the web page content as a InputStream, which it returns as
 // a string.
-    public static String downloadUrl(String myUrl) throws IOException {
+    private static String downloadUrl(String myUrl) throws IOException {
         InputStream is = null;
 
         try {
@@ -915,7 +915,7 @@ public class MainActivity extends Activity {
     }
 
     // Reads an InputStream and converts it to a String.
-    public static String readIt(InputStream stream) throws IOException {
+    private static String readIt(InputStream stream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "iso-8859-1"), 128);
         StringBuilder sb = new StringBuilder();
         String line;

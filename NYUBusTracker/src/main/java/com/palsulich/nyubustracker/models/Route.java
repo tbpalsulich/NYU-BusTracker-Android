@@ -10,13 +10,13 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class Route {
-    String longName = "";
-    String routeID = "";
-    ArrayList<Stop> stops = null;
-    BusManager sharedManager;
-    ArrayList<String> segmentIDs;
-    ArrayList<PolylineOptions> segments;
-    boolean active = true;
+    private String longName = "";
+    private String routeID = "";
+    private ArrayList<Stop> stops = null;
+    private final BusManager sharedManager;
+    private final ArrayList<String> segmentIDs;
+    private final ArrayList<PolylineOptions> segments;
+    private boolean active = true;
 
     public Route(String mLongName, String mRouteID) {
         segmentIDs = new ArrayList<String>();
@@ -39,7 +39,7 @@ public class Route {
         return segments;
     }
 
-    public void setActive(boolean active) {
+    void setActive(boolean active) {
         this.active = active;
     }
 
@@ -72,7 +72,7 @@ public class Route {
         if (!stops.contains(stop)) stops.add(stop);
     }
 
-    public void addStop(int index, Stop stop) {
+    void addStop(int index, Stop stop) {
         if (stops.contains(stop)) stops.remove(stop);
         if (stops.size() == index) stops.add(stop);
         else stops.add(index, stop);
