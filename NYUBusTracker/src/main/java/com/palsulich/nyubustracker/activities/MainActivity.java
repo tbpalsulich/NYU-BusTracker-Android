@@ -694,7 +694,7 @@ public class MainActivity extends Activity {
         ArrayList<Route> availableRoutes = new ArrayList<Route>();               // All the routes connecting the two.
         for (Route r : startRoutes) {
             //Log.v("Routes", "Start Route: " + r);
-            if (endRoutes.contains(r)) {
+            if (endRoutes.contains(r) && !availableRoutes.contains(r)) {
                 //Log.v("Routes", "*  is available.");
                 availableRoutes.add(r);
             }
