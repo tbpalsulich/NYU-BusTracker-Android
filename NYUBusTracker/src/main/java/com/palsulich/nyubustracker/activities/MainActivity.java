@@ -723,7 +723,7 @@ public class MainActivity extends Activity {
             for (Route r : availableRoutes) {
                 // Get the Times at this stop for this route.
                 ArrayList<Time> times = startStop.getTimesOfRoute(r.getLongName());
-                if (times.size() > 0) {
+                if (times.size() > 0 && !tempTimesBetweenStartAndEnd.contains(times.get(0))) {
                     tempTimesBetweenStartAndEnd.addAll(times);
                 }
             }
@@ -886,7 +886,7 @@ public class MainActivity extends Activity {
     // Given a URL, establishes an HttpUrlConnection and retrieves
 // the web page content as a InputStream, which it returns as
 // a string.
-    private static String downloadUrl(String myUrl) throws IOException {
+    private String downloadUrl(String myUrl) throws IOException {
         InputStream is = null;
 
         try {
@@ -915,7 +915,7 @@ public class MainActivity extends Activity {
     }
 
     // Reads an InputStream and converts it to a String.
-    private static String readIt(InputStream stream) throws IOException {
+    private String readIt(InputStream stream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "iso-8859-1"), 128);
         StringBuilder sb = new StringBuilder();
         String line;
