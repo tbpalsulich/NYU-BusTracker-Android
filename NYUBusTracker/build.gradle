@@ -38,6 +38,10 @@ android {
             jniDebugBuild false
             signingConfig signingConfigs.release
         }
+        beta {
+            signingConfig signingConfigs.release
+            versionNameSuffix "-beta"
+        }
         debug {
             packageNameSuffix ".debug"
             versionNameSuffix "-debug"

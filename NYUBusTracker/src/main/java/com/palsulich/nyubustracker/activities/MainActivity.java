@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -110,7 +111,7 @@ public class MainActivity extends Activity {
 
     private final DownloaderHelper stopDownloaderHelper = new DownloaderHelper() {
         @Override
-        public void parse(JSONObject jsonObject) throws JSONException, IOException{
+        public void parse(JSONObject jsonObject) throws JSONException, IOException {
             Stop.parseJSON(jsonObject);
             FileOutputStream fos = openFileOutput(STOP_JSON_FILE, MODE_PRIVATE);
             fos.write(jsonObject.toString().getBytes());
@@ -120,7 +121,7 @@ public class MainActivity extends Activity {
 
     private final DownloaderHelper routeDownloaderHelper = new DownloaderHelper() {
         @Override
-        public void parse(JSONObject jsonObject) throws JSONException, IOException{
+        public void parse(JSONObject jsonObject) throws JSONException, IOException {
             Route.parseJSON(jsonObject);
             FileOutputStream fos = openFileOutput(ROUTE_JSON_FILE, MODE_PRIVATE);
             fos.write(jsonObject.toString().getBytes());
@@ -130,7 +131,7 @@ public class MainActivity extends Activity {
 
     private final DownloaderHelper segmentDownloaderHelper = new DownloaderHelper() {
         @Override
-        public void parse(JSONObject jsonObject)  throws JSONException, IOException{
+        public void parse(JSONObject jsonObject) throws JSONException, IOException {
             BusManager.parseSegments(jsonObject);
             FileOutputStream fos = openFileOutput(SEGMENT_JSON_FILE, MODE_PRIVATE);
             fos.write(jsonObject.toString().getBytes());
@@ -140,7 +141,7 @@ public class MainActivity extends Activity {
 
     private final DownloaderHelper versionDownloaderHelper = new DownloaderHelper() {
         @Override
-        public void parse(JSONObject jsonObject) throws JSONException, IOException{
+        public void parse(JSONObject jsonObject) throws JSONException, IOException {
             BusManager sharedManager = BusManager.getBusManager();
             BusManager.parseVersion(jsonObject);
             for (String timeURL : sharedManager.getTimesToDownload()) {
@@ -191,6 +192,9 @@ public class MainActivity extends Activity {
     private AsyncTask segmentDownloader;
     private AsyncTask versionDownloader;
 
+    ProgressDialog progressDialog;
+    SharedPreferences oncePreferences;
+
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
@@ -228,6 +232,76 @@ public class MainActivity extends Activity {
         return buffer.toString();
     }
 
+    private void downloadEverything() {
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            offline = false;
+            // Download and parse everything, put it all in persistent memory, continue.
+            progressDialog = ProgressDialog.show(this, getString(R.string.downloading), getString(R.string.wait), true, false);
+
+            stopDownloader = new Downloader(stopDownloaderHelper).execute(stopsURL);
+            routeDownloader = new Downloader(routeDownloaderHelper).execute(routesURL);
+            segmentDownloader = new Downloader(segmentDownloaderHelper).execute(segmentsURL);
+            versionDownloader = new Downloader(versionDownloaderHelper).execute(versionURL);
+            final AsyncTask busTask = new Downloader(busDownloaderHelper).execute(vehiclesURL);
+
+            new Timer().scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    if (stopDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+                        routeDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+                        segmentDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+                        versionDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+                        busTask.getStatus() == AsyncTask.Status.FINISHED) {
+                        oncePreferences.edit().putBoolean(FIRST_TIME, false).commit();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Stop broadway = BusManager.getBusManager().getStopByName("715 Broadway @ Washington Square");
+                                Stop lafayette = BusManager.getBusManager().getStopByName("80 Lafayette St");
+                                getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).commit();
+                                setStartStop(broadway);
+                                setEndStop(lafayette);
+                                broadway.setFavorite(true);
+                                //Log.v("Refactor", "End: " + endStop.getName());
+                                // Update the map to show the corresponding stops, buses, and segments.
+                                if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
+                                renewBusRefreshTimer();
+                                renewTimeUntilTimer();
+                                new Timer().schedule(new TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                setNextBusTime();
+                                                progressDialog.dismiss();
+                                            }
+                                        });
+                                    }
+                                }, 750L);
+                            }
+
+                        });
+                        this.cancel();
+                    }
+                }
+            }, 0L, 500L);
+        }
+        else if (!offline) {
+            offline = true;
+            Context context = getApplicationContext();
+            CharSequence text = getString(R.string.unable_to_connect);
+            int duration = Toast.LENGTH_SHORT;
+
+            if (context != null) {
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -235,7 +309,7 @@ public class MainActivity extends Activity {
         //Log.v("General Debugging", "onCreate!");
         setContentView(R.layout.activity_main);
 
-        final ProgressDialog progressDialog;
+        oncePreferences = getSharedPreferences(RUN_ONCE_PREF, MODE_PRIVATE);
 
         int retCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
         if (retCode != ConnectionResult.SUCCESS) {
@@ -275,139 +349,86 @@ public class MainActivity extends Activity {
         mSwitcher.setInAnimation(in);
         mSwitcher.setOutAnimation(out);
 
-        final SharedPreferences preferences = getSharedPreferences(RUN_ONCE_PREF, MODE_PRIVATE);
-        if (preferences.getBoolean(FIRST_TIME, true)) {
-            ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-            if (networkInfo != null && networkInfo.isConnected()) {
-                offline = false;
-                // Download and parse everything, put it all in persistent memory, continue.
-                progressDialog = ProgressDialog.show(this, getString(R.string.downloading), getString(R.string.wait), true, false);
-
-                stopDownloader = new Downloader(stopDownloaderHelper).execute(stopsURL);
-                routeDownloader = new Downloader(routeDownloaderHelper).execute(routesURL);
-                segmentDownloader = new Downloader(segmentDownloaderHelper).execute(segmentsURL);
-                versionDownloader = new Downloader(versionDownloaderHelper).execute(versionURL);
-                final AsyncTask busTask = new Downloader(busDownloaderHelper).execute(vehiclesURL);
-
-                new Timer().scheduleAtFixedRate(new TimerTask() {
-                    @Override
-                    public void run() {
-                        if (stopDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-                            routeDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-                            segmentDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-                            versionDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-                            busTask.getStatus() == AsyncTask.Status.FINISHED) {
-                            preferences.edit().putBoolean(FIRST_TIME, false).commit();
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Stop broadway = sharedManager.getStopByName("715 Broadway @ Washington Square");
-                                    Stop lafayette = sharedManager.getStopByName("80 Lafayette St");
-                                    getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).commit();
-                                    setStartStop(broadway);
-                                    setEndStop(lafayette);
-                                    broadway.setFavorite(true);
-                                    //Log.v("Refactor", "End: " + endStop.getName());
-                                    // Update the map to show the corresponding stops, buses, and segments.
-                                    if (routesBetweenStartAndEnd != null)
-                                        updateMapWithNewStartOrEnd();
-                                    renewBusRefreshTimer();
-                                    renewTimeUntilTimer();
-                                    new Timer().schedule(new TimerTask() {
-                                        @Override
-                                        public void run() {
-                                            runOnUiThread(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    setNextBusTime();
-                                                    progressDialog.dismiss();
-                                                }
-                                            });
-                                        }
-                                    }, 750L);
-                                }
-
-                            });
-                            this.cancel();
-                        }
-                    }
-                }, 0L, 500L);
-            }
-            else if (!offline) {
-                offline = true;
-                Context context = getApplicationContext();
-                CharSequence text = getString(R.string.unable_to_connect);
-                int duration = Toast.LENGTH_SHORT;
-
-                if (context != null) {
-                    Toast toast = Toast.makeText(context, text, duration);
-                    toast.show();
-                }
-            }
+        if (oncePreferences.getBoolean(FIRST_TIME, true)) {
+            downloadEverything();
         }
         else {
             if (!sharedManager.hasRoutes() || !sharedManager.hasStops()) {
                 //Log.v("Refactor", "Parsing cached files...");
-                try {
-                    Stop.parseJSON(new JSONObject(readSavedData(STOP_JSON_FILE)));
-                    Route.parseJSON(new JSONObject(readSavedData(ROUTE_JSON_FILE)));
-                    BusManager.parseSegments(new JSONObject(readSavedData(SEGMENT_JSON_FILE)));
-                    BusManager.parseVersion(new JSONObject(readSavedData(VERSION_JSON_FILE)));
-                    for (String timeURL : sharedManager.getTimesToDownload()) {
-                        String timeFileName = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
-                        //Log.v("Refactor", "Trying to parse " + timeFileName);
-                        BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
-                    }
-                    SharedPreferences favoritePreferences = getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE);
-                    //Log.v("Refactor", "Done parsing...");
-                    for (Stop s : sharedManager.getStops()) {
-                        boolean result = favoritePreferences.getBoolean(s.getID(), false);
-                        //Log.v("Refactor", s.getName() + " is " + result);
-                        s.setFavorite(result);
-                    }
-                    new Downloader(new DownloaderHelper() {
-                        @Override
-                        public void parse(JSONObject jsonObject) {
-                            try {
-                                BusManager.parseVersion(jsonObject);
-                                for (String timeURL : sharedManager.getTimesToDownload()) {
-                                    SharedPreferences timeVersionPreferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
-                                    String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
-                                    //Log.v("Refactor", "Time to download: " + stopID);
-                                    int newestStopTimeVersion = sharedManager.getTimesVersions().get(stopID);
-                                    if (timeVersionPreferences.getInt(stopID, 0) != newestStopTimeVersion) {
-                                        new Downloader(timeDownloaderHelper).execute(timeURL);
-                                        timeVersionPreferences.edit().putInt(stopID, newestStopTimeVersion).commit();
-                                    }
-                                }
-                                FileOutputStream fos = openFileOutput(VERSION_JSON_FILE, MODE_PRIVATE);
-                                fos.write(jsonObject.toString().getBytes());
-                                fos.close();
-                            } catch (JSONException e) {
-                                //Log.e("JSON", "Error parsing Version JSON.");
-                                e.printStackTrace();
-                            } catch (IOException e) {
-                                //Log.e("JSON", "Error with Version JSON IO.");
-                                e.printStackTrace();
-                            }
+
+                File stopFile = new File(STOP_JSON_FILE);
+                File routeFile = new File(ROUTE_JSON_FILE);
+                File segFile = new File(SEGMENT_JSON_FILE);
+                File verFile = new File(VERSION_JSON_FILE);
+                String stopJson = readSavedData(STOP_JSON_FILE);
+                String routeJson = readSavedData(ROUTE_JSON_FILE);
+                String segJson = readSavedData(SEGMENT_JSON_FILE);
+                String verJson = readSavedData(VERSION_JSON_FILE);
+                if ((stopFile.exists() && routeFile.exists() && segFile.exists() && verFile.exists()) && (stopJson.length() > 0 && routeJson.length() > 0 && segJson.length() > 0 && verJson.length() > 0)) {
+
+                    try {
+                        Stop.parseJSON(new JSONObject(readSavedData(STOP_JSON_FILE)));
+                        Route.parseJSON(new JSONObject(readSavedData(ROUTE_JSON_FILE)));
+                        BusManager.parseSegments(new JSONObject(readSavedData(SEGMENT_JSON_FILE)));
+                        BusManager.parseVersion(new JSONObject(readSavedData(VERSION_JSON_FILE)));
+                        for (String timeURL : sharedManager.getTimesToDownload()) {
+                            String timeFileName = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
+                            //Log.v("Refactor", "Trying to parse " + timeFileName);
+                            BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
                         }
-                    }).execute(versionURL);
-                } catch (JSONException e) {
-                    //Log.e("RefactorJSON", "Error with JSON parsing cached file.");
-                    e.printStackTrace();
+                        SharedPreferences favoritePreferences = getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE);
+                        //Log.v("Refactor", "Done parsing...");
+                        for (Stop s : sharedManager.getStops()) {
+                            boolean result = favoritePreferences.getBoolean(s.getID(), false);
+                            //Log.v("Refactor", s.getName() + " is " + result);
+                            s.setFavorite(result);
+                        }
+                        new Downloader(new DownloaderHelper() {
+                            @Override
+                            public void parse(JSONObject jsonObject) {
+                                try {
+                                    BusManager.parseVersion(jsonObject);
+                                    for (String timeURL : sharedManager.getTimesToDownload()) {
+                                        SharedPreferences timeVersionPreferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
+                                        String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
+                                        //Log.v("Refactor", "Time to download: " + stopID);
+                                        int newestStopTimeVersion = sharedManager.getTimesVersions().get(stopID);
+                                        if (timeVersionPreferences.getInt(stopID, 0) != newestStopTimeVersion) {
+                                            new Downloader(timeDownloaderHelper).execute(timeURL);
+                                            timeVersionPreferences.edit().putInt(stopID, newestStopTimeVersion).commit();
+                                        }
+                                    }
+                                    FileOutputStream fos = openFileOutput(VERSION_JSON_FILE, MODE_PRIVATE);
+                                    fos.write(jsonObject.toString().getBytes());
+                                    fos.close();
+                                } catch (JSONException e) {
+                                    //Log.e("JSON", "Error parsing Version JSON.");
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    //Log.e("JSON", "Error with Version JSON IO.");
+                                    e.printStackTrace();
+                                }
+                            }
+                        }).execute(versionURL);
+                    } catch (JSONException e) {
+                        //Log.e("RefactorJSON", "Error with JSON parsing cached file.");
+                        e.printStackTrace();
+                    }
+                    SharedPreferences stopPreferences = getSharedPreferences(STOP_PREF, MODE_PRIVATE);
+                    setStartStop(sharedManager.getStopByName(stopPreferences.getString(START_STOP_PREF, "715 Broadway @ Washington Square")));
+                    setEndStop(sharedManager.getStopByName(stopPreferences.getString(END_STOP_PREF, "80 Lafayette St")));
+
+                    // Update the map to show the corresponding stops, buses, and segments.
+                    if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
+
+                    // Get the location of the buses every 10 sec.
+                    renewBusRefreshTimer();
+                    renewTimeUntilTimer();
+                }
+                else {
+                    downloadEverything();
                 }
             }
-            SharedPreferences stopPreferences = getSharedPreferences(STOP_PREF, MODE_PRIVATE);
-            setStartStop(sharedManager.getStopByName(stopPreferences.getString(START_STOP_PREF, "715 Broadway @ Washington Square")));
-            setEndStop(sharedManager.getStopByName(stopPreferences.getString(END_STOP_PREF, "80 Lafayette St")));
-
-            // Update the map to show the corresponding stops, buses, and segments.
-            if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
-
-            // Get the location of the buses every 10 sec.
-            renewBusRefreshTimer();
-            renewTimeUntilTimer();
         }
     }
 
@@ -473,7 +494,8 @@ public class MainActivity extends Activity {
         super.onDestroy();
         //Log.v("General Debugging", "onDestroy!");
         cacheStartAndEndStops();      // Remember user's preferences across lifetimes.
-        if (timeUntilTimer != null) timeUntilTimer.cancel();           // Don't need a timer anymore -- must be recreated onResume.
+        if (timeUntilTimer != null)
+            timeUntilTimer.cancel();           // Don't need a timer anymore -- must be recreated onResume.
         if (busRefreshTimer != null) busRefreshTimer.cancel();
     }
 
@@ -871,9 +893,9 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPostExecute(JSONObject result) {
-            try{
+            try {
                 helper.parse(result);
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
