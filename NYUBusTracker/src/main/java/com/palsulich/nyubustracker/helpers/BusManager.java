@@ -364,7 +364,7 @@ public final class BusManager {
             @Override
             public void run() {
                 Stop s = sharedBusManager.getStopByID(stopID);
-                if (s != null){
+                if (s != null) {
                     t.cancel();
                     for (int i = 0; i < s.getRoutes().size(); i++) {
                         if (routes.has(s.getRoutes().get(i).getID())) {
@@ -373,7 +373,7 @@ public final class BusManager {
                                 getTimes(routeTimes, TAG_WEEKDAY, s, Time.TimeOfWeek.Weekday);
                                 getTimes(routeTimes, TAG_FRIDAY, s, Time.TimeOfWeek.Friday);
                                 getTimes(routeTimes, TAG_WEEKEND, s, Time.TimeOfWeek.Weekend);
-                            } catch (JSONException e){
+                            } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         }

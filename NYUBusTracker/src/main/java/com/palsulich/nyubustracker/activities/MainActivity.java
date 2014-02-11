@@ -16,7 +16,6 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
@@ -154,7 +153,7 @@ public class MainActivity extends Activity {
                     preferences.edit().putInt(stopID, newestStopTimeVersion);
                 }
             }
-            if (jsonObject != null){
+            if (jsonObject != null) {
                 FileOutputStream fos = openFileOutput(VERSION_JSON_FILE, MODE_PRIVATE);
                 fos.write(jsonObject.toString().getBytes());
                 fos.close();
@@ -374,7 +373,7 @@ public class MainActivity extends Activity {
         mSwitcher.setOutAnimation(out);
 
         if (oncePreferences.getBoolean(FIRST_TIME, true)) {
-            Log.v("General Debugging", "Downloading because of first time");
+            //Log.v("General Debugging", "Downloading because of first time");
             downloadEverything();
         }
         else {
@@ -394,7 +393,7 @@ public class MainActivity extends Activity {
                         //Log.v("Refactor", "Trying to parse " + timeFileName);
                         try {
                             BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
-                        } catch (JSONException e){
+                        } catch (JSONException e) {
                             e.printStackTrace();
                             new Downloader(timeDownloaderHelper).execute(timeURL);
                         }
@@ -541,7 +540,7 @@ public class MainActivity extends Activity {
             getSharedPreferences(STOP_PREF, MODE_PRIVATE).edit().putString(START_STOP_PREF, startStop.getName()).commit();
     }
 
-    void setStartAndEndStops(){
+    void setStartAndEndStops() {
         String end = getSharedPreferences(STOP_PREF, MODE_PRIVATE).getString(END_STOP_PREF, "80 Lafayette St");         // Creates or updates cache file.
         String start = getSharedPreferences(STOP_PREF, MODE_PRIVATE).getString(START_STOP_PREF, "715 Broadway @ Washington Square");
         setStartStop(BusManager.getBusManager().getStopByName(start));
@@ -792,14 +791,14 @@ public class MainActivity extends Activity {
         renewTimeUntilTimer();
     }
 
-private final CompoundButton.OnCheckedChangeListener cbListener = new CompoundButton.OnCheckedChangeListener() {
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        Stop s = (Stop) buttonView.getTag();
-        s.setFavorite(isChecked);
-        getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(s.getID(), isChecked).commit();
-    }
-};
+    private final CompoundButton.OnCheckedChangeListener cbListener = new CompoundButton.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            Stop s = (Stop) buttonView.getTag();
+            s.setFavorite(isChecked);
+            getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(s.getID(), isChecked).commit();
+        }
+    };
 
     @SuppressWarnings("UnusedParameters")
     public void callSafeRide(View view) {
@@ -877,40 +876,40 @@ private final CompoundButton.OnCheckedChangeListener cbListener = new CompoundBu
         }
     }
 
-private class Downloader extends AsyncTask<String, Integer, JSONObject> {
-    final DownloaderHelper helper;
+    private class Downloader extends AsyncTask<String, Integer, JSONObject> {
+        final DownloaderHelper helper;
 
-    public Downloader(DownloaderHelper helper) {
-        this.helper = helper;
-    }
-
-    @Override
-    public JSONObject doInBackground(String... urls) {
-        try {
-            return new JSONObject(downloadUrl(urls[0]));
-        } catch (IOException e) {
-            //Log.e("JSON", "DownloadURL IO error.");
-            e.printStackTrace();
-        } catch (JSONException e) {
-            //Log.e("JSON", "DownloadURL JSON error.");
-            e.printStackTrace();
+        public Downloader(DownloaderHelper helper) {
+            this.helper = helper;
         }
-        return null;
-    }
 
-    @Override
-    protected void onPostExecute(JSONObject result) {
-        try {
-            helper.parse(result);
-        } catch (Exception e) {
-            e.printStackTrace();
+        @Override
+        public JSONObject doInBackground(String... urls) {
+            try {
+                return new JSONObject(downloadUrl(urls[0]));
+            } catch (IOException e) {
+                //Log.e("JSON", "DownloadURL IO error.");
+                e.printStackTrace();
+            } catch (JSONException e) {
+                //Log.e("JSON", "DownloadURL JSON error.");
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject result) {
+            try {
+                helper.parse(result);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
-}
 
-public abstract class DownloaderHelper {
-    public abstract void parse(JSONObject jsonObject) throws JSONException, IOException;
-}
+    public abstract class DownloaderHelper {
+        public abstract void parse(JSONObject jsonObject) throws JSONException, IOException;
+    }
 
     // Given a URL, establishes an HttpUrlConnection and retrieves
 // the web page content as a InputStream, which it returns as
