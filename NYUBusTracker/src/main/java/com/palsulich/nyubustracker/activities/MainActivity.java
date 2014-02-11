@@ -53,7 +53,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -350,21 +349,18 @@ public class MainActivity extends Activity {
         mSwitcher.setOutAnimation(out);
 
         if (oncePreferences.getBoolean(FIRST_TIME, true)) {
+            Log.v("General Debugging", "Downloading because of first time");
             downloadEverything();
         }
         else {
             if (!sharedManager.hasRoutes() || !sharedManager.hasStops()) {
                 //Log.v("Refactor", "Parsing cached files...");
 
-                File stopFile = new File(STOP_JSON_FILE);
-                File routeFile = new File(ROUTE_JSON_FILE);
-                File segFile = new File(SEGMENT_JSON_FILE);
-                File verFile = new File(VERSION_JSON_FILE);
                 String stopJson = readSavedData(STOP_JSON_FILE);
                 String routeJson = readSavedData(ROUTE_JSON_FILE);
                 String segJson = readSavedData(SEGMENT_JSON_FILE);
                 String verJson = readSavedData(VERSION_JSON_FILE);
-                if ((stopFile.exists() && routeFile.exists() && segFile.exists() && verFile.exists()) && (stopJson.length() > 0 && routeJson.length() > 0 && segJson.length() > 0 && verJson.length() > 0)) {
+                if (stopJson.length() > 0 && routeJson.length() > 0 && segJson.length() > 0 && verJson.length() > 0) {
 
                     try {
                         Stop.parseJSON(new JSONObject(readSavedData(STOP_JSON_FILE)));
@@ -398,14 +394,8 @@ public class MainActivity extends Activity {
                                             timeVersionPreferences.edit().putInt(stopID, newestStopTimeVersion).commit();
                                         }
                                     }
-                                    FileOutputStream fos = openFileOutput(VERSION_JSON_FILE, MODE_PRIVATE);
-                                    fos.write(jsonObject.toString().getBytes());
-                                    fos.close();
                                 } catch (JSONException e) {
                                     //Log.e("JSON", "Error parsing Version JSON.");
-                                    e.printStackTrace();
-                                } catch (IOException e) {
-                                    //Log.e("JSON", "Error with Version JSON IO.");
                                     e.printStackTrace();
                                 }
                             }
@@ -512,6 +502,7 @@ public class MainActivity extends Activity {
     public void onResume() {
         super.onResume();
         //Log.v("General Debugging", "onResume!");
+        if (endStop == null || startStop == null) setStartAndEndStops();
         if (endStop != null && startStop != null) {
             setNextBusTime();
             renewTimeUntilTimer();
@@ -523,6 +514,7 @@ public class MainActivity extends Activity {
     @Override
     public void onStart() {
         super.onStart();
+        //Log.v("General Debugging", "onStart!");
         EasyTracker.getInstance(this).activityStart(this);
     }
 
@@ -530,6 +522,7 @@ public class MainActivity extends Activity {
     @Override
     public void onStop() {
         super.onStop();
+        //Log.v("General Debugging", "onStop!");
         EasyTracker.getInstance(this).activityStop(this);
     }
 
@@ -538,7 +531,13 @@ public class MainActivity extends Activity {
             getSharedPreferences(STOP_PREF, MODE_PRIVATE).edit().putString(END_STOP_PREF, endStop.getName()).commit();         // Creates or updates cache file.
         if (startStop != null)
             getSharedPreferences(STOP_PREF, MODE_PRIVATE).edit().putString(START_STOP_PREF, startStop.getName()).commit();
+    }
 
+    void setStartAndEndStops(){
+        String end = getSharedPreferences(STOP_PREF, MODE_PRIVATE).getString(END_STOP_PREF, "80 Lafayette St");         // Creates or updates cache file.
+        String start = getSharedPreferences(STOP_PREF, MODE_PRIVATE).getString(START_STOP_PREF, "715 Broadway @ Washington Square");
+        setStartStop(BusManager.getBusManager().getStopByName(start));
+        setEndStop(BusManager.getBusManager().getStopByName(end));
     }
 
     private static Bitmap rotateBitmap(Bitmap source, float angle) {
