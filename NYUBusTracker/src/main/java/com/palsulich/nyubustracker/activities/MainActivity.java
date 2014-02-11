@@ -154,9 +154,11 @@ public class MainActivity extends Activity {
                     preferences.edit().putInt(stopID, newestStopTimeVersion);
                 }
             }
-            FileOutputStream fos = openFileOutput(VERSION_JSON_FILE, MODE_PRIVATE);
-            fos.write(jsonObject.toString().getBytes());
-            fos.close();
+            if (jsonObject != null){
+                FileOutputStream fos = openFileOutput(VERSION_JSON_FILE, MODE_PRIVATE);
+                fos.write(jsonObject.toString().getBytes());
+                fos.close();
+            }
         }
     };
 
@@ -371,7 +373,12 @@ public class MainActivity extends Activity {
                         for (String timeURL : sharedManager.getTimesToDownload()) {
                             String timeFileName = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
                             //Log.v("Refactor", "Trying to parse " + timeFileName);
-                            BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
+                            try {
+                                BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
+                            } catch (JSONException e){
+                                e.printStackTrace();
+                                new Downloader(timeDownloaderHelper).execute(timeURL);
+                            }
                         }
                         SharedPreferences favoritePreferences = getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE);
                         //Log.v("Refactor", "Done parsing...");
