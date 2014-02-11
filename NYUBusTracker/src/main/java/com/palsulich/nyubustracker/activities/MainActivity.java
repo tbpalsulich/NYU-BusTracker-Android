@@ -162,6 +162,28 @@ public class MainActivity extends Activity {
         }
     };
 
+    private final DownloaderHelper versionDownloaderHelperTwo = new DownloaderHelper() {
+        @Override
+        public void parse(JSONObject jsonObject) {
+            try {
+                BusManager.parseVersion(jsonObject);
+                for (String timeURL : BusManager.getBusManager().getTimesToDownload()) {
+                    SharedPreferences timeVersionPreferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
+                    String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
+                    //Log.v("Refactor", "Time to download: " + stopID);
+                    int newestStopTimeVersion = BusManager.getBusManager().getTimesVersions().get(stopID);
+                    if (timeVersionPreferences.getInt(stopID, 0) != newestStopTimeVersion) {
+                        new Downloader(timeDownloaderHelper).execute(timeURL);
+                        timeVersionPreferences.edit().putInt(stopID, newestStopTimeVersion).commit();
+                    }
+                }
+            } catch (JSONException e) {
+                //Log.e("JSON", "Error parsing Version JSON.");
+                e.printStackTrace();
+            }
+        }
+    };
+
     private final DownloaderHelper busDownloaderHelper = new DownloaderHelper() {
         @Override
         public void parse(JSONObject jsonObject) throws JSONException, IOException {
@@ -358,60 +380,33 @@ public class MainActivity extends Activity {
         else {
             if (!sharedManager.hasRoutes() || !sharedManager.hasStops()) {
                 //Log.v("Refactor", "Parsing cached files...");
-
-                String stopJson = readSavedData(STOP_JSON_FILE);
-                String routeJson = readSavedData(ROUTE_JSON_FILE);
-                String segJson = readSavedData(SEGMENT_JSON_FILE);
-                String verJson = readSavedData(VERSION_JSON_FILE);
-                if (stopJson.length() > 0 && routeJson.length() > 0 && segJson.length() > 0 && verJson.length() > 0) {
-
-                    try {
-                        Stop.parseJSON(new JSONObject(readSavedData(STOP_JSON_FILE)));
-                        Route.parseJSON(new JSONObject(readSavedData(ROUTE_JSON_FILE)));
-                        BusManager.parseSegments(new JSONObject(readSavedData(SEGMENT_JSON_FILE)));
-                        BusManager.parseVersion(new JSONObject(readSavedData(VERSION_JSON_FILE)));
-                        for (String timeURL : sharedManager.getTimesToDownload()) {
-                            String timeFileName = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
-                            //Log.v("Refactor", "Trying to parse " + timeFileName);
-                            try {
-                                BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
-                            } catch (JSONException e){
-                                e.printStackTrace();
-                                new Downloader(timeDownloaderHelper).execute(timeURL);
-                            }
+                try {
+                    JSONObject stopJson = new JSONObject(readSavedData(STOP_JSON_FILE));
+                    JSONObject routeJson = new JSONObject(readSavedData(ROUTE_JSON_FILE));
+                    JSONObject segJson = new JSONObject(readSavedData(SEGMENT_JSON_FILE));
+                    JSONObject verJson = new JSONObject(readSavedData(VERSION_JSON_FILE));
+                    Stop.parseJSON(stopJson);
+                    Route.parseJSON(routeJson);
+                    BusManager.parseSegments(segJson);
+                    BusManager.parseVersion(verJson);
+                    for (String timeURL : sharedManager.getTimesToDownload()) {
+                        String timeFileName = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
+                        //Log.v("Refactor", "Trying to parse " + timeFileName);
+                        try {
+                            BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
+                        } catch (JSONException e){
+                            e.printStackTrace();
+                            new Downloader(timeDownloaderHelper).execute(timeURL);
                         }
-                        SharedPreferences favoritePreferences = getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE);
-                        //Log.v("Refactor", "Done parsing...");
-                        for (Stop s : sharedManager.getStops()) {
-                            boolean result = favoritePreferences.getBoolean(s.getID(), false);
-                            //Log.v("Refactor", s.getName() + " is " + result);
-                            s.setFavorite(result);
-                        }
-                        new Downloader(new DownloaderHelper() {
-                            @Override
-                            public void parse(JSONObject jsonObject) {
-                                try {
-                                    BusManager.parseVersion(jsonObject);
-                                    for (String timeURL : sharedManager.getTimesToDownload()) {
-                                        SharedPreferences timeVersionPreferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
-                                        String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
-                                        //Log.v("Refactor", "Time to download: " + stopID);
-                                        int newestStopTimeVersion = sharedManager.getTimesVersions().get(stopID);
-                                        if (timeVersionPreferences.getInt(stopID, 0) != newestStopTimeVersion) {
-                                            new Downloader(timeDownloaderHelper).execute(timeURL);
-                                            timeVersionPreferences.edit().putInt(stopID, newestStopTimeVersion).commit();
-                                        }
-                                    }
-                                } catch (JSONException e) {
-                                    //Log.e("JSON", "Error parsing Version JSON.");
-                                    e.printStackTrace();
-                                }
-                            }
-                        }).execute(versionURL);
-                    } catch (JSONException e) {
-                        //Log.e("RefactorJSON", "Error with JSON parsing cached file.");
-                        e.printStackTrace();
                     }
+                    SharedPreferences favoritePreferences = getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE);
+                    //Log.v("Refactor", "Done parsing...");
+                    for (Stop s : sharedManager.getStops()) {
+                        boolean result = favoritePreferences.getBoolean(s.getID(), false);
+                        //Log.v("Refactor", s.getName() + " is " + result);
+                        s.setFavorite(result);
+                    }
+                    new Downloader(versionDownloaderHelperTwo).execute(versionURL);
                     SharedPreferences stopPreferences = getSharedPreferences(STOP_PREF, MODE_PRIVATE);
                     setStartStop(sharedManager.getStopByName(stopPreferences.getString(START_STOP_PREF, "715 Broadway @ Washington Square")));
                     setEndStop(sharedManager.getStopByName(stopPreferences.getString(END_STOP_PREF, "80 Lafayette St")));
@@ -422,10 +417,15 @@ public class MainActivity extends Activity {
                     // Get the location of the buses every 10 sec.
                     renewBusRefreshTimer();
                     renewTimeUntilTimer();
-                }
-                else {
+                } catch (JSONException e) {
+                    //Log.e("RefactorJSON", "Re-downloading because of an error.");
+                    e.printStackTrace();
                     downloadEverything();
                 }
+            }
+            else {
+                setStartAndEndStops();
+                updateMapWithNewStartOrEnd();
             }
         }
     }
@@ -792,14 +792,14 @@ public class MainActivity extends Activity {
         renewTimeUntilTimer();
     }
 
-    private final CompoundButton.OnCheckedChangeListener cbListener = new CompoundButton.OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            Stop s = (Stop) buttonView.getTag();
-            s.setFavorite(isChecked);
-            getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(s.getID(), isChecked).commit();
-        }
-    };
+private final CompoundButton.OnCheckedChangeListener cbListener = new CompoundButton.OnCheckedChangeListener() {
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        Stop s = (Stop) buttonView.getTag();
+        s.setFavorite(isChecked);
+        getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(s.getID(), isChecked).commit();
+    }
+};
 
     @SuppressWarnings("UnusedParameters")
     public void callSafeRide(View view) {
@@ -877,40 +877,40 @@ public class MainActivity extends Activity {
         }
     }
 
-    private class Downloader extends AsyncTask<String, Integer, JSONObject> {
-        final DownloaderHelper helper;
+private class Downloader extends AsyncTask<String, Integer, JSONObject> {
+    final DownloaderHelper helper;
 
-        public Downloader(DownloaderHelper helper) {
-            this.helper = helper;
-        }
-
-        @Override
-        public JSONObject doInBackground(String... urls) {
-            try {
-                return new JSONObject(downloadUrl(urls[0]));
-            } catch (IOException e) {
-                //Log.e("JSON", "DownloadURL IO error.");
-                e.printStackTrace();
-            } catch (JSONException e) {
-                //Log.e("JSON", "DownloadURL JSON error.");
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(JSONObject result) {
-            try {
-                helper.parse(result);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+    public Downloader(DownloaderHelper helper) {
+        this.helper = helper;
     }
 
-    public abstract class DownloaderHelper {
-        public abstract void parse(JSONObject jsonObject) throws JSONException, IOException;
+    @Override
+    public JSONObject doInBackground(String... urls) {
+        try {
+            return new JSONObject(downloadUrl(urls[0]));
+        } catch (IOException e) {
+            //Log.e("JSON", "DownloadURL IO error.");
+            e.printStackTrace();
+        } catch (JSONException e) {
+            //Log.e("JSON", "DownloadURL JSON error.");
+            e.printStackTrace();
+        }
+        return null;
     }
+
+    @Override
+    protected void onPostExecute(JSONObject result) {
+        try {
+            helper.parse(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+public abstract class DownloaderHelper {
+    public abstract void parse(JSONObject jsonObject) throws JSONException, IOException;
+}
 
     // Given a URL, establishes an HttpUrlConnection and retrieves
 // the web page content as a InputStream, which it returns as
