@@ -677,10 +677,7 @@ public class MainActivity extends Activity {
                 Stop temp = startStop;
                 startStop = endStop;
                 ((Button) findViewById(R.id.start_button)).setText(startStop.getUltimateName());
-                endStop = temp;
-                ((Button) findViewById(R.id.end_button)).setText(endStop.getUltimateName());
-                setNextBusTime();
-                updateMapWithNewStartOrEnd();
+                setEndStop(temp);
             }
             else { // We have a new start. So, we must ensure the end is actually connected. If not, pick a random connected stop.
                 startStop = stop;
@@ -786,6 +783,9 @@ public class MainActivity extends Activity {
                     }
                 }
                 updateMapWithNewStartOrEnd();
+            }
+            else {
+                setEndStop(startStop);
             }
         }
         renewBusRefreshTimer();
