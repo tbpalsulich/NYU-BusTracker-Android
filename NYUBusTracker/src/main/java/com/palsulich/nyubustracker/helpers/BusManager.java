@@ -14,6 +14,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public final class BusManager {
     private static BusManager sharedBusManager = null;      // Singleton instance.
@@ -355,17 +357,30 @@ public final class BusManager {
     }
 
     public static void parseTime(JSONObject timesJson) throws JSONException {
-        JSONObject routes = timesJson.getJSONObject(BusManager.TAG_ROUTES);
-        String stopID = timesJson.getString("stop_id");
-        Stop s = sharedBusManager.getStopByID(stopID);
-        for (int i = 0; i < s.getRoutes().size(); i++) {
-            if (routes.has(s.getRoutes().get(i).getID())) {
-                JSONObject routeTimes = routes.getJSONObject(s.getRoutes().get(i).getID());
-                getTimes(routeTimes, TAG_WEEKDAY, s, Time.TimeOfWeek.Weekday);
-                getTimes(routeTimes, TAG_FRIDAY, s, Time.TimeOfWeek.Friday);
-                getTimes(routeTimes, TAG_WEEKEND, s, Time.TimeOfWeek.Weekend);
+        final JSONObject routes = timesJson.getJSONObject(BusManager.TAG_ROUTES);
+        final String stopID = timesJson.getString("stop_id");
+        final Timer t = new Timer();
+        t.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                Stop s = sharedBusManager.getStopByID(stopID);
+                if (s != null){
+                    t.cancel();
+                    for (int i = 0; i < s.getRoutes().size(); i++) {
+                        if (routes.has(s.getRoutes().get(i).getID())) {
+                            try {
+                                JSONObject routeTimes = routes.getJSONObject(s.getRoutes().get(i).getID());
+                                getTimes(routeTimes, TAG_WEEKDAY, s, Time.TimeOfWeek.Weekday);
+                                getTimes(routeTimes, TAG_FRIDAY, s, Time.TimeOfWeek.Friday);
+                                getTimes(routeTimes, TAG_WEEKEND, s, Time.TimeOfWeek.Weekend);
+                            } catch (JSONException e){
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
             }
-        }
+        }, 0L, 250L);
     }
 
     private static void getTimes(JSONObject routeTimes, String tag, Stop s, Time.TimeOfWeek timeOfWeek) throws JSONException {
