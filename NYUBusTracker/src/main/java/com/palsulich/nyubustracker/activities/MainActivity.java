@@ -661,8 +661,14 @@ public class MainActivity extends Activity {
                 ArrayList<Route> startRoutes = startStop.getRoutes();
                 if (startRoutes.size() > 0) {
                     ArrayList<Stop> someConnectedStops = startStop.getRoutes().get(0).getStops();
-                    if (someConnectedStops.size() > 0) {
-                        setEndStop(someConnectedStops.get((someConnectedStops.indexOf(startStop) + 1) % someConnectedStops.size()));
+                    ArrayList<Stop> goodStops = new ArrayList<Stop>(someConnectedStops);
+                    for (Stop s : someConnectedStops){
+                        if (!s.hasTimes()){
+                            goodStops.remove(s);
+                        }
+                    }
+                    if (goodStops.size() > 0) {
+                        setEndStop(goodStops.get((goodStops.indexOf(startStop) + 1) % goodStops.size()));
                     }
                 }
             }
@@ -774,7 +780,7 @@ public class MainActivity extends Activity {
                 else {
                     ((TextView) findViewById(R.id.next_route)).setText("");
                     ((TextView) findViewById(R.id.next_bus)).setText("");
-                    if (rightNow.get(Calendar.HOUR) < 7) {
+                    if (rightNow.get(Calendar.HOUR_OF_DAY) < 7) {
                         findViewById(R.id.safe_ride_button).setVisibility(View.VISIBLE);
                     }
                     else {
