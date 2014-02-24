@@ -124,12 +124,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                             startList.performItemClick(startAdapter.getView(j, null, null),
                                                        j,
                                                        startAdapter.getItemId(j));
+                            assertEquals(startStop.getName(), startButton.getText());
                             for (int i = 0; i < endAdapter.getCount(); i++) {
-                                if (((Stop) endAdapter.getItem(i)).getName().equals(startStop.getName())){
+                                Stop endStop = (Stop) endAdapter.getItem(i);
+                                if (endStop.getName().equals(startStop.getName())){
                                     endButton.performClick();
                                     endList.performItemClick(endAdapter.getView(i, null, null),
                                                                i,
                                                                endAdapter.getItemId(i));
+                                    assertEquals(endStop.getName(), endButton.getText());
                                 }
                             }
                         }
