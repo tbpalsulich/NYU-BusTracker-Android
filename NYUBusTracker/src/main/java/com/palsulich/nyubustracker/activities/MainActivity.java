@@ -319,8 +319,7 @@ public class MainActivity extends Activity {
             int duration = Toast.LENGTH_SHORT;
 
             if (context != null) {
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
+                Toast.makeText(context, text, duration).show();
             }
         }
     }
@@ -475,8 +474,7 @@ public class MainActivity extends Activity {
                                 int duration = Toast.LENGTH_SHORT;
 
                                 if (context != null) {
-                                    Toast toast = Toast.makeText(context, text, duration);
-                                    toast.show();
+                                    Toast.makeText(context, text, duration).show();
                                 }
                             }
                         }

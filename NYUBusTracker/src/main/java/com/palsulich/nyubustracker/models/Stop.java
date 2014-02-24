@@ -215,17 +215,37 @@ public class Stop {
         times.add(t);
     }
 
+    public static int getStartingNumber(String s){
+        if (Character.isDigit(s.charAt(0))) {
+            int n = 0;
+            while (n < s.length() && Character.isDigit(s.charAt(n))) {
+                n++;
+            }
+            return Integer.parseInt(s.substring(0, n));
+        }
+        else return -1;
+    }
+
+    public static int compareStartingNumbers(String stop, String stop2){
+        int stopN = getStartingNumber(stop);
+        int stopN2 = getStartingNumber(stop2);
+        if (stopN > -1 && stopN2 > -1) return Integer.signum(stopN - stopN2);
+        if (stopN > -1) return -1;
+        if (stopN2 > -1) return 1;
+        return Integer.signum(stopN - stopN2);
+    }
+
     public static final Comparator<Stop> compare = new Comparator<Stop>() {
         @Override
         public int compare(Stop stop, Stop stop2) {
             if (stop.getFavorite()) {
                 if (stop2.getFavorite()) {
-                    return Integer.signum(stop.getName().compareTo(stop2.getName()));
+                    return compareStartingNumbers(stop.getName(), stop2.getName());
                 }
                 else return -1;
             }
             else if (stop2.getFavorite()) return 1;
-            else return Integer.signum(stop.getName().compareTo(stop2.getName()));
+            else return compareStartingNumbers(stop.getName(), stop2.getName());
         }
     };
 
