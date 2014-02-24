@@ -180,22 +180,24 @@ public final class BusManager {
             ArrayList<Route> stopRoutes = stop.getRoutes();
             for (Route route : stopRoutes) {       // For every route servicing this stop:
                 //Log.v("Route Debugging", route.toString() + " services this stop.");
-                for (Stop connectedStop : route.getStops()) {    // add all of that route's stops.
-                    if (connectedStop != null && !connectedStop.getUltimateName().equals(stop.getName()) &&
-                        !result.contains(connectedStop) &&
-                        (!connectedStop.isHidden() || !connectedStop.isRelatedTo(stop))) {
-                        while (connectedStop.getParent() != null) {
-                            connectedStop = connectedStop.getParent();
-                        }
-                        boolean repeatStop = false;
-                        for (Stop resultStop : result) {
-                            if (resultStop.getName().equals(connectedStop.getName())) {
-                                repeatStop = true;
+                if (stop.getTimesOfRoute(route.getLongName()).size() > 0){
+                    for (Stop connectedStop : route.getStops()) {    // add all of that route's stops.
+                        if (connectedStop != null && !connectedStop.getUltimateName().equals(stop.getName()) &&
+                            !result.contains(connectedStop) &&
+                            (!connectedStop.isHidden() || !connectedStop.isRelatedTo(stop))) {
+                            while (connectedStop.getParent() != null) {
+                                connectedStop = connectedStop.getParent();
                             }
-                        }
-                        if (!repeatStop) {
-                            result.add(connectedStop);
-                            //Log.v("Route Debugging","'" + connectedStop.getName() + "' is connected to '" + stop.getName() + "'");
+                            boolean repeatStop = false;
+                            for (Stop resultStop : result) {
+                                if (resultStop.getName().equals(connectedStop.getName())) {
+                                    repeatStop = true;
+                                }
+                            }
+                            if (!repeatStop) {
+                                result.add(connectedStop);
+                                //Log.v("Route Debugging","'" + connectedStop.getName() + "' is connected to '" + stop.getName() + "'");
+                            }
                         }
                     }
                 }
