@@ -229,6 +229,7 @@ public class MainActivity extends Activity {
                 // The Map is verified. It is now safe to manipulate the map.
                 mMap.getUiSettings().setRotateGesturesEnabled(false);
                 mMap.getUiSettings().setZoomControlsEnabled(false);
+                mMap.setMyLocationEnabled(true);
                 haveAMap = true;
             }
             else haveAMap = false;

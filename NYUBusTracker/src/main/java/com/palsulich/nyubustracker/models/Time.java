@@ -1,7 +1,6 @@
 package com.palsulich.nyubustracker.models;
 
 import android.content.res.Resources;
-import android.util.Log;
 
 import com.palsulich.nyubustracker.R;
 import com.palsulich.nyubustracker.helpers.BusManager;
@@ -191,8 +190,7 @@ public class Time {
             return new Time(hourDifference, minDifference);
         }
         else {
-            Log.v("Time Debugging", t.toString() + " isn't after " + this.toString());
-            return new Time(99, 99);
+            return new Time(99, 99);    // This time is 'infinitely' far away.
         }
     }
 
