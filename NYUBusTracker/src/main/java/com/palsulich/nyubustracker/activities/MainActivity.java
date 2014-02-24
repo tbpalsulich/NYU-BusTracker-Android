@@ -16,6 +16,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
@@ -666,7 +667,9 @@ public class MainActivity extends Activity {
                         }
                     }
                     if (goodStops.size() > 0) {
-                        setEndStop(goodStops.get((goodStops.indexOf(startStop) + 1) % goodStops.size()));
+                        Stop test = goodStops.get((goodStops.indexOf(startStop) + 1) % goodStops.size());
+                        Log.e("ERROR!!!", test.getName());
+                        setEndStop(test);
                     }
                 }
             }
@@ -752,8 +755,12 @@ public class MainActivity extends Activity {
             for (Route r : availableRoutes) {
                 // Get the Times at this stop for this route.
                 ArrayList<Time> times = startStop.getTimesOfRoute(r.getLongName());
-                if (times.size() > 0 && !tempTimesBetweenStartAndEnd.contains(times.get(0))) {
-                    tempTimesBetweenStartAndEnd.addAll(times);
+                if (times.size() > 0){
+                    for (Time t : times){
+                        if (!tempTimesBetweenStartAndEnd.contains(t)) {
+                            tempTimesBetweenStartAndEnd.add(t);
+                        }
+                    }
                 }
             }
             if (tempTimesBetweenStartAndEnd.size() > 0) {    // We actually found times.

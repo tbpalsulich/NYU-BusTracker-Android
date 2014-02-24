@@ -1,6 +1,7 @@
 package com.palsulich.nyubustracker.models;
 
 import android.content.res.Resources;
+import android.util.Log;
 
 import com.palsulich.nyubustracker.R;
 import com.palsulich.nyubustracker.helpers.BusManager;
@@ -163,6 +164,14 @@ public class Time {
         return "";
     }
 
+    public boolean equals(Object t){
+        if (t instanceof Time){
+            Time time = (Time) t;
+            return (time.hour == this.hour && time.min == this.min && time.timeOfWeek == this.timeOfWeek);
+        }
+        return false;
+    }
+
     // isStrictlyBefore(t) returns false if the times are equal or this is after t.
     public boolean isStrictlyBefore(Time t) {
         //Log.v("Time Debugging", this.toString() + " is strictly before " + t.toString() + ": " + ((this.hour < t.hour) || (this.hour == t.hour && this.min < t.min)));
@@ -182,8 +191,8 @@ public class Time {
             return new Time(hourDifference, minDifference);
         }
         else {
-            //Log.v("Time Debugging", t.toString() + " isn't after " + this.toString());
-            return new Time(0, 0);
+            Log.v("Time Debugging", t.toString() + " isn't after " + this.toString());
+            return new Time(99, 99);
         }
     }
 
