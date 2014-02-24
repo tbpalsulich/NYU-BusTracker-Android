@@ -824,6 +824,7 @@ public class MainActivity extends Activity {
         // Get all stops connected to the start stop.
         final ArrayList<Stop> connectedStops = BusManager.getBusManager().getConnectedStops(startStop);
         ListView listView = new ListView(this);     // ListView to populate the dialog.
+        listView.setId(R.id.end_stop_list);
         listView.setDivider(new ColorDrawable(getResources().getColor(R.color.list_divider)));
         listView.setDividerHeight(1);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);    // Used to build the dialog with the list of connected Stops.
@@ -851,6 +852,7 @@ public class MainActivity extends Activity {
     public void createStartDialog(View view) {
         final ArrayList<Stop> stops = BusManager.getBusManager().getStops();    // Show every stop as an option to start.
         ListView listView = new ListView(this);
+        listView.setId(R.id.start_button);
         listView.setDivider(new ColorDrawable(getResources().getColor(R.color.list_divider)));
         listView.setDividerHeight(1);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
