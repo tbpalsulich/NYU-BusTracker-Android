@@ -177,9 +177,13 @@ public class Time {
         return (this.hour < t.hour) || (this.hour == t.hour && this.min < t.min);
     }
 
+    public boolean isBefore(Time t) {
+        return (this.hour < t.hour) || (this.hour == t.hour && this.min <= t.min);
+    }
+
     // Return a Time object who represents the difference in time between the two Times.
     Time getTimeAsTimeUntil(Time t) {
-        if (this.isStrictlyBefore(t)) {
+        if (this.isBefore(t)) {
             //Log.v("Time Debugging", this + " is strictly before " + t);
             int hourDifference = t.hour - this.hour;
             int minDifference = t.min - this.min;

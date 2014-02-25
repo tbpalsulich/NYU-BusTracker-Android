@@ -776,7 +776,7 @@ public class MainActivity extends Activity {
                 Collections.sort(timesBetweenStartAndEnd, Time.compare);
                 int index = tempTimesBetweenStartAndEnd.indexOf(currentTime);
                 nextBusTime = tempTimesBetweenStartAndEnd.get((index + 1) % tempTimesBetweenStartAndEnd.size());
-                mSwitcher.setText(currentTime.getTimeAsStringUntil(nextBusTime, getResources()));
+                mSwitcher.setText(currentTime.getTimeAsStringUntil(nextBusTime, getResources()));  // Pass resources so we return the proper string value.
 
                 if (BusManager.getBusManager().isOnline()) {
                     ((TextView) findViewById(R.id.next_route)).setText(getString(R.string.via_route) + nextBusTime.getRoute());
