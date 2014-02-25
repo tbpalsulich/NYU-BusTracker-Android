@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Timer;
@@ -44,6 +45,8 @@ public final class BusManager {
     public static final String TAG_VEHICLE_ID = "vehicle_id";
     public static final String TAG_SEGMENTS = "segments";
     public static final String TAG_STOPS = "stops";
+
+    private static Calendar calendar;
 
     private BusManager() {
         stops = new ArrayList<Stop>();
@@ -275,6 +278,17 @@ public final class BusManager {
         }
 
         return result;
+    }
+
+    public static Calendar getCurrentTime(){
+        if (calendar == null){
+            return Calendar.getInstance();
+        }
+        else return calendar;
+    }
+
+    public static void spoofTime(Calendar cal){
+        calendar = cal;
     }
 
     /*

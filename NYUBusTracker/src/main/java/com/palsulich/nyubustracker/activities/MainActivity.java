@@ -434,7 +434,7 @@ public class MainActivity extends Activity {
     renewTimeUntilTimer() creates a new timer that calls setNextBusTime() every minute on the minute.
      */
     private void renewTimeUntilTimer() {
-        Calendar rightNow = Calendar.getInstance();
+        Calendar rightNow = BusManager.getCurrentTime();
 
         if (timeUntilTimer != null) timeUntilTimer.cancel();
 
@@ -524,7 +524,6 @@ public class MainActivity extends Activity {
         //Log.v("General Debugging", "onStart!");
         EasyTracker.getInstance(this).activityStart(this);
     }
-
 
     @Override
     public void onStop() {
@@ -721,7 +720,7 @@ public class MainActivity extends Activity {
         if (timeUntilTimer != null)
             timeUntilTimer.cancel();        // Don't want to be interrupted in the middle of this.
         if (busRefreshTimer != null) busRefreshTimer.cancel();
-        Calendar rightNow = Calendar.getInstance();
+        Calendar rightNow = BusManager.getCurrentTime();
         ArrayList<Route> startRoutes = startStop.getUltimateParent().getRoutes();        // All the routes leaving the start stop.
         ArrayList<Route> endRoutes = endStop.getUltimateParent().getRoutes();
         ArrayList<Route> availableRoutes = new ArrayList<Route>();               // All the routes connecting the two.
