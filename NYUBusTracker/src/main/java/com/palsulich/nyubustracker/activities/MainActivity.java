@@ -813,7 +813,7 @@ public class MainActivity extends Activity {
 
     @SuppressWarnings("UnusedParameters")
     public void callSafeRide(View view) {
-        Intent callIntent = new Intent(Intent.ACTION_CALL);
+        Intent callIntent = new Intent(Intent.ACTION_DIAL);
         callIntent.setData(Uri.parse("tel:12129928267"));
         startActivity(callIntent);
     }
