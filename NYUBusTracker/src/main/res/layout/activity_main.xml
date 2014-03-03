@@ -124,8 +124,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/ic_action_help"
         android:layout_alignParentBottom="true"
-        android:layout_alignRight="@+id/next_time"
-        android:layout_alignEnd="@+id/next_time"
+        android:layout_alignParentRight="true"
         android:onClick="createInfoDialog"
         android:alpha=".6"/>
 
