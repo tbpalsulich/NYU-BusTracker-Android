@@ -25,6 +25,12 @@
         <item name="android:gravity">left</item>
     </style>
 
+    <style name="InfoButton" parent="TimesButton">
+        <item name="android:gravity">center</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+    </style>
+
     <style name="TimesButton" parent="@android:Widget.DeviceDefault.Button.Borderless">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">40dp</item>

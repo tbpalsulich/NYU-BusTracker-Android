@@ -909,6 +909,14 @@ public class MainActivity extends Activity {
         startActivity(i);
     }
 
+    @SuppressWarnings("UnusedParameters")
+    public void goToWebsite(View view){
+        String url = "http://www.nyubustracker.com";
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(url));
+        startActivity(i);
+    }
+
     private class Downloader extends AsyncTask<String, Integer, JSONObject> {
         final DownloaderHelper helper;
 

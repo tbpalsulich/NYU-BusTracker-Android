@@ -25,5 +25,6 @@
     <string name="open_source">This app is open source!</string>
     <string name="github_link">Tap to view on GitHub</string>
     <string name="thanks">Special thanks to Mike Jaoudi</string>
+    <string name="website">www.nyubustracker.com</string>
 
 </resources>
