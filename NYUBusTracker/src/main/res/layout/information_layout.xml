@@ -11,7 +11,7 @@
         android:text="@string/information"
         android:layout_gravity="center"
         android:gravity="center"
-        android:textSize="35sp"
+        android:textSize="30sp"
         android:textColor="@color/white"/>
     <Button
         style="@style/InfoButton"
@@ -20,7 +20,7 @@
         android:text="@string/website"
         android:layout_gravity="center"
         android:gravity="center"
-        android:textSize="30sp"
+        android:textSize="25sp"
         android:onClick="goToWebsite"/>
     <ImageView style="@style/Separator"/>
     <TextView
@@ -39,7 +39,7 @@
         android:gravity="center"
         android:text="@string/name"
         android:paddingTop="5dp"
-        android:textSize="30sp"
+        android:textSize="25sp"
         android:textColor="@color/white"/>
     <ImageView style="@style/Separator"/>
     <TextView

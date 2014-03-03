@@ -126,6 +126,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignRight="@+id/next_time"
         android:layout_alignEnd="@+id/next_time"
-        android:onClick="createInfoDialog"/>
+        android:onClick="createInfoDialog"
+        android:alpha=".6"/>
 
 </RelativeLayout>
