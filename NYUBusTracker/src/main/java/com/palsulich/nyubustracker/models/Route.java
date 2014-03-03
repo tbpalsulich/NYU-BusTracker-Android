@@ -16,7 +16,6 @@ public class Route {
     private final BusManager sharedManager;
     private final ArrayList<String> segmentIDs;
     private final ArrayList<PolylineOptions> segments;
-    private boolean active = true;
 
     public Route(String mLongName, String mRouteID) {
         segmentIDs = new ArrayList<String>();
@@ -37,10 +36,6 @@ public class Route {
 
     public ArrayList<PolylineOptions> getSegments() {
         return segments;
-    }
-
-    void setActive(boolean active) {
-        this.active = active;
     }
 
     public Route setName(String name) {
@@ -100,7 +95,6 @@ public class Route {
             for (int i = 0; i < stops.length(); i++) {
                 r.addStop(i, sharedManager.getStopByID(stops.getString(i)));
             }
-            r.setActive(routeObject.getBoolean("is_active"));
             JSONArray segments = routeObject.getJSONArray(BusManager.TAG_SEGMENTS);
             //Log.v("MapDebugging", "Found " + segments.length() + " segments for route " + routeID);
             for (int i = 0; i < segments.length(); i++) {

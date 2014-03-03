@@ -81,10 +81,11 @@ public class MainActivity extends Activity {
     private ArrayList<Marker> busesOnMap = new ArrayList<Marker>();
 
     private static final String query = makeQuery("agencies", "72", "UTF-8");
-    private static final String stopsURL = "http://api.transloc.com/1.2/stops.json?" + query;
-    private static final String routesURL = "http://api.transloc.com/1.2/routes.json?" + query;
-    private static final String segmentsURL = "http://api.transloc.com/1.2/segments.json?" + query;
-    private static final String vehiclesURL = "http://api.transloc.com/1.2/vehicles.json?" + query;
+    private static final String translocURL = "https://transloc-api-1-2.p.mashape.com";
+    private static final String stopsURL = translocURL + "/stops.json?" + query;
+    private static final String routesURL = translocURL + "/routes.json?" + query;
+    private static final String segmentsURL = translocURL + "/segments.json?" + query;
+    private static final String vehiclesURL = translocURL + "/vehicles.json?" + query;
     private static final String versionURL = "https://s3.amazonaws.com/nyubustimes/1.0/version.json";
     private static final String RUN_ONCE_PREF = "runOnce";
     private static final String STOP_PREF = "stops";
@@ -937,6 +938,7 @@ public class MainActivity extends Activity {
             conn.setConnectTimeout(15000 /* milliseconds */);
             conn.setRequestMethod("GET");
             conn.setDoInput(true);
+            conn.setRequestProperty("X-Mashape-Authorization", "0gpwrDtINCQRxnhWEyJpEgdfYdQjZYSp");
             // Starts the query
             conn.connect();
             //int response = conn.getResponseCode();
