@@ -23,6 +23,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
@@ -888,6 +889,24 @@ public class MainActivity extends Activity {
             dialog.setCanceledOnTouchOutside(true);
             dialog.show();
         }
+    }
+
+    @SuppressWarnings("UnusedParameters")
+    public void createInfoDialog(View view){
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        LinearLayout linearLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.information_layout, null);
+        builder.setView(linearLayout);
+        Dialog dialog = builder.create();
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.show();
+    }
+
+    @SuppressWarnings("UnusedParameters")
+    public void goToGitHub(View view){
+        String url = "https://github.com/tpalsulich/NYU-BusTracker-Android";
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(url));
+        startActivity(i);
     }
 
     private class Downloader extends AsyncTask<String, Integer, JSONObject> {

@@ -19,5 +19,11 @@
     <string name="hour_and">"1 hour and "</string>
     <string name="via_route">"via route "</string>
     <string name="next_bus_in">Next Bus In:</string>
+    <string name="information">NYU Bus Tracker\nInformation</string>
+    <string name="programmed_by">Programmed by:</string>
+    <string name="name">Tyler Palsulich</string>
+    <string name="open_source">This app is open source!</string>
+    <string name="github_link">Tap to view on GitHub</string>
+    <string name="thanks">Special thanks to Mike Jaoudi</string>
 
 </resources>

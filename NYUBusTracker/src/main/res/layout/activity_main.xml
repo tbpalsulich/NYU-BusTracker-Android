@@ -119,4 +119,13 @@
         android:layout_below="@+id/safe_ride_button"
         android:name="com.google.android.gms.maps.MapFragment"/>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_action_help"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/next_time"
+        android:layout_alignEnd="@+id/next_time"
+        android:onClick="createInfoDialog"/>
+
 </RelativeLayout>
