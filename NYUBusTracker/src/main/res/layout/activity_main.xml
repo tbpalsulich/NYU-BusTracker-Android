@@ -42,7 +42,7 @@
         android:layout_below="@+id/start_end_divider"
         android:layout_alignParentLeft="true"
         android:textStyle="bold" />
-    
+
     <ImageView
         android:id="@+id/under_end_button_divider"
         style="@style/Separator"
