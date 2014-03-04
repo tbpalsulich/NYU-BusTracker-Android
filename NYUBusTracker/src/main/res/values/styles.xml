@@ -37,6 +37,7 @@
         <item name="android:paddingLeft">@dimen/activity_horizontal_margin</item>
         <item name="android:paddingRight">@dimen/activity_horizontal_margin</item>
         <item name="android:gravity">left|center_vertical</item>
+        <item name="android:background">@drawable/button_selector</item>
     </style>
 
     <style name="NYUText" parent="android:TextAppearance.DeviceDefault">

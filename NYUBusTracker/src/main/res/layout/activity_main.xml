@@ -3,6 +3,12 @@
     android:layout_height="match_parent"
     android:background="@color/purple">
 
+    <Button
+        android:id="@+id/start_button"
+        android:onClick="createStartDialog"
+        style="@style/StartEndButton"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true" />
 
     <TextView
         android:id="@+id/start"
@@ -14,17 +20,17 @@
         android:layout_alignParentTop="true"
         android:textStyle="bold" />
 
-    <Button
-        android:id="@+id/start_button"
-        android:onClick="createStartDialog"
-        style="@style/StartEndButton"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" />
-
     <ImageView
         android:id="@+id/start_end_divider"
         android:layout_below="@id/start_button"
         style="@style/Separator" />
+
+    <Button
+        android:id="@+id/end_button"
+        android:onClick="createEndDialog"
+        style="@style/StartEndButton"
+        android:layout_below="@+id/start_end_divider"
+        android:layout_alignParentLeft="true" />
 
     <TextView
         android:id="@+id/end"
@@ -36,14 +42,7 @@
         android:layout_below="@+id/start_end_divider"
         android:layout_alignParentLeft="true"
         android:textStyle="bold" />
-
-    <Button
-        android:id="@+id/end_button"
-        android:onClick="createEndDialog"
-        style="@style/StartEndButton"
-        android:layout_below="@+id/start_end_divider"
-        android:layout_alignParentLeft="true" />
-
+    
     <ImageView
         android:id="@+id/under_end_button_divider"
         style="@style/Separator"
@@ -120,12 +119,11 @@
         android:name="com.google.android.gms.maps.MapFragment"/>
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_action_help"
-        android:layout_alignParentBottom="true"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/ic_action_about"
         android:layout_alignParentRight="true"
-        android:onClick="createInfoDialog"
-        android:alpha=".6"/>
+        android:layout_alignParentBottom="true"
+        android:onClick="createInfoDialog"/>
 
 </RelativeLayout>

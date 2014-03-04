@@ -26,6 +26,7 @@
         android:clickable="true"
         android:layout_alignBottom="@+id/stop_checkbox"
         android:gravity="center_vertical"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        android:background="@drawable/button_selector"/>
 
 </RelativeLayout>
