@@ -667,6 +667,12 @@ public class MainActivity extends Activity {
                         if (!s.hasTimes()){
                             goodStops.remove(s);
                         }
+                        routes = new ArrayList<Route>();               // All the routes connecting the two.
+                        for (Route r : startStop.getRoutes()) {
+                            if (!r.hasStop(s)) {
+                                goodStops.remove(s);
+                            }
+                        }
                     }
                     if (goodStops.size() > 0) {
                         Stop test = goodStops.get((goodStops.indexOf(startStop) + 1) % goodStops.size());
