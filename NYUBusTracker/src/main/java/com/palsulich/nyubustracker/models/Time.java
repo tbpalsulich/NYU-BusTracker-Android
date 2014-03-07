@@ -141,7 +141,7 @@ public class Time {
             }
             if (difference.hour == 1 && difference.min == 0) {
                 BusManager.getBusManager().setOnline(true);
-                return difference.hour + resources.getString(R.string.hour);
+                return resources.getString(R.string.hour);
             }
             if (difference.hour > 1 && difference.min == 1) {
                 BusManager.getBusManager().setOnline(true);

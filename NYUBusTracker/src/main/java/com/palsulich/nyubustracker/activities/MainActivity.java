@@ -16,7 +16,6 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
@@ -667,7 +666,6 @@ public class MainActivity extends Activity {
                         if (!s.hasTimes()){
                             goodStops.remove(s);
                         }
-                        routes = new ArrayList<Route>();               // All the routes connecting the two.
                         for (Route r : startStop.getRoutes()) {
                             if (!r.hasStop(s)) {
                                 goodStops.remove(s);
@@ -676,7 +674,7 @@ public class MainActivity extends Activity {
                     }
                     if (goodStops.size() > 0) {
                         Stop test = goodStops.get((goodStops.indexOf(startStop) + 1) % goodStops.size());
-                        Log.e("ERROR!!!", test.getName());
+                        //Log.e("ERROR!!!", test.getName());
                         setEndStop(test);
                     }
                 }
