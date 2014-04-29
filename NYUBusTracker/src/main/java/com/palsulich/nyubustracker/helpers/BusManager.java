@@ -1,5 +1,7 @@
 package com.palsulich.nyubustracker.helpers;
 
+import android.util.Log;
+
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
 import com.palsulich.nyubustracker.models.Bus;
@@ -45,6 +47,7 @@ public final class BusManager {
     public static final String TAG_VEHICLE_ID = "vehicle_id";
     public static final String TAG_SEGMENTS = "segments";
     public static final String TAG_STOPS = "stops";
+    public static final String TAG_OTHER = "Other";
 
     private static Calendar calendar;
 
@@ -386,10 +389,9 @@ public final class BusManager {
                         if (routes.has(s.getRoutes().get(i).getID())) {
                             try {
                                 JSONObject routeTimes = routes.getJSONObject(s.getRoutes().get(i).getID());
-                                getTimes(routeTimes, TAG_WEEKDAY, s, Time.TimeOfWeek.Weekday);
-                                getTimes(routeTimes, TAG_FRIDAY, s, Time.TimeOfWeek.Friday);
-                                getTimes(routeTimes, TAG_WEEKEND, s, Time.TimeOfWeek.Weekend);
+                                getAllTimes(s, s.getRoutes().get(i), routeTimes);
                             } catch (JSONException e) {
+                                Log.e("Greenwich", "Error parsing JSON...");
                                 e.printStackTrace();
                             }
                         }
@@ -399,15 +401,31 @@ public final class BusManager {
         }, 0L, 250L);
     }
 
+    private static void getAllTimes(Stop s, Route r, JSONObject routeTimes) throws JSONException{
+        getTimes(routeTimes, TAG_WEEKDAY, s, Time.TimeOfWeek.Weekday);
+        getTimes(routeTimes, TAG_FRIDAY, s, Time.TimeOfWeek.Friday);
+        getTimes(routeTimes, TAG_WEEKEND, s, Time.TimeOfWeek.Weekend);
+        if (routeTimes.has(TAG_OTHER)){
+            //Log.d("Greenwich", "********Other route!!! " + r.getOtherLongName());
+            getAllTimes(s, r, routeTimes.getJSONObject(TAG_OTHER));
+            String route = routeTimes.getJSONObject(TAG_OTHER).getString(TAG_ROUTE);
+            s.setOtherRoute(route.substring(route.indexOf("Route ") + "Route ".length()));
+            r.setOtherName(route.substring(route.indexOf("Route ") + "Route ".length()));
+        }
+
+    }
+
     private static void getTimes(JSONObject routeTimes, String tag, Stop s, Time.TimeOfWeek timeOfWeek) throws JSONException {
         if (routeTimes.has(tag)) {
             JSONArray timesJson = routeTimes.getJSONArray(tag);
             //Log.v("Debugging", "Found " + weekendTimesJson.length() + " weekend times.");
             if (timesJson != null) {
                 String route = routeTimes.getString(BusManager.TAG_ROUTE);
+
                 if (route.contains("Route ")) {
                     route = route.substring(route.indexOf("Route ") + "Route ".length());
                 }
+                //Log.d("Greenwich", route + " times for " + s);
                 for (int k = 0; k < timesJson.length(); k++) {
                     s.addTime(new Time(timesJson.getString(k), timeOfWeek, route));
                 }

@@ -15,6 +15,7 @@ public class Stop {
     LatLng loc;
     String[] routesString;
     ArrayList<Route> routes = null;
+    String otherRoute = null;
     ArrayList<Time> times = null;
     boolean favorite;
     public static final String FAVORITES_PREF = "favorites";
@@ -30,6 +31,7 @@ public class Stop {
         routesString = mRoutes;
         times = new ArrayList<Time>();
         routes = new ArrayList<Route>();
+        otherRoute = "";
         childStops = new ArrayList<Stop>();
         BusManager sharedManager = BusManager.getBusManager();
         for (String s : mRoutes) {
@@ -72,6 +74,14 @@ public class Stop {
             if (childStop.hasTimes()) return true;
         }
         return false;
+    }
+
+    public void setOtherRoute(String r){
+        otherRoute = r;
+    }
+
+    public String getOtherRoute(){
+        return otherRoute;
     }
 
     public void setParentStop(Stop parent) {
@@ -157,9 +167,7 @@ public class Stop {
 
     public boolean hasRouteByString(String routeID) {
         for (String route : routesString) {
-            if (route.equals(routeID)) {
-                return true;
-            }
+            if (route.equals(routeID)) return true;
         }
         return false;
     }

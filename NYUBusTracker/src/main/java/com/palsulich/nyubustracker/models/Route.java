@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 public class Route {
     private String longName = "";
+    private String otherLongName = ""; // Useful for Route B Greenwich times.
     private String routeID = "";
     private ArrayList<Stop> stops = null;
     private final BusManager sharedManager;
@@ -43,12 +44,21 @@ public class Route {
         return this;
     }
 
+    public Route setOtherName(String otherName){
+        otherLongName = otherName;
+        return this;
+    }
+
     public ArrayList<String> getSegmentIDs() {
         return segmentIDs;
     }
 
     public String getLongName() {
         return longName;
+    }
+
+    public String getOtherLongName() {
+        return otherLongName;
     }
 
     public String getID() {

@@ -18,6 +18,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
@@ -767,7 +768,7 @@ public class MainActivity extends Activity {
         for (Route r : startRoutes) {
             //Log.v("Routes", "Start Route: " + r);
             if (endRoutes.contains(r) && !availableRoutes.contains(r)) {
-                //Log.v("Routes", "*  is available.");
+                Log.v("Greenwich", "*  " + r + " is available.");
                 availableRoutes.add(r);
             }
         }
@@ -791,11 +792,26 @@ public class MainActivity extends Activity {
         }
 
         if (availableRoutes.size() > 0) {
+            //Log.d("Greenwich", "Have a route available from " + startStop + " to " + endStop);
             ArrayList<Time> tempTimesBetweenStartAndEnd = new ArrayList<Time>();
             for (Route r : availableRoutes) {
+                //Log.d("Greenwich", "  " + r + " is available");
+                //if (!startStop.getOtherRoute().isEmpty()) Log.d("Greenwich", "  " + startStop.getOtherRoute() + " is available too!");
+                //if (!r.getOtherLongName().isEmpty()) Log.d("Greenwich", "  " + r.getOtherLongName() + " is available too!");
                 // Get the Times at this stop for this route.
                 ArrayList<Time> times = startStop.getTimesOfRoute(r.getLongName());
-                if (times.size() > 0){
+                ArrayList<Time> otherTimes = startStop.getTimesOfRoute(r.getOtherLongName());
+                //Log.d("Greenwich", "  has " + times.size() + " times ");
+                //Log.d("Greenwich", "  has " + otherTimes.size() + " other times.");
+
+                if (otherTimes.size() > 0 && endStop.getTimesOfRoute(r.getOtherLongName()).size() > 0){
+                    for (Time t : otherTimes){
+                        if (!tempTimesBetweenStartAndEnd.contains(t)) {
+                            tempTimesBetweenStartAndEnd.add(t);
+                        }
+                    }
+                }
+                else if (times.size() > 0) {
                     for (Time t : times){
                         if (!tempTimesBetweenStartAndEnd.contains(t)) {
                             tempTimesBetweenStartAndEnd.add(t);
