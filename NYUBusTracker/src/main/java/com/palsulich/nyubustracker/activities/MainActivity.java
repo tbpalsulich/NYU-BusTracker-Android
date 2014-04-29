@@ -31,7 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
-import com.google.analytics.tracking.android.EasyTracker;
+import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -43,6 +43,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.palsulich.nyubustracker.NYUBusTrackerApplication;
 import com.palsulich.nyubustracker.R;
 import com.palsulich.nyubustracker.adapters.StopAdapter;
 import com.palsulich.nyubustracker.adapters.TimeAdapter;
@@ -338,6 +339,8 @@ public class MainActivity extends Activity {
 //        Log.v("General Debugging", "onCreate!");
         setContentView(R.layout.activity_main);
 
+        ((NYUBusTrackerApplication) getApplication()).getTracker();
+
         oncePreferences = getSharedPreferences(RUN_ONCE_PREF, MODE_PRIVATE);
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -526,15 +529,15 @@ public class MainActivity extends Activity {
     public void onStart() {
         super.onStart();
 //        Log.v("General Debugging", "onStart!");
-        EasyTracker.getInstance(this).activityStart(this);
         onStartTime = System.currentTimeMillis();
+        GoogleAnalytics.getInstance(this).reportActivityStart(this);
     }
 
     @Override
     public void onStop() {
         super.onStop();
 //        Log.v("General Debugging", "onStop!");
-        EasyTracker.getInstance(this).activityStop(this);
+        GoogleAnalytics.getInstance(this).reportActivityStop(this);
     }
 
     void cacheStartAndEndStops() {

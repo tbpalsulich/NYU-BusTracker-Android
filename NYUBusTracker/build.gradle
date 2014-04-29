@@ -26,7 +26,6 @@ android {
         }
     }
 
-
     defaultConfig {
         versionCode 7
         versionName "1.41"
@@ -60,12 +59,8 @@ sourceSets {
 
 dependencies {
     dependencies {
-        compile 'com.google.android.gms:play-services:4.0.30'
-        compile 'com.google.maps.android:android-maps-utils:0.1+'
-        compile 'com.android.support:support-v4:19.0.+'
-        compile 'com.android.support:appcompat-v7:19.0.+'
-        compile 'com.android:volley:1.0'
-        compile 'se.emilsjolander:stickylistheaders:2.1.5'
+        compile 'com.google.android.gms:play-services:4.3.23'
+        compile 'com.google.maps.android:android-maps-utils:0.3+'
+        compile 'se.emilsjolander:stickylistheaders:2.3.0'
     }
-    compile files('libs/libGoogleAnalyticsServices.jar')
 }
