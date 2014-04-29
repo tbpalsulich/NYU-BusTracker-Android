@@ -11,6 +11,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -219,6 +221,8 @@ public class MainActivity extends Activity {
 
     ProgressDialog progressDialog;
     SharedPreferences oncePreferences;
+    LocationManager mLocationManager;
+    double onStartTime;
 
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
@@ -331,10 +335,11 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //Log.v("General Debugging", "onCreate!");
+//        Log.v("General Debugging", "onCreate!");
         setContentView(R.layout.activity_main);
 
         oncePreferences = getSharedPreferences(RUN_ONCE_PREF, MODE_PRIVATE);
+        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         int retCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
         if (retCode != ConnectionResult.SUCCESS) {
@@ -375,7 +380,7 @@ public class MainActivity extends Activity {
         mSwitcher.setOutAnimation(out);
 
         if (oncePreferences.getBoolean(FIRST_TIME, true)) {
-            //Log.v("General Debugging", "Downloading because of first time");
+//            Log.v("General Debugging", "Downloading because of first time");
             downloadEverything();
         }
         else {
@@ -408,9 +413,7 @@ public class MainActivity extends Activity {
                         s.setFavorite(result);
                     }
                     new Downloader(versionDownloaderHelperTwo).execute(versionURL);
-                    SharedPreferences stopPreferences = getSharedPreferences(STOP_PREF, MODE_PRIVATE);
-                    setStartStop(sharedManager.getStopByName(stopPreferences.getString(START_STOP_PREF, "715 Broadway @ Washington Square")));
-                    setEndStop(sharedManager.getStopByName(stopPreferences.getString(END_STOP_PREF, "80 Lafayette St")));
+                    setStartAndEndStops();
 
                     // Update the map to show the corresponding stops, buses, and segments.
                     if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
@@ -490,7 +493,7 @@ public class MainActivity extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        //Log.v("General Debugging", "onDestroy!");
+//        Log.v("General Debugging", "onDestroy!");
         cacheStartAndEndStops();      // Remember user's preferences across lifetimes.
         if (timeUntilTimer != null)
             timeUntilTimer.cancel();           // Don't need a timer anymore -- must be recreated onResume.
@@ -500,7 +503,7 @@ public class MainActivity extends Activity {
     @Override
     public void onPause() {
         super.onPause();
-        //Log.v("General Debugging", "onPause!");
+//        Log.v("General Debugging", "onPause!");
         cacheStartAndEndStops();
         if (timeUntilTimer != null) timeUntilTimer.cancel();
         if (busRefreshTimer != null) busRefreshTimer.cancel();
@@ -509,8 +512,8 @@ public class MainActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-        //Log.v("General Debugging", "onResume!");
-        if (endStop == null || startStop == null) setStartAndEndStops();
+//        Log.v("General Debugging", "onResume!");
+        setStartAndEndStops();
         if (endStop != null && startStop != null) {
             setNextBusTime();
             renewTimeUntilTimer();
@@ -522,14 +525,15 @@ public class MainActivity extends Activity {
     @Override
     public void onStart() {
         super.onStart();
-        //Log.v("General Debugging", "onStart!");
+//        Log.v("General Debugging", "onStart!");
         EasyTracker.getInstance(this).activityStart(this);
+        onStartTime = System.currentTimeMillis();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        //Log.v("General Debugging", "onStop!");
+//        Log.v("General Debugging", "onStop!");
         EasyTracker.getInstance(this).activityStop(this);
     }
 
@@ -540,11 +544,38 @@ public class MainActivity extends Activity {
             getSharedPreferences(STOP_PREF, MODE_PRIVATE).edit().putString(START_STOP_PREF, startStop.getName()).commit();
     }
 
+    /*
+    Returns the best location we can, checking every available location provider.
+    If no provider is available (e.g. all location services turned off), this will return null.
+     */
+    public Location getLocation() {
+        Location bestLocation = null;
+        for (String provider : mLocationManager.getProviders(true)) {
+            Location l = mLocationManager.getLastKnownLocation(provider);
+            if (l != null && (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy())) {
+                bestLocation = l;
+            }
+        }
+        return bestLocation;
+    }
+
     void setStartAndEndStops() {
         String end = getSharedPreferences(STOP_PREF, MODE_PRIVATE).getString(END_STOP_PREF, "80 Lafayette St");         // Creates or updates cache file.
         String start = getSharedPreferences(STOP_PREF, MODE_PRIVATE).getString(START_STOP_PREF, "715 Broadway @ Washington Square");
-        setStartStop(BusManager.getBusManager().getStopByName(start));
-        setEndStop(BusManager.getBusManager().getStopByName(end));
+        if (startStop == null) setStartStop(BusManager.getBusManager().getStopByName(start));
+        if (endStop == null) setEndStop(BusManager.getBusManager().getStopByName(end));
+        Location l = getLocation();
+        if (l != null && System.currentTimeMillis() - onStartTime < 1000){
+            Location startLoc = new Location(""), endLoc = new Location("");
+            startLoc.setLatitude(startStop.getLocation().latitude);
+            startLoc.setLongitude(startStop.getLocation().longitude);
+            endLoc.setLatitude(endStop.getLocation().latitude);
+            endLoc.setLongitude(endStop.getLocation().longitude);
+            if (l.distanceTo(startLoc) > l.distanceTo(endLoc)){
+                setStartStop(endStop);
+            }
+//            Log.d("General", "Location: " + l.getLatitude() + ", " + l.getLongitude());
+        }
     }
 
     private static Bitmap rotateBitmap(Bitmap source, float angle) {
