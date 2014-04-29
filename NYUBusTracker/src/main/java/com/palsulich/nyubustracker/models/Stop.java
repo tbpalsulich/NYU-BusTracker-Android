@@ -288,15 +288,11 @@ public class Stop {
             String stopLng = location.getString(BusManager.TAG_LNG);
             JSONArray stopRoutes = stopObject.getJSONArray(BusManager.TAG_ROUTES);
             String[] routes = new String[stopRoutes.length()];
-            //String routesString = "";
             for (int j = 0; j < stopRoutes.length(); j++) {
                 routes[j] = stopRoutes.getString(j);
-                //routesString += routes[j];
-                //if (j != stopRoutes.length() - 1) routesString += ", ";
             }
             Stop s = sharedManager.getStop(stopName, stopLat, stopLng, stopID, routes);
             sharedManager.addStop(s);
-            //Log.v("JSONDebug", "Stop name: " + stopName + ", stop ID: " + stopID + ", routes: " + routesString);
         }
     }
 }
