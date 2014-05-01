@@ -698,26 +698,7 @@ public class MainActivity extends Activity {
                 }
             }
             else {
-                ArrayList<Route> startRoutes = startStop.getRoutes();
-                if (startRoutes.size() > 0) {
-                    ArrayList<Stop> someConnectedStops = startStop.getRoutes().get(0).getStops();
-                    ArrayList<Stop> goodStops = new ArrayList<Stop>(someConnectedStops);
-                    for (Stop s : someConnectedStops){
-                        if (!s.hasTimes()){
-                            goodStops.remove(s);
-                        }
-                        for (Route r : startStop.getRoutes()) {
-                            if (!r.hasStop(s)) {
-                                goodStops.remove(s);
-                            }
-                        }
-                    }
-                    if (goodStops.size() > 0) {
-                        Stop test = goodStops.get((goodStops.indexOf(startStop) + 1) % goodStops.size());
-                        //Log.e("ERROR!!!", test.getName());
-                        setEndStop(test);
-                    }
-                }
+                setEndStop(BusManager.getBusManager().getConnectedStops(startStop).get(0));
             }
         }
     }
