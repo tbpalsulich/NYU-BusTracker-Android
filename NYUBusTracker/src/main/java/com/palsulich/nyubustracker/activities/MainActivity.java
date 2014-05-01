@@ -104,6 +104,8 @@ public class MainActivity extends Activity {
     private static boolean offline = true;
 
     private TextSwitcher mSwitcher;
+    private TimeAdapter timesAdapter;
+    private StickyListHeadersListView timesList;
 
     private static String makeQuery(String param, String value, String charset) {
         try {
@@ -375,12 +377,16 @@ public class MainActivity extends Activity {
         });
 
         // Declare the in and out animations and initialize them
-        Animation in = AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_out_right);
-        Animation out = AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_in_left);
+        Animation in = AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_in_left);
+        Animation out = AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_out_right);
 
         // set the animation type of textSwitcher
         mSwitcher.setInAnimation(in);
         mSwitcher.setOutAnimation(out);
+
+        timesList = (StickyListHeadersListView) findViewById(R.id.times_list);
+        timesAdapter = new TimeAdapter(this, new ArrayList<Time>());
+        timesList.setAdapter(timesAdapter);
 
         if (oncePreferences.getBoolean(FIRST_TIME, true)) {
 //            Log.v("General Debugging", "Downloading because of first time");
@@ -818,20 +824,29 @@ public class MainActivity extends Activity {
                 int index = tempTimesBetweenStartAndEnd.indexOf(currentTime);
                 nextBusTime = tempTimesBetweenStartAndEnd.get((index + 1) % tempTimesBetweenStartAndEnd.size());
                 mSwitcher.setText(currentTime.getTimeAsStringUntil(nextBusTime, getResources()));  // Pass resources so we return the proper string value.
+                timesAdapter.setDataSet(timesBetweenStartAndEnd);
+                timesAdapter.notifyDataSetChanged();
+                timesList.setSelection(timesBetweenStartAndEnd.indexOf(nextBusTime));
 
                 if (BusManager.getBusManager().isOnline()) {
                     ((TextView) findViewById(R.id.next_route)).setText(getString(R.string.via_route) + nextBusTime.getRoute());
                     ((TextView) findViewById(R.id.next_bus)).setText(getString(R.string.next_bus_in));
                     findViewById(R.id.safe_ride_button).setVisibility(View.GONE);
+                    findViewById(R.id.under_times_button_divider).setVisibility(View.GONE);
+                    findViewById(R.id.more_empty_space).setVisibility(View.GONE);
                 }
                 else {
                     ((TextView) findViewById(R.id.next_route)).setText("");
                     ((TextView) findViewById(R.id.next_bus)).setText("");
                     if (rightNow.get(Calendar.HOUR_OF_DAY) < 7) {
                         findViewById(R.id.safe_ride_button).setVisibility(View.VISIBLE);
+                        findViewById(R.id.under_times_button_divider).setVisibility(View.VISIBLE);
+                        findViewById(R.id.more_empty_space).setVisibility(View.VISIBLE);
                     }
                     else {
                         findViewById(R.id.safe_ride_button).setVisibility(View.GONE);
+                        findViewById(R.id.more_empty_space).setVisibility(View.GONE);
+                        findViewById(R.id.under_times_button_divider).setVisibility(View.GONE);
                     }
                 }
                 updateMapWithNewStartOrEnd();
@@ -913,25 +928,6 @@ public class MainActivity extends Activity {
     }
 
     @SuppressWarnings("UnusedParameters")
-    public void createTimesDialog(View view) {
-        if (timesBetweenStartAndEnd != null) {
-            // Library provided ListView with headers that (gasp) stick to the top.
-            StickyListHeadersListView listView = new StickyListHeadersListView(this);
-            listView.setDivider(new ColorDrawable(getResources().getColor(R.color.list_divider)));
-            listView.setDividerHeight(1);
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            TimeAdapter adapter = new TimeAdapter(getApplicationContext(), timesBetweenStartAndEnd);
-            listView.setAdapter(adapter);
-            int index = timesBetweenStartAndEnd.indexOf(nextBusTime);
-            listView.setSelection(index);
-            builder.setView(listView);
-            Dialog dialog = builder.create();
-            dialog.setCanceledOnTouchOutside(true);
-            dialog.show();
-        }
-    }
-
-    @SuppressWarnings("UnusedParameters")
     public void createInfoDialog(View view){
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         LinearLayout linearLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.information_layout, null);
@@ -957,7 +953,7 @@ public class MainActivity extends Activity {
         startActivity(i);
     }
 
-    private class Downloader extends AsyncTask<String, Integer, JSONObject> {
+    private class Downloader extends AsyncTask<String, Void, JSONObject> {
         final DownloaderHelper helper;
 
         public Downloader(DownloaderHelper helper) {
@@ -982,8 +978,11 @@ public class MainActivity extends Activity {
         protected void onPostExecute(JSONObject result) {
             try {
                 helper.parse(result);
-            } catch (Exception e) {
+            } catch (JSONException e) {
+                Log.d("General", "JSON Exception while parsing");
                 e.printStackTrace();
+            } catch (IOException e) {
+                Log.d("General", "IO Exception while parsing");
             }
         }
     }

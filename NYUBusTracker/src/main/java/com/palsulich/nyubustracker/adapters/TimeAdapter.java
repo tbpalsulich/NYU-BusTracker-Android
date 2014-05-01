@@ -25,6 +25,10 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
         times = mTimes;
     }
 
+    public void setDataSet(ArrayList<Time> mTimes){
+        times = mTimes;
+    }
+
     public int getCount() {
         return times.size();
     }
