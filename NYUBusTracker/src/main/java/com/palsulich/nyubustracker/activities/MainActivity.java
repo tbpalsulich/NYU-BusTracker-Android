@@ -343,7 +343,6 @@ public class MainActivity extends Activity {
         ((NYUBusTrackerApplication) getApplication()).getTracker();
 
         oncePreferences = getSharedPreferences(RUN_ONCE_PREF, MODE_PRIVATE);
-        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         int retCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
         if (retCode != ConnectionResult.SUCCESS) {
@@ -554,9 +553,11 @@ public class MainActivity extends Activity {
      */
     public Location getLocation() {
         Location bestLocation = null;
+        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         for (String provider : mLocationManager.getProviders(true)) {
             Location l = mLocationManager.getLastKnownLocation(provider);
-            if (l != null && (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy())) {
+//            Log.d("General", "time of location " + l.getAccuracy() + " is " + (System.currentTimeMillis() - l.getTime()));
+            if (l != null && (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) && (System.currentTimeMillis() - l.getTime()) < 120000 ) {
                 bestLocation = l;
             }
         }
@@ -575,6 +576,10 @@ public class MainActivity extends Activity {
             startLoc.setLongitude(startStop.getLocation().longitude);
             endLoc.setLatitude(endStop.getLocation().latitude);
             endLoc.setLongitude(endStop.getLocation().longitude);
+//            Log.d("General", "start: " + startStop);
+//            Log.d("General", "end: " + endStop);
+//            Log.d("General", "s dist: " + l.distanceTo(startLoc));
+//            Log.d("General", "e dist: " + l.distanceTo(endLoc));
             if (l.distanceTo(startLoc) > l.distanceTo(endLoc)){
                 setStartStop(endStop);
             }
