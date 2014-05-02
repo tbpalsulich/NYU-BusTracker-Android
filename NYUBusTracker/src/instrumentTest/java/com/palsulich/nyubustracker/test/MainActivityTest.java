@@ -60,8 +60,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         callSafeRideButton  =   (Button) mActivity.findViewById(R.id.safe_ride_button);
 
-        timeButton          =   (Button) mActivity.findViewById(R.id.times_button);
-        startButton         =   (Button) mActivity.findViewById(R.id.start_button);
+        timeButton          =   (Button) mActivity.findViewById(R.id.times_text);
+        startButton         =   (Button) mActivity.findViewById(R.id.start_text);
         endButton           =   (Button) mActivity.findViewById(R.id.end_button);
 
         startTextCorrect    = mActivity.getString(R.string.start);

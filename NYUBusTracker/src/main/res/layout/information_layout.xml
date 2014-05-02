@@ -4,7 +4,7 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:background="@color/purple">
+              android:background="@color/list_background">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -12,9 +12,8 @@
         android:layout_gravity="center"
         android:gravity="center"
         android:textSize="30sp"
-        android:textColor="@color/white"/>
+        android:textColor="@color/main_text"/>
     <Button
-        style="@style/InfoButton"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/website"
@@ -22,14 +21,13 @@
         android:gravity="center"
         android:textSize="25sp"
         android:onClick="goToWebsite"/>
-    <ImageView style="@style/Separator"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/programmed_by"
         android:paddingTop="5dp"
         android:textSize="25sp"
-        android:textColor="@color/white"
+        android:textColor="@color/main_text"
         android:layout_gravity="center"
         android:gravity="center"/>
     <TextView
@@ -41,26 +39,23 @@
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
         android:textSize="25sp"
-        android:textColor="@color/white"/>
-    <ImageView style="@style/Separator"/>
+        android:textColor="@color/main_text"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/open_source"
         android:paddingTop="5dp"
         android:textSize="25sp"
-        android:textColor="@color/white"
+        android:textColor="@color/main_text"
         android:layout_gravity="center"
         android:gravity="center"/>
     <Button
-        style="@style/InfoButton"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/github_link"
         android:onClick="goToGitHub"
         android:paddingTop="5dp"
         android:textSize="20sp"/>
-    <ImageView style="@style/Separator"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -68,7 +63,7 @@
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
         android:textSize="20sp"
-        android:textColor="@color/white"
+        android:textColor="@color/main_text"
         android:layout_gravity="center"
         android:gravity="center"/>
 

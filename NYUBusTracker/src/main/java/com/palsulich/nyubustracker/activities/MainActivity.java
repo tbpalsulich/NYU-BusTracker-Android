@@ -23,7 +23,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -370,7 +369,7 @@ public class MainActivity extends Activity {
             public View makeView() {
                 TextView myText = new TextView(MainActivity.this);
                 myText.setTextSize(35);
-                myText.setTextColor(getResources().getColor(R.color.white));
+                myText.setTextColor(getResources().getColor(R.color.main_text));
                 myText.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
                 return myText;
             }
@@ -666,7 +665,7 @@ public class MainActivity extends Activity {
                                 validBuilder = true;
                                 builder.include(loc);
                             }
-                            p.color(getResources().getColor(R.color.purple));
+                            p.color(getResources().getColor(R.color.main_background));
                             mMap.addPolyline(p);
                             //Log.v("MapDebugging", "Success!");
                         }
@@ -697,7 +696,7 @@ public class MainActivity extends Activity {
             }
             if (routes.size() > 0 && stop != startStop) {
                 endStop = stop;
-                ((Button) findViewById(R.id.end_button)).setText(stop.getUltimateName());
+                ((TextView) findViewById(R.id.end_button)).setText(stop.getUltimateName());
                 if (startStop != null) {
                     setNextBusTime();    // Don't set the next bus if we don't have a valid route.
                     if (routesBetweenStartAndEnd != null && haveAMap) updateMapWithNewStartOrEnd();
@@ -715,12 +714,12 @@ public class MainActivity extends Activity {
                 // Swap the start and end stops.
                 Stop temp = startStop;
                 startStop = endStop;
-                ((Button) findViewById(R.id.start_button)).setText(startStop.getUltimateName());
+                ((TextView) findViewById(R.id.start_text)).setText(startStop.getUltimateName());
                 setEndStop(temp);
             }
             else { // We have a new start. So, we must ensure the end is actually connected. If not, pick a random connected stop.
                 startStop = stop;
-                ((Button) findViewById(R.id.start_button)).setText(stop.getUltimateName());
+                ((TextView) findViewById(R.id.start_text)).setText(stop.getUltimateName());
                 if (endStop != null) {
                     // Loop through all connected Routes.
                     for (Route r : startStop.getRoutes()) {
@@ -832,21 +831,15 @@ public class MainActivity extends Activity {
                     ((TextView) findViewById(R.id.next_route)).setText(getString(R.string.via_route) + nextBusTime.getRoute());
                     ((TextView) findViewById(R.id.next_bus)).setText(getString(R.string.next_bus_in));
                     findViewById(R.id.safe_ride_button).setVisibility(View.GONE);
-                    findViewById(R.id.under_times_button_divider).setVisibility(View.GONE);
-                    findViewById(R.id.more_empty_space).setVisibility(View.GONE);
                 }
                 else {
                     ((TextView) findViewById(R.id.next_route)).setText("");
                     ((TextView) findViewById(R.id.next_bus)).setText("");
                     if (rightNow.get(Calendar.HOUR_OF_DAY) < 7) {
                         findViewById(R.id.safe_ride_button).setVisibility(View.VISIBLE);
-                        findViewById(R.id.under_times_button_divider).setVisibility(View.VISIBLE);
-                        findViewById(R.id.more_empty_space).setVisibility(View.VISIBLE);
                     }
                     else {
                         findViewById(R.id.safe_ride_button).setVisibility(View.GONE);
-                        findViewById(R.id.more_empty_space).setVisibility(View.GONE);
-                        findViewById(R.id.under_times_button_divider).setVisibility(View.GONE);
                     }
                 }
                 updateMapWithNewStartOrEnd();
@@ -881,7 +874,7 @@ public class MainActivity extends Activity {
         final ArrayList<Stop> connectedStops = BusManager.getBusManager().getConnectedStops(startStop);
         ListView listView = new ListView(this);     // ListView to populate the dialog.
         listView.setId(R.id.end_stop_list);
-        listView.setDivider(new ColorDrawable(getResources().getColor(R.color.list_divider)));
+        listView.setDivider(new ColorDrawable(getResources().getColor(R.color.time_list_background)));
         listView.setDividerHeight(1);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);    // Used to build the dialog with the list of connected Stops.
         builder.setView(listView);
@@ -908,8 +901,8 @@ public class MainActivity extends Activity {
     public void createStartDialog(View view) {
         final ArrayList<Stop> stops = BusManager.getBusManager().getStops();    // Show every stop as an option to start.
         ListView listView = new ListView(this);
-        listView.setId(R.id.start_button);
-        listView.setDivider(new ColorDrawable(getResources().getColor(R.color.list_divider)));
+        listView.setId(R.id.start_text);
+        listView.setDivider(new ColorDrawable(getResources().getColor(R.color.time_list_background)));
         listView.setDividerHeight(1);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(listView);
