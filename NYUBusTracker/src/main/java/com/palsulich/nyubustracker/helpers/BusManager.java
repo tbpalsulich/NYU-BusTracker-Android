@@ -209,6 +209,7 @@ public final class BusManager {
                 }
             }
             Collections.sort(result, Stop.compare);
+            result.remove(stop);
         }
         return result;
     }

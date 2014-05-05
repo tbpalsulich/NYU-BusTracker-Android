@@ -696,16 +696,37 @@ public class MainActivity extends Activity {
             }
             if (routes.size() > 0 && stop != startStop) {
                 endStop = stop;
-                ((TextView) findViewById(R.id.end_button)).setText(stop.getUltimateName());
+                ((TextView) findViewById(R.id.end_stop)).setText(stop.getUltimateName());
                 if (startStop != null) {
                     setNextBusTime();    // Don't set the next bus if we don't have a valid route.
                     if (routesBetweenStartAndEnd != null && haveAMap) updateMapWithNewStartOrEnd();
                 }
             }
             else {
-                setEndStop(BusManager.getBusManager().getConnectedStops(startStop).get(0));
+                ArrayList<Stop> connected = BusManager.getBusManager().getConnectedStops(startStop);
+                int stopIndex = 0;
+                while (!checkStop(connected.get(stopIndex))){
+                    stopIndex++;
+                }
+                setEndStop(connected.get(stopIndex));
             }
         }
+    }
+
+    private boolean checkStop(Stop stop){
+        if (stop != null) {     // Make sure we actually have a stop!
+            // Check there is a route between these stops.
+            ArrayList<Route> routes = new ArrayList<Route>();               // All the routes connecting the two.
+            for (Route r : startStop.getRoutes()) {
+                if (r.hasStop(stop)) {
+                    routes.add(r);
+                }
+            }
+            if (routes.size() > 0 && stop != startStop) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void setStartStop(Stop stop) {
