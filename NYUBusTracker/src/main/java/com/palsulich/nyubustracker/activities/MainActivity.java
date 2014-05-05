@@ -665,7 +665,7 @@ public class MainActivity extends Activity {
                                 validBuilder = true;
                                 builder.include(loc);
                             }
-                            p.color(getResources().getColor(R.color.main_background));
+                            p.color(getResources().getColor(R.color.main_buttons));
                             mMap.addPolyline(p);
                             //Log.v("MapDebugging", "Success!");
                         }
@@ -714,12 +714,12 @@ public class MainActivity extends Activity {
                 // Swap the start and end stops.
                 Stop temp = startStop;
                 startStop = endStop;
-                ((TextView) findViewById(R.id.start_text)).setText(startStop.getUltimateName());
+                ((TextView) findViewById(R.id.start_stop)).setText(startStop.getUltimateName());
                 setEndStop(temp);
             }
             else { // We have a new start. So, we must ensure the end is actually connected. If not, pick a random connected stop.
                 startStop = stop;
-                ((TextView) findViewById(R.id.start_text)).setText(stop.getUltimateName());
+                ((TextView) findViewById(R.id.start_stop)).setText(stop.getUltimateName());
                 if (endStop != null) {
                     // Loop through all connected Routes.
                     for (Route r : startStop.getRoutes()) {
@@ -901,7 +901,7 @@ public class MainActivity extends Activity {
     public void createStartDialog(View view) {
         final ArrayList<Stop> stops = BusManager.getBusManager().getStops();    // Show every stop as an option to start.
         ListView listView = new ListView(this);
-        listView.setId(R.id.start_text);
+        listView.setId(R.id.start_stop);
         listView.setDivider(new ColorDrawable(getResources().getColor(R.color.time_list_background)));
         listView.setDividerHeight(1);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

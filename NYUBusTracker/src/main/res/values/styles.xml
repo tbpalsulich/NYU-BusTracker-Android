@@ -19,14 +19,4 @@
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <style name="Separator" parent="">
-        <item name="android:layout_width">fill_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:paddingBottom">2dp</item>
-        <item name="android:paddingTop">2dp</item>
-        <item name="android:scaleType">fitXY</item>
-        <item name="android:src">?android:attr/listDivider</item>
-        <item name="android:alpha">100</item>
-    </style>
-
 </resources>

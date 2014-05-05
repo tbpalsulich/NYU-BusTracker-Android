@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="main_background">#6837A3</color>
+    <color name="main_buttons">#673CB1</color>
     <color name="main_text">#FFFFFF</color>
     <color name="list_background">#6837A3</color>
+    <color name="time_list_cell">#A774FF</color>
     <color name="time_list_background">#A774FF</color>
-    <color name="time_list_header">#DF6AFF</color>
+    <color name="time_list_header">#C5A3FF</color>
 </resources>

@@ -2,14 +2,15 @@
                 xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/main_background">
+                android:background="@color/time_list_background">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:id="@+id/start_group"
-        android:onClick="createStartDialog">
+        android:onClick="createStartDialog"
+        android:background="@drawable/button_selector">
         <TextView
             android:id="@+id/start"
             android:layout_width="match_parent"
@@ -19,12 +20,12 @@
             android:textColor="@color/main_text"
             android:textStyle="bold" />
         <TextView
-            android:id="@+id/start_text"
+            android:id="@+id/start_stop"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/main_text"
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
-            android:background="@drawable/button_selector"
             android:gravity="left"/>
     </LinearLayout>
 
@@ -34,6 +35,9 @@
         android:orientation="vertical"
         android:layout_below="@+id/start_group"
         android:onClick="createEndDialog"
+        android:background="@drawable/button_selector"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="1dp"
         android:id="@+id/end_group">
         <TextView
             android:id="@+id/end"
@@ -44,20 +48,27 @@
             android:textColor="@color/main_text"
             android:textStyle="bold" />
         <TextView
-            android:id="@+id/end_button"
+            android:id="@+id/end_stop"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/main_text"
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
-            android:background="@drawable/button_selector"
             android:gravity="left"/>
     </LinearLayout>
+
+    <View
+        android:id="@+id/empty_space"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_below="@+id/end_group"
+        android:background="@android:color/transparent" />
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
               android:id="@+id/map"
               android:layout_width="match_parent"
               android:layout_height="fill_parent"
-              android:layout_below="@+id/end_group"
+              android:layout_below="@+id/empty_space"
               android:name="com.google.android.gms.maps.MapFragment"/>
 
     <com.palsulich.nyubustracker.helpers.MultipleOrientationSlidingDrawer
@@ -74,21 +85,20 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/main_background">
+            android:background="@color/main_buttons">
             <TextView
                 android:id="@+id/next_bus"
                 android:layout_marginTop="4dp"
                 android:layout_marginLeft="4dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="20dp"
                 android:textColor="@color/main_text"
                 android:textSize="16sp" />
 
             <TextSwitcher
                 android:id="@+id/next_time"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_height="40dp"
                 android:layout_marginLeft="4dp"
                 android:textColor="@color/main_text"
                 android:textSize="35sp" />
@@ -96,7 +106,7 @@
             <TextView
                 android:id="@+id/next_route"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="20dp"
                 android:textSize="16sp"
                 android:textColor="@color/main_text" />
             <Button
@@ -112,7 +122,8 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@id/content_c">
+            android:id="@id/content_c"
+            android:background="@color/main_buttons">
 
             <se.emilsjolander.stickylistheaders.StickyListHeadersListView
                 android:layout_width="match_parent"

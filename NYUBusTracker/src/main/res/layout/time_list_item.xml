@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/list_background"
+    android:background="@color/time_list_cell"
     android:minHeight="35dp">
     <TextView
         android:id="@+id/time_text"
@@ -16,8 +16,7 @@
         android:textSize="18sp"
         android:paddingLeft="10dp"
         android:minHeight="36dp"
-        android:textColor="#ffffff"
-        android:layout_marginLeft="0dp" />
+        android:textColor="#ffffff"/>
 
     <TextView
         android:layout_width="fill_parent"
