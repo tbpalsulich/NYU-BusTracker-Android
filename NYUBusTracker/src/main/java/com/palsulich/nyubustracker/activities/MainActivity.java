@@ -446,7 +446,7 @@ public class MainActivity extends Activity {
     renewTimeUntilTimer() creates a new timer that calls setNextBusTime() every minute on the minute.
      */
     private void renewTimeUntilTimer() {
-        Calendar rightNow = BusManager.getCurrentTime();
+        Calendar rightNow = Calendar.getInstance();
 
         if (timeUntilTimer != null) timeUntilTimer.cancel();
 
@@ -774,7 +774,7 @@ public class MainActivity extends Activity {
         if (timeUntilTimer != null)
             timeUntilTimer.cancel();        // Don't want to be interrupted in the middle of this.
         if (busRefreshTimer != null) busRefreshTimer.cancel();
-        Calendar rightNow = BusManager.getCurrentTime();
+        Calendar rightNow = Calendar.getInstance();
         ArrayList<Route> startRoutes = startStop.getUltimateParent().getRoutes();        // All the routes leaving the start stop.
         ArrayList<Route> endRoutes = endStop.getUltimateParent().getRoutes();
         ArrayList<Route> availableRoutes = new ArrayList<Route>();               // All the routes connecting the two.

@@ -284,17 +284,6 @@ public final class BusManager {
         return result;
     }
 
-    public static Calendar getCurrentTime(){
-        if (calendar == null){
-            return Calendar.getInstance();
-        }
-        else return calendar;
-    }
-
-    public static void spoofTime(Calendar cal){
-        calendar = cal;
-    }
-
     /*
     Given a JSONObject of the version file and a fFileGrabber, parses all of the times.
     Version also has a list of hideroutes, hidestops, combine, and opposite stops. We also handle
