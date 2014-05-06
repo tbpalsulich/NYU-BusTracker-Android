@@ -18,15 +18,22 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
 
     private LayoutInflater inflater;
     private ArrayList<Time> times;
+    private Time currentTime;
+    private Context context;
 
     public TimeAdapter(Context context, ArrayList<Time> mTimes) {
         // Cache the LayoutInflate to avoid asking for a new one each time.
         inflater = LayoutInflater.from(context);
         times = mTimes;
+        this.context = context;
     }
 
     public void setDataSet(ArrayList<Time> mTimes){
         times = mTimes;
+    }
+
+    public void setTime(Time currentTime){
+        this.currentTime = currentTime;
     }
 
     public int getCount() {
@@ -57,11 +64,17 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
         else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        if (viewHolder.timeText != null)
-            viewHolder.timeText.setText(times.get(position).toString());
+        if (viewHolder.timeText != null){
+            Time thisTime = times.get(position);
+            viewHolder.timeText.setText(thisTime.toString() +
+                                        ((currentTime.getTimeAsTimeUntil(thisTime).isBefore(new Time(1, 0)))
+                                                ? " (" + currentTime.getTimeAsStringUntil(thisTime, context.getResources()) + ")"
+                                                : ""));
+        }
         if (viewHolder.viaRouteText != null) {
+            String[] routeArray = times.get(position).getRoute().split("\\s");
             String route = times.get(position).getRoute();
-            if (route.length() == 1) {
+            if (routeArray[0].length() == 1) {
                 viewHolder.viaRouteText.setText("Route " + route);
             }
             else {

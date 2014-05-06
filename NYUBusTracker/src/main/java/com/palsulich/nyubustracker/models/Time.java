@@ -182,7 +182,7 @@ public class Time {
     }
 
     // Return a Time object who represents the difference in time between the two Times.
-    Time getTimeAsTimeUntil(Time t) {
+    public Time getTimeAsTimeUntil(Time t) {
         if (this.isBefore(t)) {
             //Log.v("Time Debugging", this + " is strictly before " + t);
             int hourDifference = t.hour - this.hour;

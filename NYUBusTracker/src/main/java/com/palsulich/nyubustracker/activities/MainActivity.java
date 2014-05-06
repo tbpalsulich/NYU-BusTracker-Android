@@ -880,7 +880,9 @@ public class MainActivity extends Activity {
                 timesAdapter.setDataSet(timesBetweenStartAndEnd);
                 timesAdapter.notifyDataSetChanged();
 
-                timesList.setSelection(timesBetweenStartAndEnd.indexOf(nextBusTime));
+                int nextTimeIndex = timesBetweenStartAndEnd.indexOf(nextBusTime);
+                timesList.setSelection(nextTimeIndex);
+                timesAdapter.setTime(currentTime);
 
                 if (BusManager.getBusManager().isOnline()) {
                     ((TextView) findViewById(R.id.next_route)).setText(getString(R.string.via_route) + nextBusTime.getRoute());
