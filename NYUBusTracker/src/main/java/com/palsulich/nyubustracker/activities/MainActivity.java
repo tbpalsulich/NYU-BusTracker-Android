@@ -19,6 +19,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
@@ -48,6 +49,7 @@ import com.palsulich.nyubustracker.R;
 import com.palsulich.nyubustracker.adapters.StopAdapter;
 import com.palsulich.nyubustracker.adapters.TimeAdapter;
 import com.palsulich.nyubustracker.helpers.BusManager;
+import com.palsulich.nyubustracker.helpers.MultipleOrientationSlidingDrawer;
 import com.palsulich.nyubustracker.models.Bus;
 import com.palsulich.nyubustracker.models.Route;
 import com.palsulich.nyubustracker.models.Stop;
@@ -103,6 +105,7 @@ public class MainActivity extends Activity {
     private static boolean offline = true;
 
     private TextSwitcher mSwitcher;
+    private String mSwitcherCurrentText;
     private TimeAdapter timesAdapter;
     private StickyListHeadersListView timesList;
 
@@ -209,7 +212,7 @@ public class MainActivity extends Activity {
         }
     };
 
-    private Time nextBusTime;
+    Time nextBusTime;
 
     private Timer timeUntilTimer;  // Timer used to refresh the "time until next bus" every minute, on the minute.
     private Timer busRefreshTimer; // Timer used to refresh the bus locations every few seconds.
@@ -363,12 +366,13 @@ public class MainActivity extends Activity {
         final BusManager sharedManager = BusManager.getBusManager();
 
         mSwitcher = (TextSwitcher) findViewById(R.id.next_time);
+        mSwitcherCurrentText = "";
 
         // Set the ViewFactory of the TextSwitcher that will create TextView object when asked
         mSwitcher.setFactory(new ViewSwitcher.ViewFactory() {
             public View makeView() {
                 TextView myText = new TextView(MainActivity.this);
-                myText.setTextSize(35);
+                myText.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.time_until_text_size));
                 myText.setTextColor(getResources().getColor(R.color.main_text));
                 myText.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
                 return myText;
@@ -376,8 +380,8 @@ public class MainActivity extends Activity {
         });
 
         // Declare the in and out animations and initialize them
-        Animation in = AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_in_left);
-        Animation out = AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_out_right);
+        Animation out = AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_in_left);
+        Animation in = AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_out_right);
 
         // set the animation type of textSwitcher
         mSwitcher.setInAnimation(in);
@@ -523,7 +527,6 @@ public class MainActivity extends Activity {
 //        Log.v("General Debugging", "onResume!");
         setStartAndEndStops();
         if (endStop != null && startStop != null) {
-            setNextBusTime();
             renewTimeUntilTimer();
             renewBusRefreshTimer();
             setUpMapIfNeeded();
@@ -536,7 +539,6 @@ public class MainActivity extends Activity {
 //        Log.v("General Debugging", "onStart!");
         onStartTime = System.currentTimeMillis();
         GoogleAnalytics.getInstance(this).reportActivityStart(this);
-        setNextBusTime();
     }
 
     @Override
@@ -781,7 +783,7 @@ public class MainActivity extends Activity {
         for (Route r : startRoutes) {
             //Log.v("Routes", "Start Route: " + r);
             if (endRoutes.contains(r) && !availableRoutes.contains(r)) {
-                Log.v("Greenwich", "*  " + r + " is available.");
+                //Log.v("Greenwich", "*  " + r + " is available.");
                 availableRoutes.add(r);
             }
         }
@@ -838,15 +840,46 @@ public class MainActivity extends Activity {
                 // is the Time of the soonest next Bus.
                 timesBetweenStartAndEnd = new ArrayList<Time>(tempTimesBetweenStartAndEnd);
                 routesBetweenStartAndEnd = availableRoutes;
-                Time currentTime = new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
+                final Time currentTime = new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
                 tempTimesBetweenStartAndEnd.add(currentTime);
                 Collections.sort(tempTimesBetweenStartAndEnd, Time.compare);
                 Collections.sort(timesBetweenStartAndEnd, Time.compare);
+
                 int index = tempTimesBetweenStartAndEnd.indexOf(currentTime);
                 nextBusTime = tempTimesBetweenStartAndEnd.get((index + 1) % tempTimesBetweenStartAndEnd.size());
-                mSwitcher.setText(currentTime.getTimeAsStringUntil(nextBusTime, getResources()));  // Pass resources so we return the proper string value.
+
+                MultipleOrientationSlidingDrawer drawer = (MultipleOrientationSlidingDrawer) findViewById(R.id.sliding_drawer);
+                final String newSwitcherText = currentTime.getTimeAsStringUntil(nextBusTime, getResources());
+                if (!drawer.isMoving() && !mSwitcherCurrentText.equals(newSwitcherText)) {
+                    mSwitcher.setText(newSwitcherText);  // Pass resources so we return the proper string value.
+                    mSwitcherCurrentText = newSwitcherText;
+                }
+                // Handle a bug where the time until text disappears when the drawer is being moved. So, just wait for it to finish.
+                // We don't know if the drawer will end up open or closed, though. So handle both cases.
+                else{
+                    drawer.setOnDrawerCloseListener(new MultipleOrientationSlidingDrawer.OnDrawerCloseListener() {
+                        @Override
+                        public void onDrawerClosed() {
+                            if (!mSwitcherCurrentText.equals(newSwitcherText)) {
+                                mSwitcher.setText(newSwitcherText);
+                                mSwitcherCurrentText = newSwitcherText;
+                            }
+                        }
+                    });
+                    drawer.setOnDrawerOpenListener(new MultipleOrientationSlidingDrawer.OnDrawerOpenListener() {
+                        @Override
+                        public void onDrawerOpened() {
+                            if (!mSwitcherCurrentText.equals(newSwitcherText)) {
+                                mSwitcher.setText(newSwitcherText);
+                                mSwitcherCurrentText = newSwitcherText;
+                            }
+                        }
+                    });
+                }
+
                 timesAdapter.setDataSet(timesBetweenStartAndEnd);
                 timesAdapter.notifyDataSetChanged();
+
                 timesList.setSelection(timesBetweenStartAndEnd.indexOf(nextBusTime));
 
                 if (BusManager.getBusManager().isOnline()) {
