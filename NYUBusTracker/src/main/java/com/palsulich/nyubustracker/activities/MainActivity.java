@@ -536,6 +536,7 @@ public class MainActivity extends Activity {
 //        Log.v("General Debugging", "onStart!");
         onStartTime = System.currentTimeMillis();
         GoogleAnalytics.getInstance(this).reportActivityStart(this);
+        setNextBusTime();
     }
 
     @Override

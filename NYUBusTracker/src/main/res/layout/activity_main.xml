@@ -57,18 +57,50 @@
             android:gravity="left"/>
     </LinearLayout>
 
-    <View
-        android:id="@+id/empty_space"
+    <LinearLayout
+        android:id="@+id/filler_space"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_below="@+id/end_group"
-        android:background="@android:color/transparent" />
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/end_group">
+        <TextView
+            android:id="@+id/filler_space_next_bus"
+            android:layout_marginTop="4dp"
+            android:layout_marginLeft="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:text="@string/random_text" />
+
+        <TextView
+            android:id="@+id/filler_space_next_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/main_text"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:textSize="35sp"
+            android:text="@string/random_text"/>
+
+        <TextView
+            android:id="@+id/filler_space_next_route"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:text="@string/random_text"/>
+        <TextView
+            android:id="@+id/filler_space_safe_ride_button"
+            android:text="@string/call_safe_ride"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+    </LinearLayout>
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
               android:id="@+id/map"
               android:layout_width="match_parent"
               android:layout_height="fill_parent"
-              android:layout_below="@+id/empty_space"
+              android:layout_below="@+id/filler_space"
               android:name="com.google.android.gms.maps.MapFragment"/>
 
     <com.palsulich.nyubustracker.helpers.MultipleOrientationSlidingDrawer
@@ -91,22 +123,24 @@
                 android:layout_marginTop="4dp"
                 android:layout_marginLeft="4dp"
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
+                android:layout_height="wrap_content"
                 android:textColor="@color/main_text"
                 android:textSize="16sp" />
 
             <TextSwitcher
                 android:id="@+id/next_time"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="4dp"
                 android:textColor="@color/main_text"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
                 android:textSize="35sp" />
 
             <TextView
                 android:id="@+id/next_route"
                 android:layout_width="wrap_content"
-                android:layout_height="20dp"
+                android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:textColor="@color/main_text" />
             <Button

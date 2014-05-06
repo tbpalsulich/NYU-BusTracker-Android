@@ -26,5 +26,6 @@
     <string name="github_link">Tap to view on GitHub</string>
     <string name="thanks">Special thanks to Mike Jaoudi</string>
     <string name="website">www.nyubustracker.com</string>
+    <string name="random_text">Random Text</string>
 
 </resources>
