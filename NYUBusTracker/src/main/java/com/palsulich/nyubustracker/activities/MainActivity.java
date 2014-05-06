@@ -18,6 +18,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -375,6 +376,8 @@ public class MainActivity extends Activity {
                 myText.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.time_until_text_size));
                 myText.setTextColor(getResources().getColor(R.color.main_text));
                 myText.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
+                myText.setEllipsize(TextUtils.TruncateAt.END);
+                myText.setSingleLine(true);
                 return myText;
             }
         });
@@ -885,7 +888,16 @@ public class MainActivity extends Activity {
                 timesAdapter.setTime(currentTime);
 
                 if (BusManager.getBusManager().isOnline()) {
-                    ((TextView) findViewById(R.id.next_route)).setText(getString(R.string.via_route) + nextBusTime.getRoute());
+                    String routeText;
+                    String[] routeArray = nextBusTime.getRoute().split("\\s");
+                    String route = nextBusTime.getRoute();
+                    if (routeArray[0].length() == 1) {
+                        routeText = "Route " + route;
+                    }
+                    else {
+                        routeText = route;
+                    }
+                    ((TextView) findViewById(R.id.next_route)).setText(getString(R.string.via) + routeText);
                     ((TextView) findViewById(R.id.next_bus)).setText(getString(R.string.next_bus_in));
                     findViewById(R.id.safe_ride_button).setVisibility(View.GONE);
                 }

@@ -17,7 +17,7 @@
     <string name="hours_and">" hours and "</string>
     <string name="hour_and_one_min">1 hour and 1 minute</string>
     <string name="hour_and">"1 hour and "</string>
-    <string name="via_route">"via route "</string>
+    <string name="via">"via "</string>
     <string name="next_bus_in">Next Bus In:</string>
     <string name="information">NYU Bus Tracker\nInformation</string>
     <string name="programmed_by">Programmed by:</string>
