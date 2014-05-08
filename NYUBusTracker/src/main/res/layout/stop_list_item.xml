@@ -1,32 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/list_background">
+    android:background="@color/time_list_background">
 
     <CheckBox
         android:id="@+id/stop_checkbox"
-        android:button="@drawable/heart_selector"
+        android:drawableLeft="@drawable/heart_selector"
+        android:button="@null"
+        android:background="@color/main_buttons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="2dp"
-        android:focusable="false"/>
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:gravity="center_horizontal"
+        android:focusable="false"
+        android:checked="false"
+        android:layout_marginBottom="1dp"/>
 
     <TextView
+        android:text="@string/random_text"
         android:id="@+id/stop_text"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="fill_parent"
+        android:paddingTop="1dp"
         android:singleLine="true"
-        android:layout_alignParentTop="true"
+        android:ellipsize="end"
         android:layout_toRightOf="@+id/stop_checkbox"
-        android:paddingTop="2dp"
         android:clickable="true"
         android:layout_alignBottom="@+id/stop_checkbox"
+        android:layout_alignTop="@+id/stop_checkbox"
         android:gravity="center_vertical"
-        android:textSize="18sp"
+        android:textSize="@dimen/main_text_size"
         android:background="@drawable/button_selector"/>
 
 </RelativeLayout>

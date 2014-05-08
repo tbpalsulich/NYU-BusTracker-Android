@@ -110,6 +110,7 @@
         android:paddingTop="@dimen/activity_vertical_margin"
         android:background="@drawable/button_selector"
         android:onClick="callSafeRide"
+        android:clickable="true"
         android:visibility="gone"
         android:gravity="center"/>
 
