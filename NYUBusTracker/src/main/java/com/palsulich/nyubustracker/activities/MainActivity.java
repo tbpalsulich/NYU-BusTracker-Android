@@ -537,6 +537,13 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    public void onBackPressed() {
+        MultipleOrientationSlidingDrawer drawer = (MultipleOrientationSlidingDrawer) findViewById(R.id.sliding_drawer);
+        if (drawer.isOpened()) drawer.animateClose();
+        else super.onBackPressed();
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
 //        Log.v("General Debugging", "onStart!");
