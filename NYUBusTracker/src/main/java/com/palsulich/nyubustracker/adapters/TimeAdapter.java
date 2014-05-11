@@ -67,7 +67,8 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
         if (viewHolder.timeText != null){
             Time thisTime = times.get(position);
             viewHolder.timeText.setText(thisTime.toString() +
-                                        ((currentTime.getTimeAsTimeUntil(thisTime).isBefore(new Time(1, 0)))
+                                        ((currentTime.getTimeAsTimeUntil(thisTime).isBefore(new Time(1, 0))
+                                          && currentTime.getTimeOfWeek() == thisTime.getTimeOfWeek())
                                                 ? " (" + currentTime.getTimeAsStringUntil(thisTime, context.getResources()) + ")"
                                                 : ""));
         }

@@ -82,7 +82,7 @@ public class MainActivity extends Activity {
     private Stop startStop;     // Stop object to keep track of the start location of the desired route.
     private Stop endStop;       // Keep track of the desired end location.
     private ArrayList<Route> routesBetweenStartAndEnd;        // List of all routes between start and end.
-    private ArrayList<Time> timesBetweenStartAndEnd;        // List of all times between start and end.
+    ArrayList<Time> timesBetweenStartAndEnd;        // List of all times between start and end.
     private HashMap<String, Boolean> clickableMapMarkers;   // Hash of all markers which are clickable (so we don't zoom in on buses).
     private ArrayList<Marker> busesOnMap = new ArrayList<Marker>();
 
@@ -118,100 +118,6 @@ public class MainActivity extends Activity {
         }
         return "";
     }
-
-    private final DownloaderHelper stopDownloaderHelper = new DownloaderHelper() {
-        @Override
-        public void parse(JSONObject jsonObject) throws JSONException, IOException {
-            Stop.parseJSON(jsonObject);
-            FileOutputStream fos = openFileOutput(STOP_JSON_FILE, MODE_PRIVATE);
-            fos.write(jsonObject.toString().getBytes());
-            fos.close();
-        }
-    };
-
-    private final DownloaderHelper routeDownloaderHelper = new DownloaderHelper() {
-        @Override
-        public void parse(JSONObject jsonObject) throws JSONException, IOException {
-            Route.parseJSON(jsonObject);
-            FileOutputStream fos = openFileOutput(ROUTE_JSON_FILE, MODE_PRIVATE);
-            fos.write(jsonObject.toString().getBytes());
-            fos.close();
-        }
-    };
-
-    private final DownloaderHelper segmentDownloaderHelper = new DownloaderHelper() {
-        @Override
-        public void parse(JSONObject jsonObject) throws JSONException, IOException {
-            BusManager.parseSegments(jsonObject);
-            FileOutputStream fos = openFileOutput(SEGMENT_JSON_FILE, MODE_PRIVATE);
-            fos.write(jsonObject.toString().getBytes());
-            fos.close();
-        }
-    };
-
-    private final DownloaderHelper versionDownloaderHelper = new DownloaderHelper() {
-        @Override
-        public void parse(JSONObject jsonObject) throws JSONException, IOException {
-            BusManager sharedManager = BusManager.getBusManager();
-            BusManager.parseVersion(jsonObject);
-            for (String timeURL : sharedManager.getTimesToDownload()) {
-                SharedPreferences preferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
-                String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
-                //Log.v("Refactor", "Time to download: " + stopID);
-                int newestStopTimeVersion = sharedManager.getTimesVersions().get(stopID);
-                if (preferences.getInt(stopID, 0) != newestStopTimeVersion) {
-                    new Downloader(timeDownloaderHelper).execute(timeURL);
-                    preferences.edit().putInt(stopID, newestStopTimeVersion);
-                }
-            }
-            if (jsonObject != null) {
-                FileOutputStream fos = openFileOutput(VERSION_JSON_FILE, MODE_PRIVATE);
-                fos.write(jsonObject.toString().getBytes());
-                fos.close();
-            }
-        }
-    };
-
-    private final DownloaderHelper versionDownloaderHelperTwo = new DownloaderHelper() {
-        @Override
-        public void parse(JSONObject jsonObject) {
-            try {
-                BusManager.parseVersion(jsonObject);
-                for (String timeURL : BusManager.getBusManager().getTimesToDownload()) {
-                    SharedPreferences timeVersionPreferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
-                    String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
-                    //Log.v("Refactor", "Time to download: " + stopID);
-                    int newestStopTimeVersion = BusManager.getBusManager().getTimesVersions().get(stopID);
-                    if (timeVersionPreferences.getInt(stopID, 0) != newestStopTimeVersion) {
-                        new Downloader(timeDownloaderHelper).execute(timeURL);
-                        timeVersionPreferences.edit().putInt(stopID, newestStopTimeVersion).commit();
-                    }
-                }
-            } catch (JSONException e) {
-                //Log.e("JSON", "Error parsing Version JSON.");
-                e.printStackTrace();
-            }
-        }
-    };
-
-    private final DownloaderHelper busDownloaderHelper = new DownloaderHelper() {
-        @Override
-        public void parse(JSONObject jsonObject) throws JSONException, IOException {
-            Bus.parseJSON(jsonObject);
-            updateMapWithNewBusLocations();
-        }
-    };
-
-    private final DownloaderHelper timeDownloaderHelper = new DownloaderHelper() {
-        @Override
-        public void parse(JSONObject jsonObject) throws JSONException, IOException {
-            BusManager.parseTime(jsonObject);
-            //Log.v("Refactor", "Creating time cache file: " + jsonObject.getString("stop_id"));
-            FileOutputStream fos = openFileOutput(jsonObject.getString("stop_id"), MODE_PRIVATE);
-            fos.write(jsonObject.toString().getBytes());
-            fos.close();
-        }
-    };
 
     Time nextBusTime;
 
@@ -436,6 +342,7 @@ public class MainActivity extends Activity {
                     // Get the location of the buses every 10 sec.
                     renewBusRefreshTimer();
                     renewTimeUntilTimer();
+                    setNextBusTime();
                 } catch (JSONException e) {
                     //Log.e("RefactorJSON", "Re-downloading because of an error.");
                     e.printStackTrace();
@@ -866,23 +773,19 @@ public class MainActivity extends Activity {
                 }
                 // Handle a bug where the time until text disappears when the drawer is being moved. So, just wait for it to finish.
                 // We don't know if the drawer will end up open or closed, though. So handle both cases.
-                else{
+                else if (!mSwitcherCurrentText.equals(newSwitcherText)){
                     drawer.setOnDrawerCloseListener(new MultipleOrientationSlidingDrawer.OnDrawerCloseListener() {
                         @Override
                         public void onDrawerClosed() {
-                            if (!mSwitcherCurrentText.equals(newSwitcherText)) {
-                                mSwitcher.setText(newSwitcherText);
-                                mSwitcherCurrentText = newSwitcherText;
-                            }
+                            mSwitcher.setText(newSwitcherText);
+                            mSwitcherCurrentText = newSwitcherText;
                         }
                     });
                     drawer.setOnDrawerOpenListener(new MultipleOrientationSlidingDrawer.OnDrawerOpenListener() {
                         @Override
                         public void onDrawerOpened() {
-                            if (!mSwitcherCurrentText.equals(newSwitcherText)) {
-                                mSwitcher.setText(newSwitcherText);
-                                mSwitcherCurrentText = newSwitcherText;
-                            }
+                            mSwitcher.setText(newSwitcherText);
+                            mSwitcherCurrentText = newSwitcherText;
                         }
                     });
                 }
@@ -890,8 +793,14 @@ public class MainActivity extends Activity {
                 timesAdapter.setDataSet(timesBetweenStartAndEnd);
                 timesAdapter.notifyDataSetChanged();
 
-                int nextTimeIndex = timesBetweenStartAndEnd.indexOf(nextBusTime);
-                timesList.setSelection(nextTimeIndex);
+                final int nextTimeIndex = timesBetweenStartAndEnd.indexOf(nextBusTime);
+                timesList.clearFocus();
+                timesList.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        timesList.setSelection(nextTimeIndex);
+                    }
+                });
                 timesAdapter.setTime(currentTime);
 
                 if (BusManager.getBusManager().isOnline()) {
@@ -899,7 +808,7 @@ public class MainActivity extends Activity {
                     String[] routeArray = nextBusTime.getRoute().split("\\s");
                     String route = nextBusTime.getRoute();
                     if (routeArray[0].length() == 1) {
-                        routeText = "Route " + route;
+                        routeText = getString(R.string.route) + route;
                     }
                     else {
                         routeText = route;
@@ -1059,6 +968,100 @@ public class MainActivity extends Activity {
     public abstract class DownloaderHelper {
         public abstract void parse(JSONObject jsonObject) throws JSONException, IOException;
     }
+
+    private final DownloaderHelper stopDownloaderHelper = new DownloaderHelper() {
+        @Override
+        public void parse(JSONObject jsonObject) throws JSONException, IOException {
+            Stop.parseJSON(jsonObject);
+            FileOutputStream fos = openFileOutput(STOP_JSON_FILE, MODE_PRIVATE);
+            fos.write(jsonObject.toString().getBytes());
+            fos.close();
+        }
+    };
+
+    private final DownloaderHelper routeDownloaderHelper = new DownloaderHelper() {
+        @Override
+        public void parse(JSONObject jsonObject) throws JSONException, IOException {
+            Route.parseJSON(jsonObject);
+            FileOutputStream fos = openFileOutput(ROUTE_JSON_FILE, MODE_PRIVATE);
+            fos.write(jsonObject.toString().getBytes());
+            fos.close();
+        }
+    };
+
+    private final DownloaderHelper segmentDownloaderHelper = new DownloaderHelper() {
+        @Override
+        public void parse(JSONObject jsonObject) throws JSONException, IOException {
+            BusManager.parseSegments(jsonObject);
+            FileOutputStream fos = openFileOutput(SEGMENT_JSON_FILE, MODE_PRIVATE);
+            fos.write(jsonObject.toString().getBytes());
+            fos.close();
+        }
+    };
+
+    private final DownloaderHelper versionDownloaderHelper = new DownloaderHelper() {
+        @Override
+        public void parse(JSONObject jsonObject) throws JSONException, IOException {
+            BusManager sharedManager = BusManager.getBusManager();
+            BusManager.parseVersion(jsonObject);
+            for (String timeURL : sharedManager.getTimesToDownload()) {
+                SharedPreferences preferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
+                String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
+                //Log.v("Refactor", "Time to download: " + stopID);
+                int newestStopTimeVersion = sharedManager.getTimesVersions().get(stopID);
+                if (preferences.getInt(stopID, 0) != newestStopTimeVersion) {
+                    new Downloader(timeDownloaderHelper).execute(timeURL);
+                    preferences.edit().putInt(stopID, newestStopTimeVersion).commit();
+                }
+            }
+            if (jsonObject != null) {
+                FileOutputStream fos = openFileOutput(VERSION_JSON_FILE, MODE_PRIVATE);
+                fos.write(jsonObject.toString().getBytes());
+                fos.close();
+            }
+        }
+    };
+
+    private final DownloaderHelper versionDownloaderHelperTwo = new DownloaderHelper() {
+        @Override
+        public void parse(JSONObject jsonObject) {
+            try {
+                BusManager.parseVersion(jsonObject);
+                for (String timeURL : BusManager.getBusManager().getTimesToDownload()) {
+                    SharedPreferences timeVersionPreferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
+                    String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
+                    //Log.v("Refactor", "Time to download: " + stopID);
+                    int newestStopTimeVersion = BusManager.getBusManager().getTimesVersions().get(stopID);
+                    if (timeVersionPreferences.getInt(stopID, 0) != newestStopTimeVersion) {
+                        new Downloader(timeDownloaderHelper).execute(timeURL);
+                        timeVersionPreferences.edit().putInt(stopID, newestStopTimeVersion).commit();
+                    }
+                }
+            } catch (JSONException e) {
+                //Log.e("JSON", "Error parsing Version JSON.");
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private final DownloaderHelper busDownloaderHelper = new DownloaderHelper() {
+        @Override
+        public void parse(JSONObject jsonObject) throws JSONException, IOException {
+            Bus.parseJSON(jsonObject);
+            updateMapWithNewBusLocations();
+        }
+    };
+
+    private final DownloaderHelper timeDownloaderHelper = new DownloaderHelper() {
+        @Override
+        public void parse(JSONObject jsonObject) throws JSONException, IOException {
+            BusManager.parseTime(jsonObject);
+            //Log.v("Refactor", "Creating time cache file: " + jsonObject.getString("stop_id"));
+            FileOutputStream fos = openFileOutput(jsonObject.getString("stop_id"), MODE_PRIVATE);
+            fos.write(jsonObject.toString().getBytes());
+            fos.close();
+        }
+    };
 
     // Given a URL, establishes an HttpUrlConnection and retrieves
 // the web page content as a InputStream, which it returns as
