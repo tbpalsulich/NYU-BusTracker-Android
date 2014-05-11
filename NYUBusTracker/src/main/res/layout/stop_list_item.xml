@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@color/time_list_background">
+    android:layout_height="wrap_content">
 
     <CheckBox
         android:id="@+id/stop_checkbox"
@@ -16,8 +14,7 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:gravity="center_horizontal"
         android:focusable="false"
-        android:checked="false"
-        android:layout_marginBottom="1dp"/>
+        android:checked="false"/>
 
     <TextView
         android:text="@string/random_text"

@@ -860,7 +860,7 @@ public class MainActivity extends Activity {
         ListView listView = new ListView(this);     // ListView to populate the dialog.
         listView.setId(R.id.end_stop_list);
         listView.setDivider(new ColorDrawable(getResources().getColor(R.color.time_list_background)));
-        listView.setDividerHeight(1);
+        listView.setDividerHeight(2);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);    // Used to build the dialog with the list of connected Stops.
         builder.setView(listView);
         final Dialog dialog = builder.create();
