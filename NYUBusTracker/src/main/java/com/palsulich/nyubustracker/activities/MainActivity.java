@@ -103,7 +103,10 @@ public class MainActivity extends Activity {
     private static final String ROUTE_JSON_FILE = "routeJson";
     private static final String SEGMENT_JSON_FILE = "segmentJson";
     private static final String VERSION_JSON_FILE = "versionJson";
+    private static final String REFACTOR_LOG_TAG = "refactor";
     private static boolean offline = true;
+
+    public static final boolean LOCAL_LOGV = true;
 
     private TextSwitcher mSwitcher;
     private String mSwitcherCurrentText;
@@ -155,7 +158,7 @@ public class MainActivity extends Activity {
     }
 
     String readSavedData(String fileName) {
-        //Log.v("Refactor", "Reading saved data from " + fileName);
+        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Reading saved data from " + fileName);
         StringBuilder buffer = new StringBuilder("");
         try {
             FileInputStream inputStream = openFileInput(fileName);
@@ -197,6 +200,7 @@ public class MainActivity extends Activity {
                         segmentDownloader.getStatus() == AsyncTask.Status.FINISHED &&
                         versionDownloader.getStatus() == AsyncTask.Status.FINISHED &&
                         busTask.getStatus() == AsyncTask.Status.FINISHED) {
+                        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Downloading finished!");
                         oncePreferences.edit().putBoolean(FIRST_TIME, false).commit();
                         runOnUiThread(new Runnable() {
                             @Override
@@ -207,7 +211,7 @@ public class MainActivity extends Activity {
                                 setStartStop(broadway);
                                 setEndStop(lafayette);
                                 broadway.setFavorite(true);
-                                //Log.v("Refactor", "End: " + endStop.getName());
+                                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "End: " + endStop.getName());
                                 // Update the map to show the corresponding stops, buses, and segments.
                                 if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
                                 renewBusRefreshTimer();
@@ -248,7 +252,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        Log.v("General Debugging", "onCreate!");
+        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "onCreate!");
         setContentView(R.layout.activity_main);
 
         ((NYUBusTrackerApplication) getApplication()).getTracker();
@@ -301,12 +305,12 @@ public class MainActivity extends Activity {
         timesList.setAdapter(timesAdapter);
 
         if (oncePreferences.getBoolean(FIRST_TIME, true)) {
-//            Log.v("General Debugging", "Downloading because of first time");
+            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Downloading because of first time");
             downloadEverything();
         }
         else {
             if (!sharedManager.hasRoutes() || !sharedManager.hasStops()) {
-                //Log.v("Refactor", "Parsing cached files...");
+                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Parsing cached files...");
                 try {
                     JSONObject stopJson = new JSONObject(readSavedData(STOP_JSON_FILE));
                     JSONObject routeJson = new JSONObject(readSavedData(ROUTE_JSON_FILE));
@@ -318,19 +322,19 @@ public class MainActivity extends Activity {
                     BusManager.parseVersion(verJson);
                     for (String timeURL : sharedManager.getTimesToDownload()) {
                         String timeFileName = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
-                        //Log.v("Refactor", "Trying to parse " + timeFileName);
+                        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Trying to parse " + timeFileName);
                         try {
                             BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
                         } catch (JSONException e) {
-                            e.printStackTrace();
+                            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Didn't find time file, so downloading it: " + timeURL);
                             new Downloader(timeDownloaderHelper).execute(timeURL);
                         }
                     }
                     SharedPreferences favoritePreferences = getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE);
-                    //Log.v("Refactor", "Done parsing...");
+                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Done parsing...");
                     for (Stop s : sharedManager.getStops()) {
                         boolean result = favoritePreferences.getBoolean(s.getID(), false);
-                        //Log.v("Refactor", s.getName() + " is " + result);
+                        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, s.getName() + " is " + result);
                         s.setFavorite(result);
                     }
                     new Downloader(versionDownloaderHelperTwo).execute(versionURL);
@@ -344,7 +348,7 @@ public class MainActivity extends Activity {
                     renewTimeUntilTimer();
                     setNextBusTime();
                 } catch (JSONException e) {
-                    //Log.e("RefactorJSON", "Re-downloading because of an error.");
+                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Re-downloading because of an error.");
                     e.printStackTrace();
                     downloadEverything();
                 }
@@ -415,7 +419,7 @@ public class MainActivity extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-//        Log.v("General Debugging", "onDestroy!");
+        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "onDestroy!");
         cacheStartAndEndStops();      // Remember user's preferences across lifetimes.
         if (timeUntilTimer != null)
             timeUntilTimer.cancel();           // Don't need a timer anymore -- must be recreated onResume.
@@ -425,7 +429,7 @@ public class MainActivity extends Activity {
     @Override
     public void onPause() {
         super.onPause();
-//        Log.v("General Debugging", "onPause!");
+        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "onPause!");
         cacheStartAndEndStops();
         if (timeUntilTimer != null) timeUntilTimer.cancel();
         if (busRefreshTimer != null) busRefreshTimer.cancel();
@@ -434,12 +438,12 @@ public class MainActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-//        Log.v("General Debugging", "onResume!");
-        setStartAndEndStops();
+        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "onResume!");
         if (endStop != null && startStop != null) {
             renewTimeUntilTimer();
             renewBusRefreshTimer();
             setUpMapIfNeeded();
+            setStartAndEndStops();
         }
     }
 
@@ -453,7 +457,7 @@ public class MainActivity extends Activity {
     @Override
     public void onStart() {
         super.onStart();
-//        Log.v("General Debugging", "onStart!");
+//        if (LOCAL_LOGV) Log.v("General Debugging", "onStart!");
         onStartTime = System.currentTimeMillis();
         GoogleAnalytics.getInstance(this).reportActivityStart(this);
     }
@@ -461,7 +465,7 @@ public class MainActivity extends Activity {
     @Override
     public void onStop() {
         super.onStop();
-//        Log.v("General Debugging", "onStop!");
+//        if (LOCAL_LOGV) Log.v("General Debugging", "onStop!");
         GoogleAnalytics.getInstance(this).reportActivityStop(this);
     }
 
@@ -536,7 +540,7 @@ public class MainActivity extends Activity {
                 if (r.isActive(startStop) || !somethingActive) {
                     somethingActive = true;
                     for (Bus b : sharedManager.getBuses()) {
-                        //Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
+                        //if (LOCAL_LOGV) Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
                         if (b.getRoute().equals(r.getID())) {
                             Marker mMarker = mMap.addMarker(new MarkerOptions().position(b.getLocation()).icon(BitmapDescriptorFactory.fromBitmap(rotateBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_bus_arrow), b.getHeading()))).anchor(0.5f, 0.5f));
                             clickableMapMarkers.put(mMarker.getId(), false);    // Unable to click on buses.
@@ -564,12 +568,12 @@ public class MainActivity extends Activity {
             for (Route r : routesBetweenStartAndEnd) {
                 if (r.isActive(startStop) || !somethingActive) {
                     somethingActive = true;
-                    //Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
+                    //if (LOCAL_LOGV) Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
                     for (Stop s : r.getStops()) {
                         for (Stop f : s.getFamily()) {
                             if ((!f.isHidden() && !f.isRelatedTo(startStop) && !f.isRelatedTo(endStop)) || (f == startStop || f == endStop)) {
                                 // Only put one representative from a family of stops on the p
-                                //Log.v("MapDebugging", "Not hiding " + f);
+                                //if (LOCAL_LOGV) Log.v("MapDebugging", "Not hiding " + f);
                                 Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
                                                                         .position(f.getLocation()).title(f.getName()).anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_map_stop))));
                                 clickableMapMarkers.put(mMarker.getId(), true);
@@ -579,7 +583,7 @@ public class MainActivity extends Activity {
                     updateMapWithNewBusLocations();
                     // Adds the segments of every Route to the map.
                     for (PolylineOptions p : r.getSegments()) {
-                        //Log.v("MapDebugging", "Trying to add a segment to the map");
+                        //if (LOCAL_LOGV) Log.v("MapDebugging", "Trying to add a segment to the map");
                         if (p != null) {
                             for (LatLng loc : p.getPoints()) {
                                 validBuilder = true;
@@ -587,9 +591,9 @@ public class MainActivity extends Activity {
                             }
                             p.color(getResources().getColor(R.color.main_buttons));
                             mMap.addPolyline(p);
-                            //Log.v("MapDebugging", "Success!");
+                            //if (LOCAL_LOGV) Log.v("MapDebugging", "Success!");
                         }
-                        //else Log.v("MapDebugging", "Segment was null for " + r.getID());
+                        //else if (LOCAL_LOGV) Log.v("MapDebugging", "Segment was null for " + r.getID());
                     }
                 }
             }
@@ -698,9 +702,9 @@ public class MainActivity extends Activity {
         ArrayList<Route> endRoutes = endStop.getUltimateParent().getRoutes();
         ArrayList<Route> availableRoutes = new ArrayList<Route>();               // All the routes connecting the two.
         for (Route r : startRoutes) {
-            //Log.v("Routes", "Start Route: " + r);
+            //if (LOCAL_LOGV) Log.v("Routes", "Start Route: " + r);
             if (endRoutes.contains(r) && !availableRoutes.contains(r)) {
-                //Log.v("Greenwich", "*  " + r + " is available.");
+                //if (LOCAL_LOGV) Log.v("Greenwich", "*  " + r + " is available.");
                 availableRoutes.add(r);
             }
         }
@@ -1007,7 +1011,7 @@ public class MainActivity extends Activity {
             for (String timeURL : sharedManager.getTimesToDownload()) {
                 SharedPreferences preferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
                 String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
-                //Log.v("Refactor", "Time to download: " + stopID);
+                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Time to download: " + stopID);
                 int newestStopTimeVersion = sharedManager.getTimesVersions().get(stopID);
                 if (preferences.getInt(stopID, 0) != newestStopTimeVersion) {
                     new Downloader(timeDownloaderHelper).execute(timeURL);
@@ -1030,7 +1034,7 @@ public class MainActivity extends Activity {
                 for (String timeURL : BusManager.getBusManager().getTimesToDownload()) {
                     SharedPreferences timeVersionPreferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
                     String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
-                    //Log.v("Refactor", "Time to download: " + stopID);
+                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Time to download: " + stopID);
                     int newestStopTimeVersion = BusManager.getBusManager().getTimesVersions().get(stopID);
                     if (timeVersionPreferences.getInt(stopID, 0) != newestStopTimeVersion) {
                         new Downloader(timeDownloaderHelper).execute(timeURL);
@@ -1056,7 +1060,7 @@ public class MainActivity extends Activity {
         @Override
         public void parse(JSONObject jsonObject) throws JSONException, IOException {
             BusManager.parseTime(jsonObject);
-            //Log.v("Refactor", "Creating time cache file: " + jsonObject.getString("stop_id"));
+            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Creating time cache file: " + jsonObject.getString("stop_id"));
             FileOutputStream fos = openFileOutput(jsonObject.getString("stop_id"), MODE_PRIVATE);
             fos.write(jsonObject.toString().getBytes());
             fos.close();

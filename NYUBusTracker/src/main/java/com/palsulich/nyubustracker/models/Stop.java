@@ -278,7 +278,7 @@ public class Stop {
         JSONArray jStops = new JSONArray();
         BusManager sharedManager = BusManager.getBusManager();
         if (stopsJson != null) jStops = stopsJson.getJSONArray(BusManager.TAG_DATA);
-        //Log.v("JSONDebug", "Number of stops: " + jStops.length());
+        //if (MainActivity.LOCAL_LOGV) if (MainActivity.LOCAL_LOGV) Log.v("JSONDebug", "Number of stops: " + jStops.length());
         for (int i = 0; i < jStops.length(); i++) {
             JSONObject stopObject = jStops.getJSONObject(i);
             String stopID = stopObject.getString(BusManager.TAG_STOP_ID);

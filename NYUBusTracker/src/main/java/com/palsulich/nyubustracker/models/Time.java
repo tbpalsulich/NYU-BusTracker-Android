@@ -74,7 +74,7 @@ public class Time {
             case Weekend:
                 return "Weekend";
         }
-        //Log.e("Time Debugging", "Invalid timeOfWeek");
+        //if (MainActivity.LOCAL_LOGV) Log.e("Time Debugging", "Invalid timeOfWeek");
         return "";      // Should never reach here.
     }
 
@@ -112,8 +112,8 @@ public class Time {
     // Return a nice string saying the difference between this time and the argument.
     public String getTimeAsStringUntil(Time t, Resources resources) {
         Time difference = this.getTimeAsTimeUntil(t);
-        //Log.v("Time Debugging", "this: " + this.toString() + " | that: " + t.toString());
-        //Log.v("Time Debugging", "Difference: " + difference.hour + ":" + difference.min);
+        //if (MainActivity.LOCAL_LOGV) Log.v("Time Debugging", "this: " + this.toString() + " | that: " + t.toString());
+        //if (MainActivity.LOCAL_LOGV) Log.v("Time Debugging", "Difference: " + difference.hour + ":" + difference.min);
         if (difference != null) {
             if (this.getTimeOfWeek() != t.getTimeOfWeek()) {
                 BusManager.getBusManager().setOnline(false);
@@ -173,7 +173,7 @@ public class Time {
 
     // isStrictlyBefore(t) returns false if the times are equal or this is after t.
     public boolean isStrictlyBefore(Time t) {
-        //Log.v("Time Debugging", this.toString() + " is strictly before " + t.toString() + ": " + ((this.hour < t.hour) || (this.hour == t.hour && this.min < t.min)));
+        //if (MainActivity.LOCAL_LOGV) Log.v("Time Debugging", this.toString() + " is strictly before " + t.toString() + ": " + ((this.hour < t.hour) || (this.hour == t.hour && this.min < t.min)));
         return (this.hour < t.hour) || (this.hour == t.hour && this.min < t.min);
     }
 
@@ -184,7 +184,7 @@ public class Time {
     // Return a Time object who represents the difference in time between the two Times.
     public Time getTimeAsTimeUntil(Time t) {
         if (this.isBefore(t)) {
-            //Log.v("Time Debugging", this + " is strictly before " + t);
+            //if (MainActivity.LOCAL_LOGV) Log.v("Time Debugging", this + " is strictly before " + t);
             int hourDifference = t.hour - this.hour;
             int minDifference = t.min - this.min;
             if (minDifference < 0) {
