@@ -106,7 +106,7 @@ public class MainActivity extends Activity {
     private static final String REFACTOR_LOG_TAG = "refactor";
     private static boolean offline = true;
 
-    public static final boolean LOCAL_LOGV = true;
+    public static final boolean LOCAL_LOGV = false;
 
     private TextSwitcher mSwitcher;
     private String mSwitcherCurrentText;
