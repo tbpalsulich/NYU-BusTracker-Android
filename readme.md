@@ -36,3 +36,5 @@ correspond to (sometimes, more than one route travels between stops A and B).
 (https://github.com/tpalsulich/NYU-BusTracker-Android/blob/master/NYUBusTracker/src/main/java/com/palsulich/nyubustracker/activities/MainActivity.java).
 In the future, we may add additional activities to access times in an alternate format (like by
 route + stop, instead of stop + stop).
+
+Please see the LICENSE file for license information.
