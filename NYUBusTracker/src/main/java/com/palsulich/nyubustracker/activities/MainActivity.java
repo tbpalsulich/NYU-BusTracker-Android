@@ -174,7 +174,6 @@ public class MainActivity extends Activity {
                     bufferedWriter.write(jsonObject.toString());
                     bufferedWriter.close();
                 }
-                // TODO: Finish copying and pasting.
             }
         }
     };
