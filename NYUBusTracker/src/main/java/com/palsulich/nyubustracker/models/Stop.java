@@ -1,6 +1,9 @@
 package com.palsulich.nyubustracker.models;
 
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
+import com.palsulich.nyubustracker.activities.MainActivity;
 import com.palsulich.nyubustracker.helpers.BusManager;
 
 import org.json.JSONArray;
@@ -85,11 +88,12 @@ public class Stop {
         JSONArray jStops = new JSONArray();
         BusManager sharedManager = BusManager.getBusManager();
         if (stopsJson != null) jStops = stopsJson.getJSONArray(BusManager.TAG_DATA);
-        //if (MainActivity.LOCAL_LOGV) if (MainActivity.LOCAL_LOGV) Log.v("JSONDebug", "Number of stops: " + jStops.length());
+        if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Number of stops: " + jStops.length());
         for (int i = 0; i < jStops.length(); i++) {
             JSONObject stopObject = jStops.getJSONObject(i);
             String stopID = stopObject.getString(BusManager.TAG_STOP_ID);
             String stopName = stopObject.getString(BusManager.TAG_STOP_NAME);
+            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "*   Stop: " + stopID + " | " + stopName);
             JSONObject location = stopObject.getJSONObject(BusManager.TAG_LOCATION);
             String stopLat = location.getString(BusManager.TAG_LAT);
             String stopLng = location.getString(BusManager.TAG_LNG);

@@ -86,7 +86,7 @@ public class MainActivity extends Activity {
     private static final String ROUTES_URL = TRANSLOC_URL + "/routes.json?" + QUERY;
     private static final String SEGMENTS_URL = TRANSLOC_URL + "/segments.json?" + QUERY;
     private static final String VEHICLES_URL = TRANSLOC_URL + "/vehicles.json?" + QUERY;
-    private static final String VERSION_URL = "https://s3.amazonaws.com/nyubustimes/test/version.json";
+    private static final String VERSION_URL = "https://s3.amazonaws.com/nyubustimes/1.0/version.json";
     private static final String RUN_ONCE_PREF = "runOnce";
     private static final String STOP_PREF = "stops";
     private static final String START_STOP_PREF = "startStop";
@@ -124,7 +124,7 @@ public class MainActivity extends Activity {
         }
     };
     private static final String VERSION_JSON_FILE = "versionJson";
-    private static final String REFACTOR_LOG_TAG = "refactor";
+    public static final String REFACTOR_LOG_TAG = "refactor";
     private final DownloaderHelper versionDownloaderHelper = new DownloaderHelper() {
         @Override
         public void parse(JSONObject jsonObject) throws JSONException, IOException {
@@ -172,11 +172,13 @@ public class MainActivity extends Activity {
         @Override
         public void parse(JSONObject jsonObject) throws JSONException, IOException {
             BusManager.parseTime(jsonObject);
-            if (LOCAL_LOGV)
-                Log.v(REFACTOR_LOG_TAG, "Creating time cache file: " + jsonObject.getString("stop_id"));
-            FileOutputStream fos = openFileOutput(jsonObject.getString("stop_id"), MODE_PRIVATE);
-            fos.write(jsonObject.toString().getBytes());
-            fos.close();
+            if (jsonObject != null && jsonObject.length() > 0) {
+                if (LOCAL_LOGV)
+                    Log.v(REFACTOR_LOG_TAG, "Creating time cache file: " + jsonObject.getString("stop_id"));
+                FileOutputStream fos = openFileOutput(jsonObject.getString("stop_id"), MODE_PRIVATE);
+                fos.write(jsonObject.toString().getBytes());
+                fos.close();
+            }
         }
     };
     private final CompoundButton.OnCheckedChangeListener cbListener = new CompoundButton.OnCheckedChangeListener() {
@@ -219,6 +221,7 @@ public class MainActivity extends Activity {
     private AsyncTask versionDownloader;
     private AsyncTask vehiclesDownloader;
     private boolean offline = true;
+    private boolean currentlyDownloadingEverything = false;
 
     private static String makeQuery(String param, String value, String charset) {
         try {
@@ -268,12 +271,14 @@ public class MainActivity extends Activity {
 
             inputStream.close();
         } catch (IOException e) {
+            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Failed to read " + fileName + "...");
             e.printStackTrace();
         }
         return buffer.toString();
     }
 
     private void downloadEverything() {
+        currentlyDownloadingEverything = true;
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
@@ -297,6 +302,7 @@ public class MainActivity extends Activity {
                 Toast.makeText(context, text, duration).show();
             }
         }
+        currentlyDownloadingEverything = false;
     }
 
     private void pieceDownloadsTogether() {
@@ -311,13 +317,14 @@ public class MainActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Number of stops: " + BusManager.getBusManager().getStops().size());
                     Stop broadway = BusManager.getBusManager().getStopByName("715 Broadway @ Washington Square");
                     if (LOCAL_LOGV)
                         Log.v(REFACTOR_LOG_TAG, "has stops? " + (BusManager.getBusManager().getConnectedStops(broadway).size() > 0));
-                    Stop lafayette = BusManager.getBusManager().getStopByName("80 Lafayette St");
+                    Stop nextStop = BusManager.getBusManager().getConnectedStops(broadway).get(0);
                     getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).commit();
                     setStartStop(broadway);
-                    setEndStop(lafayette);
+                    setEndStop(nextStop);
                     broadway.setFavorite(true);
                     if (LOCAL_LOGV)
                         Log.v(REFACTOR_LOG_TAG, "End: " + endStop.getName());
@@ -572,7 +579,7 @@ public class MainActivity extends Activity {
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         for (String provider : mLocationManager.getProviders(true)) {
             Location l = mLocationManager.getLastKnownLocation(provider);
-            //            Log.d("General", "time of location " + l.getAccuracy() + " is " + (System.currentTimeMillis() - l.getTime()));
+            //            Log.d(REFACTOR_LOG_TAG, "time of location " + l.getAccuracy() + " is " + (System.currentTimeMillis() - l.getTime()));
             if (l != null && (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) && (System.currentTimeMillis() - l.getTime()) < 120000) {
                 bestLocation = l;
             }
@@ -592,14 +599,14 @@ public class MainActivity extends Activity {
             startLoc.setLongitude(startStop.getLocation().longitude);
             endLoc.setLatitude(endStop.getLocation().latitude);
             endLoc.setLongitude(endStop.getLocation().longitude);
-            //            Log.d("General", "start: " + startStop);
-            //            Log.d("General", "end: " + endStop);
-            //            Log.d("General", "s dist: " + l.distanceTo(startLoc));
-            //            Log.d("General", "e dist: " + l.distanceTo(endLoc));
+            //            Log.d(REFACTOR_LOG_TAG, "start: " + startStop);
+            //            Log.d(REFACTOR_LOG_TAG, "end: " + endStop);
+            //            Log.d(REFACTOR_LOG_TAG, "s dist: " + l.distanceTo(startLoc));
+            //            Log.d(REFACTOR_LOG_TAG, "e dist: " + l.distanceTo(endLoc));
             if (l.distanceTo(startLoc) > l.distanceTo(endLoc)) {
                 setStartStop(endStop);
             }
-            //            Log.d("General", "Location: " + l.getLatitude() + ", " + l.getLongitude());
+            //            Log.d(REFACTOR_LOG_TAG, "Location: " + l.getLatitude() + ", " + l.getLongitude());
         }
     }
 
@@ -709,10 +716,11 @@ public class MainActivity extends Activity {
             else {
                 ArrayList<Stop> connected = BusManager.getBusManager().getConnectedStops(startStop);
                 int stopIndex = 0;
-                while (!checkStop(connected.get(stopIndex))) {
+                while (connected.size() > stopIndex && !checkStop(connected.get(stopIndex))) {
                     stopIndex++;
                 }
-                setEndStop(connected.get(stopIndex));
+                if (stopIndex < connected.size()) setEndStop(connected.get(stopIndex));
+                else downloadEverything();
             }
         }
     }
@@ -1076,10 +1084,10 @@ public class MainActivity extends Activity {
                 helper.parse(result);
                 pieceDownloadsTogether();
             } catch (JSONException e) {
-                Log.d("General", "JSON Exception while parsing");
+                Log.d(REFACTOR_LOG_TAG, "JSON Exception while parsing in onPostExecute.");
                 e.printStackTrace();
             } catch (IOException e) {
-                Log.d("General", "IO Exception while parsing");
+                Log.d(REFACTOR_LOG_TAG, "IO Exception while parsing in onPostExecute.");
             }
         }
     }

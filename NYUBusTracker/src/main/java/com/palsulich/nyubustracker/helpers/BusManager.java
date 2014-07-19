@@ -151,6 +151,7 @@ public final class BusManager {
     }
 
     public static void parseTime(JSONObject timesJson) throws JSONException {
+        if (timesJson == null) return;      // Couldn't get the JSON. So, give up.
         final JSONObject routes = timesJson.getJSONObject(BusManager.TAG_ROUTES);
         final String stopID = timesJson.getString("stop_id");
         final Timer t = new Timer();
