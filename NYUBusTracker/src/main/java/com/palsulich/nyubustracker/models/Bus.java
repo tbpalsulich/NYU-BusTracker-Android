@@ -17,41 +17,6 @@ public class Bus {
         vehicleID = mVehicleID;
     }
 
-    Bus setLocation(String lat, String lng) {
-        loc = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
-        return this;
-    }
-
-    public LatLng getLocation() {
-        return loc;
-    }
-
-    Bus setHeading(String mHeading) {
-        heading = mHeading;
-        return this;
-    }
-
-    Bus setRoute(String mRoute) {
-        route = mRoute;
-        return this;
-    }
-
-    public String getRoute() {
-        return route;
-    }
-
-    public Float getHeading() {
-        try {
-            return Float.parseFloat(heading);
-        } catch (Exception e) {
-            return 0f;
-        }
-    }
-
-    public String getID() {
-        return vehicleID;
-    }
-
     public static void parseJSON(JSONObject vehiclesJson) throws JSONException {
         BusManager sharedManager = BusManager.getBusManager();
         JSONObject jVehiclesData = null;
@@ -72,5 +37,40 @@ public class Bus {
             //if (MainActivity.LOCAL_LOGV) Log.v("BusLocations", "Parsing buses: bus id: " + vehicleID + " | bus' route: " + busRoute);
             //if (MainActivity.LOCAL_LOGV) Log.v("JSONDebug", "Bus ID: " + vehicleID + " | Heading: " + busHeading + " | (" + busLat + ", " + busLng + ")");
         }
+    }
+
+    Bus setLocation(String lat, String lng) {
+        loc = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
+        return this;
+    }
+
+    public LatLng getLocation() {
+        return loc;
+    }
+
+    public String getRoute() {
+        return route;
+    }
+
+    Bus setRoute(String mRoute) {
+        route = mRoute;
+        return this;
+    }
+
+    public Float getHeading() {
+        try {
+            return Float.parseFloat(heading);
+        } catch (Exception e) {
+            return 0f;
+        }
+    }
+
+    Bus setHeading(String mHeading) {
+        heading = mHeading;
+        return this;
+    }
+
+    public String getID() {
+        return vehicleID;
     }
 }

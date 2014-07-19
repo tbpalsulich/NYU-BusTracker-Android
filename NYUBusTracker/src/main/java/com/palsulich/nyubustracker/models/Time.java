@@ -10,14 +10,6 @@ import java.util.Comparator;
 import java.util.Locale;
 
 public class Time {
-    public enum TimeOfWeek {Weekday, Friday, Weekend}
-
-    private int hour;           // In 24 hour (military) format.
-    private int min;
-    private boolean AM;         // Used for parsing the input string ("8:04 PM") => 20:04, AM = true
-    private String route;       // What route this time corresponds to.
-    private final TimeOfWeek timeOfWeek;  // Either Weekday, Friday, Weekend.
-
     // compare is used to sort the list of times being checked for the "nextBusTime" in MainActivity.
     public static final Comparator<Time> compare = new Comparator<Time>() {
         // Return a negative number if Time1 is before, positive number if time2 is before, and 0 otherwise.
@@ -49,6 +41,11 @@ public class Time {
             }
         }
     };
+    private final TimeOfWeek timeOfWeek;  // Either Weekday, Friday, Weekend.
+    private int hour;           // In 24 hour (military) format.
+    private int min;
+    private boolean AM;         // Used for parsing the input string ("8:04 PM") => 20:04, AM = true
+    private String route;       // What route this time corresponds to.
 
     public Time(String time, TimeOfWeek mTimeOfWeek, String mRoute) {           // Input a string like "8:04 PM".
         AM = time.contains("AM");       // Automatically accounts for AM/PM with military time.
@@ -62,24 +59,6 @@ public class Time {
         }
         timeOfWeek = mTimeOfWeek;
         route = mRoute;
-    }
-
-    // Returns a String representation of the time of week this Time is in.
-    public String getTimeOfWeekAsString() {
-        switch (timeOfWeek) {
-            case Weekday:
-                return "Weekday";
-            case Friday:
-                return "Friday";
-            case Weekend:
-                return "Weekend";
-        }
-        //if (MainActivity.LOCAL_LOGV) Log.e("Time Debugging", "Invalid timeOfWeek");
-        return "";      // Should never reach here.
-    }
-
-    public TimeOfWeek getTimeOfWeek() {
-        return timeOfWeek;
     }
 
     // Create a new Time given a military hour and minute.
@@ -103,6 +82,20 @@ public class Time {
     public static Time getCurrentTime() {
         Calendar rightNow = Calendar.getInstance();
         return new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
+    }
+
+    // Returns a String representation of the time of week this Time is in.
+    public String getTimeOfWeekAsString() {
+        switch (timeOfWeek) {
+            case Weekday:
+                return "Weekday";
+            case Friday:
+                return "Friday";
+            case Weekend:
+                return "Weekend";
+        }
+        //if (MainActivity.LOCAL_LOGV) Log.e("Time Debugging", "Invalid timeOfWeek");
+        return "";      // Should never reach here.
     }
 
     public String getRoute() {
@@ -163,24 +156,6 @@ public class Time {
         return "";
     }
 
-    public boolean equals(Object t){
-        if (t instanceof Time){
-            Time time = (Time) t;
-            return (time.hour == this.hour && time.min == this.min && time.timeOfWeek == this.timeOfWeek);
-        }
-        return false;
-    }
-
-    // isStrictlyBefore(t) returns false if the times are equal or this is after t.
-    public boolean isStrictlyBefore(Time t) {
-        //if (MainActivity.LOCAL_LOGV) Log.v("Time Debugging", this.toString() + " is strictly before " + t.toString() + ": " + ((this.hour < t.hour) || (this.hour == t.hour && this.min < t.min)));
-        return (this.hour < t.hour) || (this.hour == t.hour && this.min < t.min);
-    }
-
-    public boolean isBefore(Time t) {
-        return (this.hour < t.hour) || (this.hour == t.hour && this.min <= t.min);
-    }
-
     // Return a Time object who represents the difference in time between the two Times.
     public Time getTimeAsTimeUntil(Time t) {
         if (this.isBefore(t)) {
@@ -198,12 +173,24 @@ public class Time {
         }
     }
 
-    public String toString() {
-        return getHourInNormalTime() + ":" + getMinInNormalTime() + " " + getAMorPM();
+    public TimeOfWeek getTimeOfWeek() {
+        return timeOfWeek;
     }
 
-    private String getAMorPM() {
-        return AM ? "AM" : "PM";
+    public boolean isBefore(Time t) {
+        return (this.hour < t.hour) || (this.hour == t.hour && this.min <= t.min);
+    }
+
+    public boolean equals(Object t) {
+        if (t instanceof Time) {
+            Time time = (Time) t;
+            return (time.hour == this.hour && time.min == this.min && time.timeOfWeek == this.timeOfWeek);
+        }
+        return false;
+    }
+
+    public String toString() {
+        return getHourInNormalTime() + ":" + getMinInNormalTime() + " " + getAMorPM();
     }
 
     // Return this Time in 12-hour format.
@@ -220,4 +207,16 @@ public class Time {
         if (min < 10) return "0" + min;
         else return Integer.toString(min);
     }
+
+    private String getAMorPM() {
+        return AM ? "AM" : "PM";
+    }
+
+    // isStrictlyBefore(t) returns false if the times are equal or this is after t.
+    public boolean isStrictlyBefore(Time t) {
+        //if (MainActivity.LOCAL_LOGV) Log.v("Time Debugging", this.toString() + " is strictly before " + t.toString() + ": " + ((this.hour < t.hour) || (this.hour == t.hour && this.min < t.min)));
+        return (this.hour < t.hour) || (this.hour == t.hour && this.min < t.min);
+    }
+
+    public enum TimeOfWeek {Weekday, Friday, Weekend}
 }

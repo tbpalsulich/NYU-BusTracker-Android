@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item type="id" name="start_stop_list" />
-    <item type="id" name="end_stop_list" />
+    <item name="start_stop_list" type="id"/>
+    <item name="end_stop_list" type="id"/>
 </resources>

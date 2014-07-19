@@ -28,11 +28,11 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
         this.context = context;
     }
 
-    public void setDataSet(ArrayList<Time> mTimes){
+    public void setDataSet(ArrayList<Time> mTimes) {
         times = mTimes;
     }
 
-    public void setTime(Time currentTime){
+    public void setTime(Time currentTime) {
         this.currentTime = currentTime;
     }
 
@@ -64,13 +64,9 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
         else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        if (viewHolder.timeText != null){
+        if (viewHolder.timeText != null) {
             Time thisTime = times.get(position);
-            viewHolder.timeText.setText(thisTime.toString() +
-                                        ((currentTime.getTimeAsTimeUntil(thisTime).isBefore(new Time(1, 0))
-                                          && currentTime.getTimeOfWeek() == thisTime.getTimeOfWeek())
-                                                ? " (" + currentTime.getTimeAsStringUntil(thisTime, context.getResources()) + ")"
-                                                : ""));
+            viewHolder.timeText.setText(thisTime.toString() + ((currentTime.getTimeAsTimeUntil(thisTime).isBefore(new Time(1, 0)) && currentTime.getTimeOfWeek() == thisTime.getTimeOfWeek()) ? " (" + currentTime.getTimeAsStringUntil(thisTime, context.getResources()) + ")" : ""));
         }
         if (viewHolder.viaRouteText != null) {
             String[] routeArray = times.get(position).getRoute().split("\\s");

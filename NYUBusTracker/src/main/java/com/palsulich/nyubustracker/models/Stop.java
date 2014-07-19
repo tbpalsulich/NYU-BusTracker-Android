@@ -11,6 +11,21 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 public class Stop {
+    public static final String FAVORITES_PREF = "favorites";
+    public static final Comparator<Stop> compare = new Comparator<Stop>() {
+        @Override
+        public int compare(Stop stop, Stop stop2) {
+            if (stop.getFavorite()) {
+                if (stop2.getFavorite()) {
+                    return compareStartingNumbers(stop.getName(), stop2.getName());
+                }
+                else return -1;
+            }
+            else if (stop2.getFavorite()) return 1;
+            else return compareStartingNumbers(stop.getName(), stop2.getName());
+        }
+    };
+    final ArrayList<Stop> childStops;
     String name, id;
     LatLng loc;
     String[] routesString;
@@ -18,8 +33,6 @@ public class Stop {
     String otherRoute = null;
     ArrayList<Time> times = null;
     boolean favorite;
-    public static final String FAVORITES_PREF = "favorites";
-    final ArrayList<Stop> childStops;
     Stop parent;
     Stop oppositeStop;
     boolean hidden;
@@ -48,24 +61,62 @@ public class Stop {
         return name;
     }
 
-    public void setOppositeStop(Stop stop) {
-        oppositeStop = stop;
+    public static int compareStartingNumbers(String stop, String stop2) {
+        int stopN = getStartingNumber(stop);
+        int stopN2 = getStartingNumber(stop2);
+        if (stopN > -1 && stopN2 > -1) return Integer.signum(stopN - stopN2);
+        if (stopN > -1) return -1;
+        if (stopN2 > -1) return 1;
+        return Integer.signum(stopN - stopN2);
+    }
+
+    public static int getStartingNumber(String s) {
+        if (Character.isDigit(s.charAt(0))) {
+            int n = 0;
+            while (n < s.length() && Character.isDigit(s.charAt(n))) {
+                n++;
+            }
+            return Integer.parseInt(s.substring(0, n));
+        }
+        else return -1;
+    }
+
+    public static void parseJSON(JSONObject stopsJson) throws JSONException {
+        JSONArray jStops = new JSONArray();
+        BusManager sharedManager = BusManager.getBusManager();
+        if (stopsJson != null) jStops = stopsJson.getJSONArray(BusManager.TAG_DATA);
+        //if (MainActivity.LOCAL_LOGV) if (MainActivity.LOCAL_LOGV) Log.v("JSONDebug", "Number of stops: " + jStops.length());
+        for (int i = 0; i < jStops.length(); i++) {
+            JSONObject stopObject = jStops.getJSONObject(i);
+            String stopID = stopObject.getString(BusManager.TAG_STOP_ID);
+            String stopName = stopObject.getString(BusManager.TAG_STOP_NAME);
+            JSONObject location = stopObject.getJSONObject(BusManager.TAG_LOCATION);
+            String stopLat = location.getString(BusManager.TAG_LAT);
+            String stopLng = location.getString(BusManager.TAG_LNG);
+            JSONArray stopRoutes = stopObject.getJSONArray(BusManager.TAG_ROUTES);
+            String[] routes = new String[stopRoutes.length()];
+            for (int j = 0; j < stopRoutes.length(); j++) {
+                routes[j] = stopRoutes.getString(j);
+            }
+            Stop s = sharedManager.getStop(stopName, stopLat, stopLng, stopID, routes);
+            sharedManager.addStop(s);
+        }
     }
 
     public Stop getOppositeStop() {
         return oppositeStop;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setHidden(boolean hidden) {
-        this.hidden = hidden;
+    public void setOppositeStop(Stop stop) {
+        oppositeStop = stop;
     }
 
     public boolean isHidden() {
         return hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
     }
 
     public boolean hasTimes() {
@@ -76,20 +127,16 @@ public class Stop {
         return false;
     }
 
-    public void setOtherRoute(String r){
-        otherRoute = r;
+    public String getOtherRoute() {
+        return otherRoute;
     }
 
-    public String getOtherRoute(){
-        return otherRoute;
+    public void setOtherRoute(String r) {
+        otherRoute = r;
     }
 
     public void setParentStop(Stop parent) {
         this.parent = parent;
-    }
-
-    public Stop getParent() {
-        return parent;
     }
 
     public Stop getUltimateParent() {
@@ -100,18 +147,14 @@ public class Stop {
         return result;
     }
 
+    public Stop getParent() {
+        return parent;
+    }
+
     public void addChildStop(Stop stop) {
         if (!childStops.contains(stop)) {
             childStops.add(stop);
         }
-    }
-
-    public String getUltimateName() {
-        Stop s = this;
-        while (s.getParent() != null) {
-            s = s.getParent();
-        }
-        return s.getName();
     }
 
     public ArrayList<Stop> getFamily() {
@@ -147,10 +190,6 @@ public class Stop {
 
     public LatLng getLocation() {
         return loc;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public String toString() {
@@ -223,40 +262,6 @@ public class Stop {
         times.add(t);
     }
 
-    public static int getStartingNumber(String s){
-        if (Character.isDigit(s.charAt(0))) {
-            int n = 0;
-            while (n < s.length() && Character.isDigit(s.charAt(n))) {
-                n++;
-            }
-            return Integer.parseInt(s.substring(0, n));
-        }
-        else return -1;
-    }
-
-    public static int compareStartingNumbers(String stop, String stop2){
-        int stopN = getStartingNumber(stop);
-        int stopN2 = getStartingNumber(stop2);
-        if (stopN > -1 && stopN2 > -1) return Integer.signum(stopN - stopN2);
-        if (stopN > -1) return -1;
-        if (stopN2 > -1) return 1;
-        return Integer.signum(stopN - stopN2);
-    }
-
-    public static final Comparator<Stop> compare = new Comparator<Stop>() {
-        @Override
-        public int compare(Stop stop, Stop stop2) {
-            if (stop.getFavorite()) {
-                if (stop2.getFavorite()) {
-                    return compareStartingNumbers(stop.getName(), stop2.getName());
-                }
-                else return -1;
-            }
-            else if (stop2.getFavorite()) return 1;
-            else return compareStartingNumbers(stop.getName(), stop2.getName());
-        }
-    };
-
     public ArrayList<Time> getTimesOfRoute(String route) {
         ArrayList<Time> result = new ArrayList<Time>();
         for (Time t : times) {
@@ -274,25 +279,19 @@ public class Stop {
         return (this.getUltimateName().equals(stop.getUltimateName()));
     }
 
-    public static void parseJSON(JSONObject stopsJson) throws JSONException {
-        JSONArray jStops = new JSONArray();
-        BusManager sharedManager = BusManager.getBusManager();
-        if (stopsJson != null) jStops = stopsJson.getJSONArray(BusManager.TAG_DATA);
-        //if (MainActivity.LOCAL_LOGV) if (MainActivity.LOCAL_LOGV) Log.v("JSONDebug", "Number of stops: " + jStops.length());
-        for (int i = 0; i < jStops.length(); i++) {
-            JSONObject stopObject = jStops.getJSONObject(i);
-            String stopID = stopObject.getString(BusManager.TAG_STOP_ID);
-            String stopName = stopObject.getString(BusManager.TAG_STOP_NAME);
-            JSONObject location = stopObject.getJSONObject(BusManager.TAG_LOCATION);
-            String stopLat = location.getString(BusManager.TAG_LAT);
-            String stopLng = location.getString(BusManager.TAG_LNG);
-            JSONArray stopRoutes = stopObject.getJSONArray(BusManager.TAG_ROUTES);
-            String[] routes = new String[stopRoutes.length()];
-            for (int j = 0; j < stopRoutes.length(); j++) {
-                routes[j] = stopRoutes.getString(j);
-            }
-            Stop s = sharedManager.getStop(stopName, stopLat, stopLng, stopID, routes);
-            sharedManager.addStop(s);
+    public String getUltimateName() {
+        Stop s = this;
+        while (s.getParent() != null) {
+            s = s.getParent();
         }
+        return s.getName();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

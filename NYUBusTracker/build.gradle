@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.+'
+        classpath 'com.android.tools.build:gradle:0.11.+'
     }
 }
 apply plugin: 'android'
@@ -15,25 +15,25 @@ repositories {
 
 android {
     compileSdkVersion 19
-    buildToolsVersion '19.0.3'
-
-    signingConfigs {
-        release {
-            storeFile file(RELEASE_STORE_FILE)
-            storePassword RELEASE_STORE_PASSWORD
-            keyAlias RELEASE_KEY_ALIAS
-            keyPassword RELEASE_KEY_PASSWORD
-        }
-    }
-
-    defaultConfig {
-        versionCode 9
-        versionName "1.51"
-        minSdkVersion 11
-        targetSdkVersion 19
-    }
+    buildToolsVersion '19.1.0'
 
     buildTypes {
+        signingConfigs {
+            release {
+                storeFile file(RELEASE_STORE_FILE)
+                storePassword RELEASE_STORE_PASSWORD
+                keyAlias RELEASE_KEY_ALIAS
+                keyPassword RELEASE_KEY_PASSWORD
+            }
+        }
+
+        defaultConfig {
+            versionCode 9
+            versionName "1.51"
+            minSdkVersion 11
+            targetSdkVersion 19
+        }
+
         release {
             zipAlign true
             debuggable false
@@ -45,7 +45,7 @@ android {
             versionNameSuffix "-beta"
         }
         debug {
-            packageNameSuffix ".debug"
+            applicationIdSuffix ".debug"
             versionNameSuffix "-debug"
         }
     }
@@ -59,7 +59,7 @@ sourceSets {
 
 dependencies {
     dependencies {
-        compile 'com.google.android.gms:play-services:4.3.23'
+        compile 'com.google.android.gms:play-services:4.4.52'
         compile 'com.google.maps.android:android-maps-utils:0.3+'
         compile 'se.emilsjolander:stickylistheaders:2.3.0'
     }

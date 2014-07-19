@@ -10,13 +10,13 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class Route {
+    private final BusManager sharedManager;
+    private final ArrayList<String> segmentIDs;
+    private final ArrayList<PolylineOptions> segments;
     private String longName = "";
     private String otherLongName = ""; // Useful for Route B Greenwich times.
     private String routeID = "";
     private ArrayList<Stop> stops = null;
-    private final BusManager sharedManager;
-    private final ArrayList<String> segmentIDs;
-    private final ArrayList<PolylineOptions> segments;
 
     public Route(String mLongName, String mRouteID) {
         segmentIDs = new ArrayList<String>();
@@ -29,66 +29,6 @@ public class Route {
             s.addRoute(this);
         }
         //if (MainActivity.LOCAL_LOGV) Log.v("Debugging", longName + "'s number of stops:" + stops.size());
-    }
-
-    public String toString() {
-        return longName;
-    }
-
-    public ArrayList<PolylineOptions> getSegments() {
-        return segments;
-    }
-
-    public Route setName(String name) {
-        longName = name;
-        return this;
-    }
-
-    public Route setOtherName(String otherName){
-        otherLongName = otherName;
-        return this;
-    }
-
-    public ArrayList<String> getSegmentIDs() {
-        return segmentIDs;
-    }
-
-    public String getLongName() {
-        return longName;
-    }
-
-    public String getOtherLongName() {
-        return otherLongName;
-    }
-
-    public String getID() {
-        return routeID;
-    }
-
-    public boolean hasStop(Stop stop) {
-        return stops.contains(stop);
-    }
-
-    public ArrayList<Stop> getStops() {
-        return stops;
-    }
-
-    public void addStop(Stop stop) {
-        if (!stops.contains(stop)) stops.add(stop);
-    }
-
-    void addStop(int index, Stop stop) {
-        if (stops.contains(stop)) stops.remove(stop);
-        if (stops.size() == index) stops.add(stop);
-        else stops.add(index, stop);
-    }
-
-    public boolean isActive(Stop s) {
-        Time currentTime = Time.getCurrentTime();
-        for (Time t : s.getTimesOfRoute(this.getLongName())) {
-            if (!t.isStrictlyBefore(currentTime)) return true;
-        }
-        return false;
     }
 
     public static void parseJSON(JSONObject routesJson) throws JSONException {
@@ -114,5 +54,65 @@ public class Route {
             sharedManager.addRoute(r);
             //if (MainActivity.LOCAL_LOGV) Log.v("JSONDebug", "Route name: " + routeLongName + " | ID:" + routeID + " | Number of stops: " + sharedManager.getRouteByID(routeID).getStops().size());
         }
+    }
+
+    void addStop(int index, Stop stop) {
+        if (stops.contains(stop)) stops.remove(stop);
+        if (stops.size() == index) stops.add(stop);
+        else stops.add(index, stop);
+    }
+
+    public ArrayList<String> getSegmentIDs() {
+        return segmentIDs;
+    }
+
+    public String toString() {
+        return longName;
+    }
+
+    public ArrayList<PolylineOptions> getSegments() {
+        return segments;
+    }
+
+    public Route setName(String name) {
+        longName = name;
+        return this;
+    }
+
+    public Route setOtherName(String otherName) {
+        otherLongName = otherName;
+        return this;
+    }
+
+    public String getOtherLongName() {
+        return otherLongName;
+    }
+
+    public String getID() {
+        return routeID;
+    }
+
+    public boolean hasStop(Stop stop) {
+        return stops.contains(stop);
+    }
+
+    public ArrayList<Stop> getStops() {
+        return stops;
+    }
+
+    public void addStop(Stop stop) {
+        if (!stops.contains(stop)) stops.add(stop);
+    }
+
+    public boolean isActive(Stop s) {
+        Time currentTime = Time.getCurrentTime();
+        for (Time t : s.getTimesOfRoute(this.getLongName())) {
+            if (!t.isStrictlyBefore(currentTime)) return true;
+        }
+        return false;
+    }
+
+    public String getLongName() {
+        return longName;
     }
 }

@@ -8,12 +8,13 @@ import com.google.android.gms.analytics.Tracker;
 
 public class NYUBusTrackerApplication extends Application {
     Tracker tracker = null;
+
     public NYUBusTrackerApplication() {
         super();
     }
 
-    public synchronized Tracker getTracker(){
-        if (tracker == null){
+    public synchronized Tracker getTracker() {
+        if (tracker == null) {
             GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
             tracker = analytics.newTracker(R.xml.app_tracker);
         }

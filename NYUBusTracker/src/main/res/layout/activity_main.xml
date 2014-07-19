@@ -4,61 +4,65 @@
                 android:background="@color/time_list_background">
 
     <LinearLayout
+        android:id="@+id/start_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:id="@+id/start_group"
+        android:background="@drawable/button_selector"
         android:onClick="createStartDialog"
-        android:background="@drawable/button_selector">
+        android:orientation="vertical">
+
         <TextView
             android:id="@+id/start"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/start"
             android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:text="@string/start"
             android:textColor="@color/main_text"
             android:textSize="@dimen/main_text_size"
-            android:textStyle="bold" />
+            android:textStyle="bold"/>
+
         <TextView
             android:id="@+id/start_stop"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/main_text"
-            android:textSize="@dimen/main_text_size"
+            android:gravity="left"
+            android:paddingBottom="@dimen/activity_vertical_margin"
             android:paddingLeft="@dimen/indented_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:gravity="left"/>
+            android:textColor="@color/main_text"
+            android:textSize="@dimen/main_text_size"/>
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/end_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_below="@+id/start_group"
-        android:onClick="createEndDialog"
-        android:background="@drawable/button_selector"
         android:layout_marginTop="1dp"
-        android:id="@+id/end_group">
+        android:background="@drawable/button_selector"
+        android:onClick="createEndDialog"
+        android:orientation="vertical">
+
         <TextView
             android:id="@+id/end"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/end"
-            android:textSize="@dimen/main_text_size"
             android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:text="@string/end"
             android:textColor="@color/main_text"
-            android:textStyle="bold" />
+            android:textSize="@dimen/main_text_size"
+            android:textStyle="bold"/>
+
         <TextView
             android:id="@+id/end_stop"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/main_text"
-            android:textSize="@dimen/main_text_size"
+            android:gravity="left"
+            android:paddingBottom="@dimen/activity_vertical_margin"
             android:paddingLeft="@dimen/indented_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:gravity="left"/>
+            android:textColor="@color/main_text"
+            android:textSize="@dimen/main_text_size"/>
     </LinearLayout>
 
 
@@ -67,87 +71,92 @@
         sliding drawer. Any change to the handle must also be changed here.-->
     <LinearLayout
         android:id="@+id/filler_space"
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/end_group">
+        android:layout_below="@+id/end_group"
+        android:orientation="vertical">
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"/>
+
         <TextView
             android:id="@+id/filler_space_next_bus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/activity_vertical_margin"
-            android:textSize="@dimen/main_text_size"
-            android:text="@string/random_text" />
+            android:text="@string/random_text"
+            android:textSize="@dimen/main_text_size"/>
 
         <TextView
             android:id="@+id/filler_space_next_time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/time_until_text_size"
-            android:text="@string/random_text"/>
+            android:text="@string/random_text"
+            android:textSize="@dimen/time_until_text_size"/>
 
         <TextView
             android:id="@+id/filler_space_next_route"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingBottom="@dimen/activity_vertical_margin"
-            android:textSize="@dimen/main_text_size"
-            android:text="@string/random_text"/>
+            android:text="@string/random_text"
+            android:textSize="@dimen/main_text_size"/>
     </LinearLayout>
 
     <TextView
         android:id="@+id/safe_ride_button"
-        android:layout_below="@+id/filler_space"
-        android:text="@string/call_safe_ride"
-        android:textColor="@color/main_text"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/filler_space"
         android:layout_marginTop="1dp"
+        android:background="@drawable/button_selector"
+        android:clickable="true"
+        android:gravity="center"
+        android:onClick="callSafeRide"
         android:paddingBottom="10dp"
         android:paddingTop="10dp"
-        android:background="@drawable/button_selector"
-        android:onClick="callSafeRide"
-        android:clickable="true"
-        android:visibility="gone"
-        android:gravity="center"/>
+        android:text="@string/call_safe_ride"
+        android:textColor="@color/main_text"
+        android:visibility="gone"/>
 
-    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/map"
+    <fragment android:id="@+id/map"
+              android:name="com.google.android.gms.maps.MapFragment"
+              xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="fill_parent"
-              android:layout_below="@+id/safe_ride_button"
-              android:name="com.google.android.gms.maps.MapFragment"/>
+              android:layout_below="@+id/safe_ride_button"/>
 
     <com.palsulich.nyubustracker.helpers.MultipleOrientationSlidingDrawer
+        android:id="@+id/sliding_drawer"
         xmlns:custom="http://schemas.android.com/apk/res-auto/com.palsulich.nyubustracker"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:layout_below="@+id/end_group"
-        android:id="@+id/sliding_drawer"
-        custom:handle="@+id/handle_c"
         custom:content="@+id/content_c"
+        custom:handle="@+id/handle_c"
         custom:orientation="top">
+
         <LinearLayout
             android:id="@id/handle_c"
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/main_buttons">
+            android:background="@color/main_buttons"
+            android:orientation="vertical">
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@color/time_list_background"/>
+
             <TextView
                 android:id="@+id/next_bus"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:paddingTop="@dimen/activity_vertical_margin"
                 android:textColor="@color/main_text"
-                android:textSize="@dimen/main_text_size" />
+                android:textSize="@dimen/main_text_size"/>
 
             <TextSwitcher
                 android:id="@+id/next_time"
@@ -155,7 +164,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/indented_horizontal_margin"
                 android:textColor="@color/main_text"
-                android:textSize="@dimen/time_until_text_size" />
+                android:textSize="@dimen/time_until_text_size"/>
 
             <TextView
                 android:id="@+id/next_route"
@@ -163,19 +172,20 @@
                 android:layout_height="wrap_content"
                 android:paddingBottom="@dimen/activity_vertical_margin"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:textSize="@dimen/main_text_size"
-                android:textColor="@color/main_text"/>
+                android:textColor="@color/main_text"
+                android:textSize="@dimen/main_text_size"/>
         </LinearLayout>
+
         <FrameLayout
+            android:id="@id/content_c"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@id/content_c"
             android:background="@color/main_buttons">
 
             <se.emilsjolander.stickylistheaders.StickyListHeadersListView
+                android:id="@+id/times_list"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/times_list">
+                android:layout_height="wrap_content">
 
             </se.emilsjolander.stickylistheaders.StickyListHeadersListView>
         </FrameLayout>
@@ -184,9 +194,9 @@
     <Button
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:background="@drawable/ic_action_about"
-        android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/ic_action_about"
         android:onClick="createInfoDialog"/>
 
 </RelativeLayout>

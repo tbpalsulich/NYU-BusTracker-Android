@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="TypographyDashes">
+<resources xmlns:tools="http://schemas.android.com/tools"
+           tools:ignore="TypographyDashes">
 
     <!-- The apps Analytics Tracking Id -->
     <string name="ga_trackingId">UA-38958586-2</string>
@@ -20,6 +21,7 @@
     substitute for the full length canonical Activity name in screen view hit. In order to
     specify an alternate screen name use an <screenName> element, with the name attribute
     specifying the canonical name, and the value the alias to use instead. -->
-    <screenName name="com.palsulich.nyubustracker.activities.MainActivity">Main Activity</screenName>
+    <screenName name="com.palsulich.nyubustracker.activities.MainActivity">Main Activity
+    </screenName>
 
 </resources>

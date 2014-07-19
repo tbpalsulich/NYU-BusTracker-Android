@@ -43,22 +43,22 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         super.setUp();
         mActivity = this.getActivity();
 
-        startText           = (TextView) mActivity.findViewById(R.id.start);
+        startText = (TextView) mActivity.findViewById(R.id.start);
 
-        endText             = (TextView) mActivity.findViewById(R.id.end);
+        endText = (TextView) mActivity.findViewById(R.id.end);
 
-        nextTime            = (TextSwitcher) mActivity.findViewById(R.id.next_time);
-        nextRoute           = (TextView) mActivity.findViewById(R.id.next_route);
-        nextBus             = (TextView) mActivity.findViewById(R.id.next_bus);
+        nextTime = (TextSwitcher) mActivity.findViewById(R.id.next_time);
+        nextRoute = (TextView) mActivity.findViewById(R.id.next_route);
+        nextBus = (TextView) mActivity.findViewById(R.id.next_bus);
 
-        callSafeRideButton  =   (Button) mActivity.findViewById(R.id.safe_ride_button);
+        callSafeRideButton = (Button) mActivity.findViewById(R.id.safe_ride_button);
 
-        startButton         =   (Button) mActivity.findViewById(R.id.start_stop);
-        endButton           =   (Button) mActivity.findViewById(R.id.end_stop);
+        startButton = (Button) mActivity.findViewById(R.id.start_stop);
+        endButton = (Button) mActivity.findViewById(R.id.end_stop);
 
-        startTextCorrect    = mActivity.getString(R.string.start);
+        startTextCorrect = mActivity.getString(R.string.start);
         safeRideTextCorrect = mActivity.getString(R.string.call_safe_ride);
-        endTextCorrect      = mActivity.getString(R.string.end);
+        endTextCorrect = mActivity.getString(R.string.end);
 
         busManager = BusManager.getBusManager();
 

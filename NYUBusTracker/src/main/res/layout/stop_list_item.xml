@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
     <CheckBox
         android:id="@+id/stop_checkbox"
-        android:drawableLeft="@drawable/heart_selector"
-        android:button="@null"
-        android:background="@color/main_buttons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:gravity="center_horizontal"
+        android:background="@color/main_buttons"
+        android:button="@null"
+        android:checked="false"
+        android:drawableLeft="@drawable/heart_selector"
         android:focusable="false"
-        android:checked="false"/>
+        android:gravity="center_horizontal"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"/>
 
     <TextView
-        android:text="@string/random_text"
         android:id="@+id/stop_text"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:paddingTop="1dp"
-        android:singleLine="true"
-        android:ellipsize="end"
-        android:layout_toRightOf="@+id/stop_checkbox"
-        android:clickable="true"
         android:layout_alignBottom="@+id/stop_checkbox"
         android:layout_alignTop="@+id/stop_checkbox"
+        android:layout_toRightOf="@+id/stop_checkbox"
+        android:background="@drawable/button_selector"
+        android:clickable="true"
+        android:ellipsize="end"
         android:gravity="center_vertical"
-        android:textSize="@dimen/main_text_size"
-        android:background="@drawable/button_selector"/>
+        android:paddingTop="1dp"
+        android:singleLine="true"
+        android:text="@string/random_text"
+        android:textSize="@dimen/main_text_size"/>
 
 </RelativeLayout>

@@ -15,22 +15,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public final class BusManager {
-    private static BusManager sharedBusManager = null;      // Singleton instance.
-    private static ArrayList<Stop> stops = null;            // Hold all known stops.
-    private static ArrayList<Route> routes = null;
-    private static ArrayList<String> hideRoutes = null;     // Routes to not show the user.
-    private static ArrayList<Bus> buses = null;
-    private static ArrayList<String> timesToDownload = null;
-    private static HashMap<String, Integer> timesVersions = null;
-    private static boolean online;
-
     public static final String TAG_DATA = "data";
     public static final String TAG_LONG_NAME = "long_name";
     public static final String TAG_LOCATION = "location";
@@ -40,17 +30,23 @@ public final class BusManager {
     public static final String TAG_STOP_NAME = "name";
     public static final String TAG_STOP_ID = "stop_id";
     public static final String TAG_ROUTES = "routes";
-    private static final String TAG_ROUTE = "route";
     public static final String TAG_ROUTE_ID = "route_id";
-    private static final String TAG_WEEKDAY = "Weekday";
-    private static final String TAG_FRIDAY = "Friday";
-    private static final String TAG_WEEKEND = "Weekend";
     public static final String TAG_VEHICLE_ID = "vehicle_id";
     public static final String TAG_SEGMENTS = "segments";
     public static final String TAG_STOPS = "stops";
     public static final String TAG_OTHER = "Other";
-
-    private static Calendar calendar;
+    private static final String TAG_ROUTE = "route";
+    private static final String TAG_WEEKDAY = "Weekday";
+    private static final String TAG_FRIDAY = "Friday";
+    private static final String TAG_WEEKEND = "Weekend";
+    private static BusManager sharedBusManager = null;      // Singleton instance.
+    private static ArrayList<Stop> stops = null;            // Hold all known stops.
+    private static ArrayList<Route> routes = null;
+    private static ArrayList<String> hideRoutes = null;     // Routes to not show the user.
+    private static ArrayList<Bus> buses = null;
+    private static ArrayList<String> timesToDownload = null;
+    private static HashMap<String, Integer> timesVersions = null;
+    private static boolean online;
 
     private BusManager() {
         stops = new ArrayList<Stop>();
@@ -60,229 +56,6 @@ public final class BusManager {
         timesToDownload = new ArrayList<String>();
         timesVersions = new HashMap<String, Integer>();
         online = false;
-    }
-
-    public static BusManager getBusManager() {
-        if (sharedBusManager == null) {
-            sharedBusManager = new BusManager();
-        }
-        return sharedBusManager;
-    }
-
-    ArrayList<Route> getRoutes() {
-        return routes;
-    }
-
-    public boolean isOnline() {
-        return online;
-    }
-
-    public void setOnline(boolean state) {
-        online = state;
-    }
-
-    public ArrayList<String> getTimesToDownload() {
-        return timesToDownload;
-    }
-
-    public ArrayList<Stop> getStops() {
-        ArrayList<Stop> result = new ArrayList<Stop>(stops);
-        for (Stop stop : stops) {
-            if (stop.isHidden() || !stop.hasTimes()) {
-                result.remove(stop);
-            }
-        }
-        Collections.sort(result, Stop.compare);
-        return result;
-    }
-
-    public HashMap<String, Integer> getTimesVersions() {
-        return timesVersions;
-    }
-
-    public boolean hasStops() {
-        return stops != null && stops.size() > 0;
-    }
-
-    public ArrayList<Bus> getBuses() {
-        return buses;
-    }
-
-    /*
-    Given a bus ID, getBus returns either the existing Bus with that ID, or a new bus with that ID.
-    This is used to parse the Bus JSON over and over to update location (called from Bus.parseJSON()).
-     */
-    public Bus getBus(String busID) {
-        for (Bus b : buses) {
-            if (b.getID().equals(busID)) {
-                return b;
-            }
-        }
-        Bus b = new Bus(busID);
-        buses.add(b);
-        return b;
-    }
-
-    /*
-    Given the name of a stop (e.g. "715 Broadway"), getStopByName returns the Stop with that name.
-     */
-    public Stop getStopByName(String stopName) {
-        for (Stop s : stops) {
-            if (s.getName().equals(stopName)) {
-                return s;
-            }
-        }
-        return null;
-    }
-
-    /*
-    Given the ID of a stop, getStopByID returns the Stop with that ID.
-     */
-    public Stop getStopByID(String stopID) {
-        for (Stop s : stops) {
-            if (s.getID().equals(stopID)) return s;
-        }
-        return null;
-    }
-
-    /*
-    Given a route ID, getStopsByRouteID returns an ArrayList of all Stops visited by that Route.
-     */
-    public ArrayList<Stop> getStopsByRouteID(String routeID) {
-        ArrayList<Stop> result = new ArrayList<Stop>();
-        for (Stop stop : stops) {
-            //if (MainActivity.LOCAL_LOGV) Log.v("Debugging", "Number of routes of stop " + j + ": " + stop.routes.size());
-            if (stop.hasRouteByString(routeID)) {
-                result.add(stop);
-            }
-        }
-        return result;
-    }
-
-    public boolean hasRoutes() {
-        return routes != null && routes.size() > 0;
-    }
-
-    /*
-    Given an ID (e.g. "81374"), returns the Route with that ID.
-     */
-    public Route getRouteByID(String id) {
-        if (routes != null) {
-            for (Route route : routes) {
-                if (route.getID().equals(id)) {
-                    return route;
-                }
-            }
-        }
-        return null;
-    }
-
-    /*
-    Given a Stop, getConnectedStops returns an array of Strings corresponding to every stop which has
-    some route between it and the given stop.
-     */
-    public ArrayList<Stop> getConnectedStops(Stop stop) {
-        ArrayList<Stop> result = new ArrayList<Stop>();
-        if (stop != null) {
-            ArrayList<Route> stopRoutes = stop.getRoutes();
-            for (Route route : stopRoutes) {       // For every route servicing this stop:
-                //if (MainActivity.LOCAL_LOGV) Log.v("Route Debugging", route.toString() + " services this stop.");
-                if (stop.getTimesOfRoute(route.getLongName()).size() > 0){
-                    for (Stop connectedStop : route.getStops()) {    // add all of that route's stops.
-                        if (connectedStop != null && !connectedStop.getUltimateName().equals(stop.getName()) &&
-                            !result.contains(connectedStop) &&
-                            (!connectedStop.isHidden() || !connectedStop.isRelatedTo(stop))) {
-                            while (connectedStop.getParent() != null) {
-                                connectedStop = connectedStop.getParent();
-                            }
-                            boolean repeatStop = false;
-                            for (Stop resultStop : result) {
-                                if (resultStop.getName().equals(connectedStop.getName())) {
-                                    repeatStop = true;
-                                }
-                            }
-                            if (!repeatStop) {
-                                result.add(connectedStop);
-                                //if (MainActivity.LOCAL_LOGV) Log.v("Route Debugging","'" + connectedStop.getName() + "' is connected to '" + stop.getName() + "'");
-                            }
-                        }
-                    }
-                }
-            }
-            Collections.sort(result, Stop.compare);
-            result.remove(stop);
-        }
-        return result;
-    }
-
-    /*
-    addStop will add a Stop to our ArrayList of Stops, unless we're supposed to hide it.
-     */
-    public void addStop(Stop stop) {
-        if (!stop.isHidden()) {
-            stops.add(stop);
-            //if (MainActivity.LOCAL_LOGV) Log.v("Debugging", "Added " + stop.toString() + " to list of stops (" + stops.size() + ")");
-        }
-    }
-
-    public Stop getStop(String stopName, String stopLat, String stopLng, String stopID, String[] routes) {
-        Stop s = getStopByID(stopID);
-        if (s == null) {
-            s = new Stop(stopName, stopLat, stopLng, stopID, routes);
-        }
-        else {
-            s.setValues(stopName, stopLat, stopLng, stopID, routes);
-        }
-        return s;
-    }
-
-
-    /*
-    addRoute will add a Route to our ArrayList of Routes, unless we're supposed to hide it.
-     */
-    public void addRoute(Route route) {
-        if (!hideRoutes.contains(route.getID())) {
-            //if (MainActivity.LOCAL_LOGV) Log.v("JSONDebug", "Adding route: " + route.getID());
-            routes.add(route);
-        }
-    }
-
-    public Route getRoute(String name, String id) {
-        Route r;
-        if ((r = getRouteByID(id)) == null) {
-            return new Route(name, id);
-        }
-        else return r.setName(name);
-    }
-
-    public int distanceBetween(Stop stop1, Stop stop2) {
-        // Check these stops and their children.
-        int result = 100;
-        if (stop1 != null && stop2 != null) {
-            for (Route r : routes) {
-                if (r.hasStop(stop1) && r.hasStop(stop2)) {
-                    int index1 = r.getStops().indexOf(stop1);
-                    int index2 = r.getStops().indexOf(stop2);
-                    result = index2 - index1;
-                    if (result < 0) result += r.getStops().size();
-                }
-            }
-            int children = 100;
-            for (Stop s : stop1.getChildStops()) {
-                int test = distanceBetween(s, stop2);
-                if (test < children) children = test;
-            }
-            if (children < result) result = children;
-
-            children = 100;
-            for (Stop s : stop2.getChildStops()) {
-                int test = distanceBetween(stop1, s);
-                if (test < children) children = test;
-            }
-            if (children < result) result = children;
-        }
-
-        return result;
     }
 
     /*
@@ -361,9 +134,20 @@ public final class BusManager {
             JSONObject stopObject = jVersion.getJSONObject(j);
             String file = stopObject.getString("file");
             //if (MainActivity.LOCAL_LOGV) Log.v("Debugging", "Looking for times for " + file);
-            timesToDownload.add("https://s3.amazonaws.com/nyubustimes/1.0/" + file);
+            timesToDownload.add("https://s3.amazonaws.com/nyubustimes/times/" + file);
             timesVersions.put(file.substring(0, file.indexOf(".json")), stopObject.getInt("version"));
         }
+    }
+
+    public ArrayList<Stop> getStops() {
+        ArrayList<Stop> result = new ArrayList<Stop>(stops);
+        for (Stop stop : stops) {
+            if (stop.isHidden() || !stop.hasTimes()) {
+                result.remove(stop);
+            }
+        }
+        Collections.sort(result, Stop.compare);
+        return result;
     }
 
     public static void parseTime(JSONObject timesJson) throws JSONException {
@@ -382,7 +166,8 @@ public final class BusManager {
                                 JSONObject routeTimes = routes.getJSONObject(s.getRoutes().get(i).getID());
                                 getAllTimes(s, s.getRoutes().get(i), routeTimes);
                             } catch (JSONException e) {
-                                if (MainActivity.LOCAL_LOGV) Log.e("Greenwich", "Error parsing JSON...");
+                                if (MainActivity.LOCAL_LOGV)
+                                    Log.e("Greenwich", "Error parsing JSON...");
                                 e.printStackTrace();
                             }
                         }
@@ -392,11 +177,11 @@ public final class BusManager {
         }, 0L, 250L);
     }
 
-    private static void getAllTimes(Stop s, Route r, JSONObject routeTimes) throws JSONException{
+    private static void getAllTimes(Stop s, Route r, JSONObject routeTimes) throws JSONException {
         getTimes(routeTimes, TAG_WEEKDAY, s, Time.TimeOfWeek.Weekday);
         getTimes(routeTimes, TAG_FRIDAY, s, Time.TimeOfWeek.Friday);
         getTimes(routeTimes, TAG_WEEKEND, s, Time.TimeOfWeek.Weekend);
-        if (routeTimes.has(TAG_OTHER)){
+        if (routeTimes.has(TAG_OTHER)) {
             //if (MainActivity.LOCAL_LOGV) Log.d("Greenwich", "********Other route!!! " + r.getOtherLongName());
             getAllTimes(s, r, routeTimes.getJSONObject(TAG_OTHER));
             String route = routeTimes.getJSONObject(TAG_OTHER).getString(TAG_ROUTE);
@@ -437,5 +222,216 @@ public final class BusManager {
                 }
             }
         }
+    }
+
+    public static BusManager getBusManager() {
+        if (sharedBusManager == null) {
+            sharedBusManager = new BusManager();
+        }
+        return sharedBusManager;
+    }
+
+    ArrayList<Route> getRoutes() {
+        return routes;
+    }
+
+    public boolean isOnline() {
+        return online;
+    }
+
+    public void setOnline(boolean state) {
+        online = state;
+    }
+
+    public ArrayList<String> getTimesToDownload() {
+        return timesToDownload;
+    }
+
+    public HashMap<String, Integer> getTimesVersions() {
+        return timesVersions;
+    }
+
+    public boolean hasStops() {
+        return stops != null && stops.size() > 0;
+    }
+
+    public ArrayList<Bus> getBuses() {
+        return buses;
+    }
+
+    /*
+    Given a bus ID, getBus returns either the existing Bus with that ID, or a new bus with that ID.
+    This is used to parse the Bus JSON over and over to update location (called from Bus.parseJSON()).
+     */
+    public Bus getBus(String busID) {
+        for (Bus b : buses) {
+            if (b.getID().equals(busID)) {
+                return b;
+            }
+        }
+        Bus b = new Bus(busID);
+        buses.add(b);
+        return b;
+    }
+
+    /*
+    Given the name of a stop (e.g. "715 Broadway"), getStopByName returns the Stop with that name.
+     */
+    public Stop getStopByName(String stopName) {
+        for (Stop s : stops) {
+            if (s.getName().equals(stopName)) {
+                return s;
+            }
+        }
+        return null;
+    }
+
+    /*
+    Given a route ID, getStopsByRouteID returns an ArrayList of all Stops visited by that Route.
+     */
+    public ArrayList<Stop> getStopsByRouteID(String routeID) {
+        ArrayList<Stop> result = new ArrayList<Stop>();
+        for (Stop stop : stops) {
+            //if (MainActivity.LOCAL_LOGV) Log.v("Debugging", "Number of routes of stop " + j + ": " + stop.routes.size());
+            if (stop.hasRouteByString(routeID)) {
+                result.add(stop);
+            }
+        }
+        return result;
+    }
+
+    public boolean hasRoutes() {
+        return routes != null && routes.size() > 0;
+    }
+
+    /*
+    Given a Stop, getConnectedStops returns an array of Strings corresponding to every stop which has
+    some route between it and the given stop.
+     */
+    public ArrayList<Stop> getConnectedStops(Stop stop) {
+        ArrayList<Stop> result = new ArrayList<Stop>();
+        if (stop != null) {
+            ArrayList<Route> stopRoutes = stop.getRoutes();
+            for (Route route : stopRoutes) {       // For every route servicing this stop:
+                //if (MainActivity.LOCAL_LOGV) Log.v("Route Debugging", route.toString() + " services this stop.");
+                if (stop.getTimesOfRoute(route.getLongName()).size() > 0) {
+                    for (Stop connectedStop : route.getStops()) {    // add all of that route's stops.
+                        if (connectedStop != null && !connectedStop.getUltimateName().equals(stop.getName()) &&
+                            !result.contains(connectedStop) &&
+                            (!connectedStop.isHidden() || !connectedStop.isRelatedTo(stop))) {
+                            while (connectedStop.getParent() != null) {
+                                connectedStop = connectedStop.getParent();
+                            }
+                            boolean repeatStop = false;
+                            for (Stop resultStop : result) {
+                                if (resultStop.getName().equals(connectedStop.getName())) {
+                                    repeatStop = true;
+                                }
+                            }
+                            if (!repeatStop) {
+                                result.add(connectedStop);
+                                //if (MainActivity.LOCAL_LOGV) Log.v("Route Debugging","'" + connectedStop.getName() + "' is connected to '" + stop.getName() + "'");
+                            }
+                        }
+                    }
+                }
+            }
+            Collections.sort(result, Stop.compare);
+            result.remove(stop);
+        }
+        return result;
+    }
+
+    /*
+    addStop will add a Stop to our ArrayList of Stops, unless we're supposed to hide it.
+     */
+    public void addStop(Stop stop) {
+        if (!stop.isHidden()) {
+            stops.add(stop);
+            //if (MainActivity.LOCAL_LOGV) Log.v("Debugging", "Added " + stop.toString() + " to list of stops (" + stops.size() + ")");
+        }
+    }
+
+    public Stop getStop(String stopName, String stopLat, String stopLng, String stopID, String[] routes) {
+        Stop s = getStopByID(stopID);
+        if (s == null) {
+            s = new Stop(stopName, stopLat, stopLng, stopID, routes);
+        }
+        else {
+            s.setValues(stopName, stopLat, stopLng, stopID, routes);
+        }
+        return s;
+    }
+
+    /*
+    Given the ID of a stop, getStopByID returns the Stop with that ID.
+     */
+    public Stop getStopByID(String stopID) {
+        for (Stop s : stops) {
+            if (s.getID().equals(stopID)) return s;
+        }
+        return null;
+    }
+
+    /*
+    addRoute will add a Route to our ArrayList of Routes, unless we're supposed to hide it.
+     */
+    public void addRoute(Route route) {
+        if (!hideRoutes.contains(route.getID())) {
+            //if (MainActivity.LOCAL_LOGV) Log.v("JSONDebug", "Adding route: " + route.getID());
+            routes.add(route);
+        }
+    }
+
+    public Route getRoute(String name, String id) {
+        Route r;
+        if ((r = getRouteByID(id)) == null) {
+            return new Route(name, id);
+        }
+        else return r.setName(name);
+    }
+
+    /*
+    Given an ID (e.g. "81374"), returns the Route with that ID.
+     */
+    public Route getRouteByID(String id) {
+        if (routes != null) {
+            for (Route route : routes) {
+                if (route.getID().equals(id)) {
+                    return route;
+                }
+            }
+        }
+        return null;
+    }
+
+    public int distanceBetween(Stop stop1, Stop stop2) {
+        // Check these stops and their children.
+        int result = 100;
+        if (stop1 != null && stop2 != null) {
+            for (Route r : routes) {
+                if (r.hasStop(stop1) && r.hasStop(stop2)) {
+                    int index1 = r.getStops().indexOf(stop1);
+                    int index2 = r.getStops().indexOf(stop2);
+                    result = index2 - index1;
+                    if (result < 0) result += r.getStops().size();
+                }
+            }
+            int children = 100;
+            for (Stop s : stop1.getChildStops()) {
+                int test = distanceBetween(s, stop2);
+                if (test < children) children = test;
+            }
+            if (children < result) result = children;
+
+            children = 100;
+            for (Stop s : stop2.getChildStops()) {
+                int test = distanceBetween(stop1, s);
+                if (test < children) children = test;
+            }
+            if (children < result) result = children;
+        }
+
+        return result;
     }
 }
