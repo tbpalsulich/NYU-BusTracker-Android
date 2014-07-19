@@ -80,13 +80,13 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 public class MainActivity extends Activity {
     public static final boolean LOCAL_LOGV = true;
-    private static final String query = makeQuery("agencies", "72", "UTF-8");
-    private static final String translocURL = "https://transloc-api-1-2.p.mashape.com";
-    private static final String stopsURL = translocURL + "/stops.json?" + query;
-    private static final String routesURL = translocURL + "/routes.json?" + query;
-    private static final String segmentsURL = translocURL + "/segments.json?" + query;
-    private static final String vehiclesURL = translocURL + "/vehicles.json?" + query;
-    private static final String versionURL = "https://s3.amazonaws.com/nyubustimes/test/version.json";
+    private static final String QUERY = makeQuery("agencies", "72", "UTF-8");
+    private static final String TRANSLOC_URL = "https://transloc-api-1-2.p.mashape.com";
+    private static final String STOPS_URL = TRANSLOC_URL + "/stops.json?" + QUERY;
+    private static final String ROUTES_URL = TRANSLOC_URL + "/routes.json?" + QUERY;
+    private static final String SEGMENTS_URL = TRANSLOC_URL + "/segments.json?" + QUERY;
+    private static final String VEHICLES_URL = TRANSLOC_URL + "/vehicles.json?" + QUERY;
+    private static final String VERSION_URL = "https://s3.amazonaws.com/nyubustimes/test/version.json";
     private static final String RUN_ONCE_PREF = "runOnce";
     private static final String STOP_PREF = "stops";
     private static final String START_STOP_PREF = "startStop";
@@ -217,6 +217,7 @@ public class MainActivity extends Activity {
     private AsyncTask routeDownloader;
     private AsyncTask segmentDownloader;
     private AsyncTask versionDownloader;
+    private AsyncTask vehiclesDownloader;
     private boolean offline = true;
 
     private static String makeQuery(String param, String value, String charset) {
@@ -280,60 +281,13 @@ public class MainActivity extends Activity {
             // Download and parse everything, put it all in persistent memory, continue.
             progressDialog = ProgressDialog.show(this, getString(R.string.downloading), getString(R.string.wait), true, false);
 
-            stopDownloader = new Downloader(stopDownloaderHelper).execute(stopsURL);
-            routeDownloader = new Downloader(routeDownloaderHelper).execute(routesURL);
-            segmentDownloader = new Downloader(segmentDownloaderHelper).execute(segmentsURL);
-            versionDownloader = new Downloader(versionDownloaderHelper).execute(versionURL);
-            final AsyncTask busTask = new Downloader(busDownloaderHelper).execute(vehiclesURL);
-
-            new Timer().scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    if (stopDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-                        routeDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-                        segmentDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-                        versionDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-                        busTask.getStatus() == AsyncTask.Status.FINISHED) {
-                        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Downloading finished!");
-                        oncePreferences.edit().putBoolean(FIRST_TIME, false).commit();
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Stop broadway = BusManager.getBusManager().getStopByName("715 Broadway @ Washington Square");
-                                if (LOCAL_LOGV)
-                                    Log.v(REFACTOR_LOG_TAG, "has stops? " + (BusManager.getBusManager().getConnectedStops(broadway).size() > 0));
-                                Stop lafayette = BusManager.getBusManager().getStopByName("80 Lafayette St");
-                                getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).commit();
-                                setStartStop(broadway);
-                                setEndStop(lafayette);
-                                broadway.setFavorite(true);
-                                if (LOCAL_LOGV)
-                                    Log.v(REFACTOR_LOG_TAG, "End: " + endStop.getName());
-                                // Update the map to show the corresponding stops, buses, and segments.
-                                if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
-                                renewBusRefreshTimer();
-                                renewTimeUntilTimer();
-                                new Timer().schedule(new TimerTask() {
-                                    @Override
-                                    public void run() {
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                setNextBusTime();
-                                                progressDialog.dismiss();
-                                            }
-                                        });
-                                    }
-                                }, 750L);
-                            }
-
-                        });
-                        this.cancel();
-                    }
-                }
-            }, 0L, 500L);
+            stopDownloader = new Downloader(stopDownloaderHelper).execute(STOPS_URL);
+            routeDownloader = new Downloader(routeDownloaderHelper).execute(ROUTES_URL);
+            segmentDownloader = new Downloader(segmentDownloaderHelper).execute(SEGMENTS_URL);
+            versionDownloader = new Downloader(versionDownloaderHelper).execute(VERSION_URL);
+            vehiclesDownloader = new Downloader(busDownloaderHelper).execute(VEHICLES_URL);
         }
-        else if (!offline) {
+        else if (!offline) {    // Only show the offline dialog once.
             offline = true;
             Context context = getApplicationContext();
             CharSequence text = getString(R.string.unable_to_connect);
@@ -343,6 +297,41 @@ public class MainActivity extends Activity {
                 Toast.makeText(context, text, duration).show();
             }
         }
+    }
+
+    private void pieceDownloadsTogether() {
+        if (stopDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+            routeDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+            segmentDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+            versionDownloader.getStatus() == AsyncTask.Status.FINISHED &&
+            vehiclesDownloader.getStatus() == AsyncTask.Status.FINISHED) {
+
+            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Downloading finished!");
+            oncePreferences.edit().putBoolean(FIRST_TIME, false).commit();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Stop broadway = BusManager.getBusManager().getStopByName("715 Broadway @ Washington Square");
+                    if (LOCAL_LOGV)
+                        Log.v(REFACTOR_LOG_TAG, "has stops? " + (BusManager.getBusManager().getConnectedStops(broadway).size() > 0));
+                    Stop lafayette = BusManager.getBusManager().getStopByName("80 Lafayette St");
+                    getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).commit();
+                    setStartStop(broadway);
+                    setEndStop(lafayette);
+                    broadway.setFavorite(true);
+                    if (LOCAL_LOGV)
+                        Log.v(REFACTOR_LOG_TAG, "End: " + endStop.getName());
+                    // Update the map to show the corresponding stops, buses, and segments.
+                    if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
+                    renewBusRefreshTimer();
+                    renewTimeUntilTimer();
+                    setNextBusTime();
+                    progressDialog.dismiss();
+                }
+
+            });
+        }
+        // Else, we have nothing to do, since not all downloads are finished.
     }
 
     @Override
@@ -435,7 +424,7 @@ public class MainActivity extends Activity {
                         if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, s.getName() + " is " + result);
                         s.setFavorite(result);
                     }
-                    new Downloader(versionDownloaderHelperTwo).execute(versionURL);
+                    new Downloader(versionDownloaderHelperTwo).execute(VERSION_URL);
                     setStartAndEndStops();
 
                     // Update the map to show the corresponding stops, buses, and segments.
@@ -555,7 +544,7 @@ public class MainActivity extends Activity {
                             NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
                             if (networkInfo != null && networkInfo.isConnected()) {
                                 offline = false;
-                                new Downloader(busDownloaderHelper).execute(vehiclesURL);
+                                new Downloader(busDownloaderHelper).execute(VEHICLES_URL);
                             }
                             else if (!offline) {
                                 offline = true;
@@ -1031,7 +1020,7 @@ public class MainActivity extends Activity {
             conn.setRequestMethod("GET");
             conn.setDoInput(true);
             conn.setRequestProperty("X-Mashape-Authorization", "0gpwrDtINCQRxnhWEyJpEgdfYdQjZYSp");
-            // Starts the query
+            // Starts the QUERY
             conn.connect();
             //int response = conn.getResponseCode();
             //Log.d("JSON", "The response is: " + response);
@@ -1085,6 +1074,7 @@ public class MainActivity extends Activity {
         protected void onPostExecute(JSONObject result) {
             try {
                 helper.parse(result);
+                pieceDownloadsTogether();
             } catch (JSONException e) {
                 Log.d("General", "JSON Exception while parsing");
                 e.printStackTrace();
