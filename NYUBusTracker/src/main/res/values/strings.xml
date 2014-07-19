@@ -28,5 +28,6 @@
     <string name="website">www.nyubustracker.com</string>
     <string name="random_text">Random Text</string>
     <string name="route">"Route "</string>
+    <string name="no_stops_available">We\'re sorry. No stops currently available.</string>
 
 </resources>

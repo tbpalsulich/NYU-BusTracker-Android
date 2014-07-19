@@ -60,8 +60,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -94,13 +96,18 @@ public class MainActivity extends Activity {
     private static final String TIME_VERSION_PREF = "stopVersions";
     private static final String FIRST_TIME = "firstTime";
     private static final String STOP_JSON_FILE = "stopJson";
+    private static final String CREATED_FILES_DIR = "NYUCachedFiles";
     private final DownloaderHelper stopDownloaderHelper = new DownloaderHelper() {
         @Override
         public void parse(JSONObject jsonObject) throws JSONException, IOException {
             Stop.parseJSON(jsonObject);
-            FileOutputStream fos = openFileOutput(STOP_JSON_FILE, MODE_PRIVATE);
-            fos.write(jsonObject.toString().getBytes());
-            fos.close();
+            File path = new File(getFilesDir(), CREATED_FILES_DIR);
+            if (path.mkdir()) {
+                File file = new File(path, STOP_JSON_FILE);
+                BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
+                bufferedWriter.write(jsonObject.toString());
+                bufferedWriter.close();
+            }
         }
     };
     private static final String ROUTE_JSON_FILE = "routeJson";
@@ -108,9 +115,13 @@ public class MainActivity extends Activity {
         @Override
         public void parse(JSONObject jsonObject) throws JSONException, IOException {
             Route.parseJSON(jsonObject);
-            FileOutputStream fos = openFileOutput(ROUTE_JSON_FILE, MODE_PRIVATE);
-            fos.write(jsonObject.toString().getBytes());
-            fos.close();
+            File path = new File(getFilesDir(), CREATED_FILES_DIR);
+            if (path.mkdir()) {
+                File file = new File(path, ROUTE_JSON_FILE);
+                BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
+                bufferedWriter.write(jsonObject.toString());
+                bufferedWriter.close();
+            }
         }
     };
     private static final String SEGMENT_JSON_FILE = "segmentJson";
@@ -118,9 +129,13 @@ public class MainActivity extends Activity {
         @Override
         public void parse(JSONObject jsonObject) throws JSONException, IOException {
             BusManager.parseSegments(jsonObject);
-            FileOutputStream fos = openFileOutput(SEGMENT_JSON_FILE, MODE_PRIVATE);
-            fos.write(jsonObject.toString().getBytes());
-            fos.close();
+            File path = new File(getFilesDir(), CREATED_FILES_DIR);
+            if (path.mkdir()) {
+                File file = new File(path, SEGMENT_JSON_FILE);
+                BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
+                bufferedWriter.write(jsonObject.toString());
+                bufferedWriter.close();
+            }
         }
     };
     private static final String VERSION_JSON_FILE = "versionJson";
@@ -136,35 +151,11 @@ public class MainActivity extends Activity {
                 if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Time to download: " + stopID);
                 int newestStopTimeVersion = sharedManager.getTimesVersions().get(stopID);
                 if (preferences.getInt(stopID, 0) != newestStopTimeVersion) {
+                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "*   Actually downloading it!");
                     new Downloader(timeDownloaderHelper).execute(timeURL);
                     preferences.edit().putInt(stopID, newestStopTimeVersion).commit();
                 }
-            }
-            if (jsonObject != null) {
-                FileOutputStream fos = openFileOutput(VERSION_JSON_FILE, MODE_PRIVATE);
-                fos.write(jsonObject.toString().getBytes());
-                fos.close();
-            }
-        }
-    };
-    private final DownloaderHelper versionDownloaderHelperTwo = new DownloaderHelper() {
-        @Override
-        public void parse(JSONObject jsonObject) {
-            try {
-                BusManager.parseVersion(jsonObject);
-                for (String timeURL : BusManager.getBusManager().getTimesToDownload()) {
-                    SharedPreferences timeVersionPreferences = getSharedPreferences(TIME_VERSION_PREF, MODE_PRIVATE);
-                    String stopID = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
-                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Time to download: " + stopID);
-                    int newestStopTimeVersion = BusManager.getBusManager().getTimesVersions().get(stopID);
-                    if (timeVersionPreferences.getInt(stopID, 0) != newestStopTimeVersion) {
-                        new Downloader(timeDownloaderHelper).execute(timeURL);
-                        timeVersionPreferences.edit().putInt(stopID, newestStopTimeVersion).commit();
-                    }
-                }
-            } catch (JSONException e) {
-                //Log.e("JSON", "Error parsing Version JSON.");
-                e.printStackTrace();
+                else if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "*   Not actually downloading it, because we already have the current version.");
             }
         }
     };
@@ -175,9 +166,15 @@ public class MainActivity extends Activity {
             if (jsonObject != null && jsonObject.length() > 0) {
                 if (LOCAL_LOGV)
                     Log.v(REFACTOR_LOG_TAG, "Creating time cache file: " + jsonObject.getString("stop_id"));
-                FileOutputStream fos = openFileOutput(jsonObject.getString("stop_id"), MODE_PRIVATE);
-                fos.write(jsonObject.toString().getBytes());
-                fos.close();
+
+                File path = new File(getFilesDir(), CREATED_FILES_DIR);
+                if (path.mkdir()) {
+                    File file = new File(path, jsonObject.getString("stop_id"));
+                    BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
+                    bufferedWriter.write(jsonObject.toString());
+                    bufferedWriter.close();
+                }
+                // TODO: Finish copying and pasting.
             }
         }
     };
@@ -219,9 +216,8 @@ public class MainActivity extends Activity {
     private AsyncTask routeDownloader;
     private AsyncTask segmentDownloader;
     private AsyncTask versionDownloader;
-    private AsyncTask vehiclesDownloader;
     private boolean offline = true;
-    private boolean currentlyDownloadingEverything = false;
+    private int downloadsOnTheWire = 0;
 
     private static String makeQuery(String param, String value, String charset) {
         try {
@@ -259,17 +255,21 @@ public class MainActivity extends Activity {
         if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Reading saved data from " + fileName);
         StringBuilder buffer = new StringBuilder("");
         try {
-            FileInputStream inputStream = openFileInput(fileName);
-            InputStreamReader streamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(streamReader);
+            File path = new File(getFilesDir(), CREATED_FILES_DIR);
+            if (path.mkdir()) {
+                File file = new File(path, fileName);
+                FileInputStream inputStream = new FileInputStream(file);
+                InputStreamReader streamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(streamReader);
 
-            String readString = bufferedReader.readLine();
-            while (readString != null) {
-                buffer.append(readString);
-                readString = bufferedReader.readLine();
+                String readString = bufferedReader.readLine();
+                while (readString != null) {
+                    buffer.append(readString);
+                    readString = bufferedReader.readLine();
+                }
+
+                inputStream.close();
             }
-
-            inputStream.close();
         } catch (IOException e) {
             if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Failed to read " + fileName + "...");
             e.printStackTrace();
@@ -278,7 +278,7 @@ public class MainActivity extends Activity {
     }
 
     private void downloadEverything() {
-        currentlyDownloadingEverything = true;
+        deleteEverythingInMemory();
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
@@ -290,7 +290,6 @@ public class MainActivity extends Activity {
             routeDownloader = new Downloader(routeDownloaderHelper).execute(ROUTES_URL);
             segmentDownloader = new Downloader(segmentDownloaderHelper).execute(SEGMENTS_URL);
             versionDownloader = new Downloader(versionDownloaderHelper).execute(VERSION_URL);
-            vehiclesDownloader = new Downloader(busDownloaderHelper).execute(VEHICLES_URL);
         }
         else if (!offline) {    // Only show the offline dialog once.
             offline = true;
@@ -302,40 +301,36 @@ public class MainActivity extends Activity {
                 Toast.makeText(context, text, duration).show();
             }
         }
-        currentlyDownloadingEverything = false;
     }
 
     private void pieceDownloadsTogether() {
-        if (stopDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-            routeDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-            segmentDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-            versionDownloader.getStatus() == AsyncTask.Status.FINISHED &&
-            vehiclesDownloader.getStatus() == AsyncTask.Status.FINISHED) {
-
+        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Downloads on the wire: " + downloadsOnTheWire);
+        if (downloadsOnTheWire == 0) {
             if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Downloading finished!");
             oncePreferences.edit().putBoolean(FIRST_TIME, false).commit();
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Number of stops: " + BusManager.getBusManager().getStops().size());
+                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Number of stops: " + BusManager.getBusManager().numStops());
                     Stop broadway = BusManager.getBusManager().getStopByName("715 Broadway @ Washington Square");
                     if (LOCAL_LOGV)
                         Log.v(REFACTOR_LOG_TAG, "has stops? " + (BusManager.getBusManager().getConnectedStops(broadway).size() > 0));
-                    Stop nextStop = BusManager.getBusManager().getConnectedStops(broadway).get(0);
-                    getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).commit();
-                    setStartStop(broadway);
-                    setEndStop(nextStop);
-                    broadway.setFavorite(true);
-                    if (LOCAL_LOGV)
-                        Log.v(REFACTOR_LOG_TAG, "End: " + endStop.getName());
-                    // Update the map to show the corresponding stops, buses, and segments.
-                    if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
-                    renewBusRefreshTimer();
-                    renewTimeUntilTimer();
-                    setNextBusTime();
+                    ArrayList<Stop> connectedStops = BusManager.getBusManager().getConnectedStops(broadway);
+                    if (connectedStops.size() > 0) {
+                        Stop nextStop = BusManager.getBusManager().getConnectedStops(broadway).get(0);
+                        getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).commit();
+                        setStartStop(broadway);
+                        setEndStop(nextStop);
+                        broadway.setFavorite(true);
+                        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "End: " + endStop.getName());
+                        // Update the map to show the corresponding stops, buses, and segments.
+                        if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
+                        renewBusRefreshTimer();
+                        renewTimeUntilTimer();
+                        setNextBusTime();
+                    }
                     progressDialog.dismiss();
                 }
-
             });
         }
         // Else, we have nothing to do, since not all downloads are finished.
@@ -431,7 +426,7 @@ public class MainActivity extends Activity {
                         if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, s.getName() + " is " + result);
                         s.setFavorite(result);
                     }
-                    new Downloader(versionDownloaderHelperTwo).execute(VERSION_URL);
+                    new Downloader(versionDownloaderHelper).execute(VERSION_URL);
                     setStartAndEndStops();
 
                     // Update the map to show the corresponding stops, buses, and segments.
@@ -940,52 +935,72 @@ public class MainActivity extends Activity {
     public void createEndDialog(View view) {
         // Get all stops connected to the start stop.
         final ArrayList<Stop> connectedStops = BusManager.getBusManager().getConnectedStops(startStop);
-        ListView listView = new ListView(this);     // ListView to populate the dialog.
-        listView.setId(R.id.end_stop_list);
-        listView.setDivider(new ColorDrawable(getResources().getColor(R.color.time_list_background)));
-        listView.setDividerHeight(2);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);    // Used to build the dialog with the list of connected Stops.
-        builder.setView(listView);
-        final Dialog dialog = builder.create();
-        // An adapter takes some data, then adapts it to fit into a view. The adapter supplies the individual view elements of
-        // the list view. So, in this case, we supply the StopAdapter with a list of stops, and it gives us back the nice
-        // views with a heart button to signify favorites and a TextView with the name of the stop.
-        // We provide the onClickListeners to the adapter, which then attaches them to the respective views.
-        StopAdapter adapter = new StopAdapter(getApplicationContext(), connectedStops, new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Clicked on a Stop. So, make it the end and dismiss the dialog.
-                Stop s = (Stop) view.getTag();
-                setEndStop(s);  // Actually set the end stop.
-                dialog.dismiss();
-            }
-        }, cbListener);
-        listView.setAdapter(adapter);
-        dialog.setCanceledOnTouchOutside(true);
-        dialog.show();  // Dismissed when a stop is clicked.
+        if (connectedStops.size() > 0) {
+            ListView listView = new ListView(this);     // ListView to populate the dialog.
+            listView.setId(R.id.end_stop_list);
+            listView.setDivider(new ColorDrawable(getResources().getColor(R.color.time_list_background)));
+            listView.setDividerHeight(2);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);    // Used to build the dialog with the list of connected Stops.
+            builder.setView(listView);
+            final Dialog dialog = builder.create();
+            // An adapter takes some data, then adapts it to fit into a view. The adapter supplies the individual view elements of
+            // the list view. So, in this case, we supply the StopAdapter with a list of stops, and it gives us back the nice
+            // views with a heart button to signify favorites and a TextView with the name of the stop.
+            // We provide the onClickListeners to the adapter, which then attaches them to the respective views.
+            StopAdapter adapter = new StopAdapter(getApplicationContext(), connectedStops, new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // Clicked on a Stop. So, make it the end and dismiss the dialog.
+                    Stop s = (Stop) view.getTag();
+                    setEndStop(s);  // Actually set the end stop.
+                    dialog.dismiss();
+                }
+            }, cbListener);
+            listView.setAdapter(adapter);
+            dialog.setCanceledOnTouchOutside(true);
+            dialog.show();  // Dismissed when a stop is clicked.
+        }
+        else {
+            displayStopError();
+        }
     }
 
     @SuppressWarnings("UnusedParameters")
     public void createStartDialog(View view) {
         final ArrayList<Stop> stops = BusManager.getBusManager().getStops();    // Show every stop as an option to start.
-        ListView listView = new ListView(this);
-        listView.setId(R.id.start_stop);
-        listView.setDivider(new ColorDrawable(getResources().getColor(R.color.time_list_background)));
-        listView.setDividerHeight(1);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(listView);
-        final Dialog dialog = builder.create();
-        StopAdapter adapter = new StopAdapter(getApplicationContext(), stops, new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Stop s = (Stop) view.getTag();
-                setStartStop(s);    // Actually set the start stop.
-                dialog.dismiss();
-            }
-        }, cbListener);
-        listView.setAdapter(adapter);
-        dialog.setCanceledOnTouchOutside(true);
-        dialog.show();
+        if (stops.size() > 0) {
+            ListView listView = new ListView(this);
+            listView.setId(R.id.start_stop);
+            listView.setDivider(new ColorDrawable(getResources().getColor(R.color.time_list_background)));
+            listView.setDividerHeight(1);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setView(listView);
+            final Dialog dialog = builder.create();
+            StopAdapter adapter = new StopAdapter(getApplicationContext(), stops, new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Stop s = (Stop) view.getTag();
+                    setStartStop(s);    // Actually set the start stop.
+                    dialog.dismiss();
+                }
+            }, cbListener);
+            listView.setAdapter(adapter);
+            dialog.setCanceledOnTouchOutside(true);
+            dialog.show();
+        }
+        else {
+            displayStopError();
+        }
+    }
+
+    public void displayStopError() {
+        Context context = getApplicationContext();
+        CharSequence text = getString(R.string.no_stops_available);
+        int duration = Toast.LENGTH_LONG;
+
+        if (context != null) {
+            Toast.makeText(context, text, duration).show();
+        }
     }
 
     @SuppressWarnings("UnusedParameters")
@@ -1046,6 +1061,20 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void deleteEverythingInMemory() {
+        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Trying to delete all files.");
+        File directory = new File(getFilesDir(), CREATED_FILES_DIR);
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File f : files) {
+                if (f.delete()) {
+                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Deleted " + f.toString());
+                }
+                else if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Could not delete " + f.toString());
+            }
+        }
+    }
+
     // Reads an InputStream and converts it to a String.
     private String readIt(InputStream stream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "iso-8859-1"), 128);
@@ -1062,6 +1091,11 @@ public class MainActivity extends Activity {
 
         public Downloader(DownloaderHelper helper) {
             this.helper = helper;
+        }
+
+        @Override
+        public void onPreExecute() {
+            downloadsOnTheWire++;
         }
 
         @Override
@@ -1082,6 +1116,7 @@ public class MainActivity extends Activity {
         protected void onPostExecute(JSONObject result) {
             try {
                 helper.parse(result);
+                downloadsOnTheWire--;
                 pieceDownloadsTogether();
             } catch (JSONException e) {
                 Log.d(REFACTOR_LOG_TAG, "JSON Exception while parsing in onPostExecute.");

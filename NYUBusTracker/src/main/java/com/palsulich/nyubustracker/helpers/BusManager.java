@@ -225,7 +225,7 @@ public final class BusManager {
         }
     }
 
-    public static BusManager getBusManager() {
+    public static synchronized BusManager getBusManager() {
         if (sharedBusManager == null) {
             sharedBusManager = new BusManager();
         }
@@ -280,7 +280,9 @@ public final class BusManager {
      */
     public Stop getStopByName(String stopName) {
         for (Stop s : stops) {
+            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Looking for " + stopName + " | " + s.getName());
             if (s.getName().equals(stopName)) {
+                if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Found it!");
                 return s;
             }
         }
@@ -314,7 +316,7 @@ public final class BusManager {
         if (stop != null) {
             ArrayList<Route> stopRoutes = stop.getRoutes();
             for (Route route : stopRoutes) {       // For every route servicing this stop:
-                //if (MainActivity.LOCAL_LOGV) Log.v("Route Debugging", route.toString() + " services this stop.");
+                if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, route.toString() + " services this stop.");
                 if (stop.getTimesOfRoute(route.getLongName()).size() > 0) {
                     for (Stop connectedStop : route.getStops()) {    // add all of that route's stops.
                         if (connectedStop != null && !connectedStop.getUltimateName().equals(stop.getName()) &&
@@ -340,6 +342,7 @@ public final class BusManager {
             Collections.sort(result, Stop.compare);
             result.remove(stop);
         }
+        if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Found " + result.size() + " connected stops.");
         return result;
     }
 
@@ -357,11 +360,18 @@ public final class BusManager {
         Stop s = getStopByID(stopID);
         if (s == null) {
             s = new Stop(stopName, stopLat, stopLng, stopID, routes);
+            stops.add(s);
+            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "BusManager num stops: " + stops.size());
         }
         else {
             s.setValues(stopName, stopLat, stopLng, stopID, routes);
+            if (!stops.contains(s)) stops.add(s);
         }
         return s;
+    }
+
+    public int numStops() {
+        return stops.size();
     }
 
     /*
