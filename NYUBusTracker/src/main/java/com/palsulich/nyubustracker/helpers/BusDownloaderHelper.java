@@ -12,8 +12,4 @@ public class BusDownloaderHelper implements DownloaderHelper {
     public void parse(JSONObject jsonObject) throws JSONException, IOException {
         Bus.parseJSON(jsonObject);
     }
-
-    public String getUrl() {
-        return VEHICLES_URL;
-    }
 }

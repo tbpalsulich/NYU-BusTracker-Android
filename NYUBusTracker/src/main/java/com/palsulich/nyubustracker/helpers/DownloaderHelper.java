@@ -14,6 +14,5 @@ public interface DownloaderHelper {
     static final String VEHICLES_URL = TRANSLOC_URL + "/vehicles.json?" + QUERY;
     static final String VERSION_URL = "https://s3.amazonaws.com/nyubustimes/1.0/version.json";
 
-    public String getUrl();
     public abstract void parse(JSONObject jsonObject) throws JSONException, IOException;
 }

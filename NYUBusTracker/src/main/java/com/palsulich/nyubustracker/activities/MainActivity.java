@@ -123,7 +123,7 @@ public class MainActivity extends Activity {
     private Timer busRefreshTimer; // Timer used to refresh the bus locations every few seconds.
     private GoogleMap mMap;     // Map to display all stops, segments, and buses.
     private boolean offline = true;
-    private static int downloadsOnTheWire = 0;
+    public static int downloadsOnTheWire = 0;
     public static Handler UIHandler;
 
     static {
@@ -188,13 +188,13 @@ public class MainActivity extends Activity {
         if (networkInfo != null && networkInfo.isConnected()) {
             offline = false;
             // Download and parse everything, put it all in persistent memory, continue.
-            if (progressDialog != null) progressDialog.cancel();
             progressDialog = ProgressDialog.show(this, getString(R.string.downloading), getString(R.string.wait), true, false);
             Context context = getApplicationContext();
-            new Downloader(stopDownloaderHelper, context).execute();
-            new Downloader(routeDownloaderHelper, context).execute();
-            new Downloader(segmentDownloaderHelper, context).execute();
-            new Downloader(versionDownloaderHelper, context).execute();
+            downloadsOnTheWire += 4;
+            new Downloader(stopDownloaderHelper, context).execute(DownloaderHelper.STOPS_URL);
+            new Downloader(routeDownloaderHelper, context).execute(DownloaderHelper.ROUTES_URL);
+            new Downloader(segmentDownloaderHelper, context).execute(DownloaderHelper.SEGMENTS_URL);
+            new Downloader(versionDownloaderHelper, context).execute(DownloaderHelper.VERSION_URL);
         }
         else if (!offline) {    // Only show the offline dialog once.
             offline = true;
@@ -209,6 +209,7 @@ public class MainActivity extends Activity {
     }
 
     public static void pieceDownloadsTogether(final Context context) {
+        downloadsOnTheWire--;
         if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Downloads on the wire: " + downloadsOnTheWire);
         if (downloadsOnTheWire == 0) {
             if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Downloading finished!");
@@ -317,7 +318,7 @@ public class MainActivity extends Activity {
                         if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, s.getName() + " is " + result);
                         s.setFavorite(result);
                     }
-                    new Downloader(versionDownloaderHelper, context).execute();
+                    new Downloader(versionDownloaderHelper, context).execute(DownloaderHelper.VERSION_URL);;
                     setStartAndEndStops();
 
                     // Update the map to show the corresponding stops, buses, and segments.
@@ -436,7 +437,11 @@ public class MainActivity extends Activity {
                         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
                         if (networkInfo != null && networkInfo.isConnected()) {
                             offline = false;
-                            new Downloader(busDownloaderHelper, getApplicationContext()).execute();
+                            new Downloader(busDownloaderHelper, getApplicationContext()).execute(DownloaderHelper.VEHICLES_URL);
+                            updateMapWithNewBusLocations();
+                            updateMapWithNewStartOrEnd();
+                            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Current start: " + startStop);
+                            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Current end  : " + endStop);
                         }
                         else if (!offline) {
                             offline = true;
@@ -526,6 +531,8 @@ public class MainActivity extends Activity {
 
     // Clear the map, because we may have just changed what route we wish to display. Then, add everything back onto the map.
     private void updateMapWithNewStartOrEnd() {
+        if (routesBetweenStartAndEnd == null) return;       // Can't update without any routes...
+        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Have " + routesBetweenStartAndEnd.size() + " routes to show.");
         setUpMapIfNeeded();
         mMap.clear();
         clickableMapMarkers = new HashMap<String, Boolean>();
@@ -535,10 +542,11 @@ public class MainActivity extends Activity {
         for (Route r : routesBetweenStartAndEnd) {
             somethingActive = somethingActive || r.isActive(startStop);
         }
+        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Something active: " + somethingActive);
         for (Route r : routesBetweenStartAndEnd) {
             if (r.isActive(startStop) || !somethingActive) {
                 somethingActive = true;
-                //if (LOCAL_LOGV) Log.v("MapDebugging", "Updating map with route: " + r.getLongName());
+                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Updating map with route: " + r.getLongName());
                 for (Stop s : r.getStops()) {
                     for (Stop f : s.getFamily()) {
                         if ((!f.isHidden() && !f.isRelatedTo(startStop) && !f.isRelatedTo(endStop)) || (f == startStop || f == endStop)) {
@@ -552,8 +560,9 @@ public class MainActivity extends Activity {
                 }
                 updateMapWithNewBusLocations();
                 // Adds the segments of every Route to the map.
+                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, r + " has " + r.getSegments().size() + " segments.");
                 for (PolylineOptions p : r.getSegments()) {
-                    //if (LOCAL_LOGV) Log.v("MapDebugging", "Trying to add a segment to the map");
+                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Trying to add a segment to the map");
                     if (p != null) {
                         for (LatLng loc : p.getPoints()) {
                             validBuilder = true;
@@ -561,9 +570,9 @@ public class MainActivity extends Activity {
                         }
                         p.color(getResources().getColor(R.color.main_buttons));
                         mMap.addPolyline(p);
-                        //if (LOCAL_LOGV) Log.v("MapDebugging", "Success!");
+                        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Success!");
                     }
-                    //else if (LOCAL_LOGV) Log.v("MapDebugging", "Segment was null for " + r.getID());
+                    else if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Segment was null for " + r.getID());
                 }
             }
         }
@@ -591,18 +600,25 @@ public class MainActivity extends Activity {
                 endStop = stop;
                 ((TextView) findViewById(R.id.end_stop)).setText(stop.getUltimateName());
                 if (startStop != null) {
+                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Start stop: " + startStop);
+                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "End stop: " + endStop);
                     setNextBusTime();    // Don't set the next bus if we don't have a valid route.
                     if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
                 }
             }
             else {
                 ArrayList<Stop> connected = BusManager.getBusManager().getConnectedStops(startStop);
-                int stopIndex = 0;
-                while (connected.size() > stopIndex && !checkStop(connected.get(stopIndex))) {
-                    stopIndex++;
+                if (connected.size() == 1) {
+                    displayStopError();
                 }
-                if (stopIndex < connected.size()) setEndStop(connected.get(stopIndex));
-                else downloadEverything();
+                else {
+                    int stopIndex = 0;
+                    while (connected.size() > stopIndex && !checkStop(connected.get(stopIndex))) {
+                        stopIndex++;
+                    }
+                    if (stopIndex < connected.size()) setEndStop(connected.get(stopIndex));
+                    else downloadEverything();
+                }
             }
         }
     }
@@ -698,10 +714,10 @@ public class MainActivity extends Activity {
         }
 
         if (availableRoutes.size() > 0) {
-            //Log.d("Greenwich", "Have a route available from " + startStop + " to " + endStop);
+            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Have a route available from " + startStop + " to " + endStop);
             ArrayList<Time> tempTimesBetweenStartAndEnd = new ArrayList<Time>();
             for (Route r : availableRoutes) {
-                //Log.d("Greenwich", "  " + r + " is available");
+                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "  " + r + " is available");
                 //if (!startStop.getOtherRoute().isEmpty()) Log.d("Greenwich", "  " + startStop.getOtherRoute() + " is available too!");
                 //if (!r.getOtherLongName().isEmpty()) Log.d("Greenwich", "  " + r.getOtherLongName() + " is available too!");
                 // Get the Times at this stop for this route.
@@ -725,12 +741,12 @@ public class MainActivity extends Activity {
                     }
                 }
             }
+            routesBetweenStartAndEnd = availableRoutes;
             if (tempTimesBetweenStartAndEnd.size() > 0) {    // We actually found times.
                 // Here, we grab the list of all times of all routes between the start and end, add in the current
                 // time, then sort that list of times. That way, we know the first bus Time after the current time
                 // is the Time of the soonest next Bus.
                 timesBetweenStartAndEnd = new ArrayList<Time>(tempTimesBetweenStartAndEnd);
-                routesBetweenStartAndEnd = availableRoutes;
                 final Time currentTime = new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
                 tempTimesBetweenStartAndEnd.add(currentTime);
                 Collections.sort(tempTimesBetweenStartAndEnd, Time.compare);
@@ -803,10 +819,11 @@ public class MainActivity extends Activity {
                 }
                 updateMapWithNewStartOrEnd();
             }
-            else {
+            else if (startStop.hasTimes()) {
                 setEndStop(startStop);
             }
         }
+        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Have " + availableRoutes.size() + " routes available");
         renewBusRefreshTimer();
         renewTimeUntilTimer();
     }

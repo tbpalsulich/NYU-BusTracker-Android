@@ -34,8 +34,4 @@ public class VersionDownloaderHelper implements DownloaderHelper {
             else if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "*   Not actually downloading it, because we already have the current version.");
         }
     }
-
-    public String getUrl() {
-        return VERSION_URL;
-    }
 }

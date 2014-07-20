@@ -15,8 +15,4 @@ public class RouteDownloaderHelper implements DownloaderHelper {
         Route.parseJSON(jsonObject);
         Downloader.cache(ROUTE_JSON_FILE, jsonObject);
     }
-
-    public String getUrl() {
-        return ROUTES_URL;
-    }
 }

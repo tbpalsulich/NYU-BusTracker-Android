@@ -12,8 +12,4 @@ public class SegmentDownloaderHelper implements DownloaderHelper {
         BusManager.parseSegments(jsonObject);
         Downloader.cache(SEGMENT_JSON_FILE, jsonObject);
     }
-
-    public String getUrl() {
-        return SEGMENTS_URL;
-    }
-};
+}

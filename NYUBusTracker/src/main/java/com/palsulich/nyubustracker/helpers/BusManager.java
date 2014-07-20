@@ -142,7 +142,7 @@ public final class BusManager {
     public ArrayList<Stop> getStops() {
         ArrayList<Stop> result = new ArrayList<Stop>(stops);
         for (Stop stop : stops) {
-            if (stop.isHidden() || !stop.hasTimes()) {
+            if (stop.isHidden()) { // || !stop.hasTimes()) {    Show stops without times for now.
                 result.remove(stop);
             }
         }
@@ -216,6 +216,7 @@ public final class BusManager {
         BusManager sharedManager = BusManager.getBusManager();
         if (jSegments != null) {
             for (Route r : sharedManager.getRoutes()) {
+                if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Parsing segments for " + r + " (" + r.getSegmentIDs() + ")");
                 for (String seg : r.getSegmentIDs()) {
                     if (jSegments.has(seg)) {
                         r.getSegments().add(new PolylineOptions().addAll(PolyUtil.decode(jSegments.getString(seg))));
@@ -317,7 +318,7 @@ public final class BusManager {
             ArrayList<Route> stopRoutes = stop.getRoutes();
             for (Route route : stopRoutes) {       // For every route servicing this stop:
                 if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, route.toString() + " services this stop.");
-                if (stop.getTimesOfRoute(route.getLongName()).size() > 0) {
+                if (stop.getTimesOfRoute(route.getLongName()).size() > -1) {    // TODO: make this > 0.
                     for (Stop connectedStop : route.getStops()) {    // add all of that route's stops.
                         if (connectedStop != null && !connectedStop.getUltimateName().equals(stop.getName()) &&
                             !result.contains(connectedStop) &&

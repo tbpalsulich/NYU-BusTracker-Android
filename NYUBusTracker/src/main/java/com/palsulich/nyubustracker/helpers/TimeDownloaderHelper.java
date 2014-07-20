@@ -29,8 +29,4 @@ public class TimeDownloaderHelper implements DownloaderHelper {
             }
         }
     }
-
-    public String getUrl() {
-        return null;
-    }
 }

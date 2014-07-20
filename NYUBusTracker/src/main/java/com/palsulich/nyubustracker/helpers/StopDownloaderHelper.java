@@ -15,8 +15,4 @@ public class StopDownloaderHelper implements DownloaderHelper {
         Stop.parseJSON(jsonObject);
         Downloader.cache(STOP_JSON_FILE, jsonObject);
     }
-
-    public String getUrl(){
-        return STOPS_URL;
-    }
 }
