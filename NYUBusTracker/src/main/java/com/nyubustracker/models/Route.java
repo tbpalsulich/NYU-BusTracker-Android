@@ -1,10 +1,10 @@
-package com.palsulich.nyubustracker.models;
+package com.nyubustracker.models;
 
 import android.util.Log;
 
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.palsulich.nyubustracker.activities.MainActivity;
-import com.palsulich.nyubustracker.helpers.BusManager;
+import com.nyubustracker.activities.MainActivity;
+import com.nyubustracker.helpers.BusManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;

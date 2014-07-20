@@ -1,7 +1,7 @@
-package com.palsulich.nyubustracker.models;
+package com.nyubustracker.models;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.palsulich.nyubustracker.helpers.BusManager;
+import com.nyubustracker.helpers.BusManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;

@@ -16,13 +16,13 @@
         android:required="true"/>
 
     <application
-        android:name=".NYUBusTrackerApplication"
+        android:name="com.nyubustracker.NYUBusTrackerApplication"
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name">
 
         <activity
-            android:name=".activities.MainActivity"
+            android:name="com.nyubustracker.activitiesracker.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme">
             <intent-filter>

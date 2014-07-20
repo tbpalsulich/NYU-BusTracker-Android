@@ -9,8 +9,8 @@ import android.widget.TextSwitcher;
 import android.widget.TextView;
 
 import com.palsulich.nyubustracker.R;
-import com.palsulich.nyubustracker.activities.MainActivity;
-import com.palsulich.nyubustracker.helpers.BusManager;
+import com.nyubustracker.activities.MainActivity;
+import com.nyubustracker.helpers.BusManager;
 
 public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActivity> {
     Activity mActivity;

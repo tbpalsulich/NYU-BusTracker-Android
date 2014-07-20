@@ -1,9 +1,9 @@
-package com.palsulich.nyubustracker.models;
+package com.nyubustracker.models;
 
 import android.content.res.Resources;
 
 import com.palsulich.nyubustracker.R;
-import com.palsulich.nyubustracker.helpers.BusManager;
+import com.nyubustracker.helpers.BusManager;
 
 import java.util.Calendar;
 import java.util.Comparator;

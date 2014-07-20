@@ -1,4 +1,4 @@
-package com.palsulich.nyubustracker.adapters;
+package com.nyubustracker.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.palsulich.nyubustracker.R;
-import com.palsulich.nyubustracker.models.Time;
+import com.nyubustracker.models.Time;
 
 import java.util.ArrayList;
 

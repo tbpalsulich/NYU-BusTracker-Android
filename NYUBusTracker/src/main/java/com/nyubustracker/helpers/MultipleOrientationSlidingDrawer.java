@@ -1,4 +1,4 @@
-package com.palsulich.nyubustracker.helpers;
+package com.nyubustracker.helpers;
 
 import android.content.Context;
 import android.content.res.TypedArray;

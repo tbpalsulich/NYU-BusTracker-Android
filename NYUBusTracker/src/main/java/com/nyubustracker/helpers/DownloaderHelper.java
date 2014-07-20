@@ -1,4 +1,4 @@
-package com.palsulich.nyubustracker.helpers;
+package com.nyubustracker.helpers;
 
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -1,9 +1,10 @@
-package com.palsulich.nyubustracker;
+package com.nyubustracker;
 
 import android.app.Application;
 
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
+import com.palsulich.nyubustracker.R;
 
 
 public class NYUBusTrackerApplication extends Application {

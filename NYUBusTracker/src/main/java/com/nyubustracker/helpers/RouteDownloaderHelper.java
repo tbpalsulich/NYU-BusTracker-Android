@@ -1,6 +1,6 @@
-package com.palsulich.nyubustracker.helpers;
+package com.nyubustracker.helpers;
 
-import com.palsulich.nyubustracker.models.Route;
+import com.nyubustracker.models.Route;
 
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -1,6 +1,6 @@
-package com.palsulich.nyubustracker.helpers;
+package com.nyubustracker.helpers;
 
-import com.palsulich.nyubustracker.models.Bus;
+import com.nyubustracker.models.Bus;
 
 import org.json.JSONException;
 import org.json.JSONObject;

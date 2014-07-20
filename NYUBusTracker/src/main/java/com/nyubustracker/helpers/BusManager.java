@@ -1,14 +1,14 @@
-package com.palsulich.nyubustracker.helpers;
+package com.nyubustracker.helpers;
 
 import android.util.Log;
 
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
-import com.palsulich.nyubustracker.activities.MainActivity;
-import com.palsulich.nyubustracker.models.Bus;
-import com.palsulich.nyubustracker.models.Route;
-import com.palsulich.nyubustracker.models.Stop;
-import com.palsulich.nyubustracker.models.Time;
+import com.nyubustracker.activities.MainActivity;
+import com.nyubustracker.models.Bus;
+import com.nyubustracker.models.Route;
+import com.nyubustracker.models.Stop;
+import com.nyubustracker.models.Time;
 
 import org.json.JSONArray;
 import org.json.JSONException;

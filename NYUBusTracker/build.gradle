@@ -3,10 +3,10 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.11.+'
+        classpath 'com.android.tools.build:gradle:0.12.+'
     }
 }
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 repositories {
     mavenCentral()
@@ -28,8 +28,8 @@ android {
         }
 
         defaultConfig {
-            versionCode 9
-            versionName "1.51"
+            versionCode 11
+            versionName "1.6"
             minSdkVersion 11
             targetSdkVersion 19
         }
@@ -58,9 +58,7 @@ sourceSets {
 }
 
 dependencies {
-    dependencies {
-        compile 'com.google.android.gms:play-services:4.4.52'
-        compile 'com.google.maps.android:android-maps-utils:0.3+'
-        compile 'se.emilsjolander:stickylistheaders:2.3.0'
-    }
+    compile 'com.google.android.gms:play-services:4.4.52'
+    compile 'com.google.maps.android:android-maps-utils:0.3+'
+    compile 'se.emilsjolander:stickylistheaders:2.3.0'
 }

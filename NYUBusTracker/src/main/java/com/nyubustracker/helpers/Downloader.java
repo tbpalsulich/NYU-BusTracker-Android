@@ -1,10 +1,10 @@
-package com.palsulich.nyubustracker.helpers;
+package com.nyubustracker.helpers;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.palsulich.nyubustracker.activities.MainActivity;
+import com.nyubustracker.activities.MainActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;

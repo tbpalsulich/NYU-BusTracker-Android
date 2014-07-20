@@ -1,4 +1,4 @@
-package com.palsulich.nyubustracker.adapters;
+package com.nyubustracker.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,7 +10,7 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.palsulich.nyubustracker.R;
-import com.palsulich.nyubustracker.models.Stop;
+import com.nyubustracker.models.Stop;
 
 import java.util.ArrayList;
 
