@@ -56,7 +56,7 @@ public class Downloader extends AsyncTask<String, Void, JSONObject> {
         try {
             helper.parse(result);
             if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "helper class: " + helper.getClass() + " (" + MainActivity.downloadsOnTheWire + ")");
-            if (!helper.getClass().toString().endsWith("BusDownloaderHelper")) MainActivity.pieceDownloadsTogether(context);
+            if (!helper.getClass().toString().contains("BusDownloaderHelper")) MainActivity.pieceDownloadsTogether(context);
         } catch (JSONException e) {
             Log.d(MainActivity.REFACTOR_LOG_TAG, "JSON Exception while parsing in onPostExecute.");
             e.printStackTrace();
@@ -110,12 +110,11 @@ public class Downloader extends AsyncTask<String, Void, JSONObject> {
 
     public static void cache(String fileName, JSONObject jsonObject) throws IOException {
         File path = new File(context.getFilesDir(), CREATED_FILES_DIR);
-        if (path.mkdir()) {
-            File file = new File(path, fileName);
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
-            bufferedWriter.write(jsonObject.toString());
-            bufferedWriter.close();
-        }
+        path.mkdir();
+        File file = new File(path, fileName);
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
+        bufferedWriter.write(jsonObject.toString());
+        bufferedWriter.close();
     }
 
     public static String makeQuery(String param, String value, String charset) {

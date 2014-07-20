@@ -281,9 +281,9 @@ public final class BusManager {
      */
     public Stop getStopByName(String stopName) {
         for (Stop s : stops) {
-            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Looking for " + stopName + " | " + s.getName());
+            //if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Looking for " + stopName + " | " + s.getName());
             if (s.getName().equals(stopName)) {
-                if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Found it!");
+                //if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Found it!");
                 return s;
             }
         }
@@ -362,7 +362,7 @@ public final class BusManager {
         if (s == null) {
             s = new Stop(stopName, stopLat, stopLng, stopID, routes);
             stops.add(s);
-            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "BusManager num stops: " + stops.size());
+            //if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "BusManager num stops: " + stops.size());
         }
         else {
             s.setValues(stopName, stopLat, stopLng, stopID, routes);

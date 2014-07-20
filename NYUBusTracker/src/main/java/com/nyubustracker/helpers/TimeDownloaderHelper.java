@@ -19,14 +19,7 @@ public class TimeDownloaderHelper implements DownloaderHelper {
         if (jsonObject != null && jsonObject.length() > 0) {
             if (MainActivity.LOCAL_LOGV)
                 Log.v(MainActivity.REFACTOR_LOG_TAG, "Creating time cache file: " + jsonObject.getString("stop_id"));
-
-            File path = new File(Downloader.getContext().getFilesDir(), Downloader.CREATED_FILES_DIR);
-            if (path.mkdir()) {
-                File file = new File(path, jsonObject.getString("stop_id"));
-                BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
-                bufferedWriter.write(jsonObject.toString());
-                bufferedWriter.close();
-            }
+            Downloader.cache(jsonObject.getString("stop_id"), jsonObject);
         }
     }
 }

@@ -161,20 +161,19 @@ public class MainActivity extends Activity {
         StringBuilder buffer = new StringBuilder("");
         try {
             File path = new File(getFilesDir(), Downloader.CREATED_FILES_DIR);
-            if (path.mkdir()) {
-                File file = new File(path, fileName);
-                FileInputStream inputStream = new FileInputStream(file);
-                InputStreamReader streamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(streamReader);
+            path.mkdir();
+            File file = new File(path, fileName);
+            FileInputStream inputStream = new FileInputStream(file);
+            InputStreamReader streamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(streamReader);
 
-                String readString = bufferedReader.readLine();
-                while (readString != null) {
-                    buffer.append(readString);
-                    readString = bufferedReader.readLine();
-                }
-
-                inputStream.close();
+            String readString = bufferedReader.readLine();
+            while (readString != null) {
+                buffer.append(readString);
+                readString = bufferedReader.readLine();
             }
+
+            inputStream.close();
         } catch (IOException e) {
             if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Failed to read " + fileName + "...");
             e.printStackTrace();
@@ -214,12 +213,12 @@ public class MainActivity extends Activity {
         if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Downloads on the wire: " + downloadsOnTheWire);
         if (downloadsOnTheWire == 0) {
             if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Downloading finished!");
-            oncePreferences.edit().putBoolean(FIRST_TIME, false).commit();
+            oncePreferences.edit().putBoolean(FIRST_TIME, false).apply();
             runOnUI(new Runnable() {
                 @Override
                 public void run() {
                     Stop broadway = BusManager.getBusManager().getStopByName("715 Broadway @ Washington Square");
-                    context.getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).commit();
+                    context.getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).apply();
                     broadway.setFavorite(true);
                     progressDialog.dismiss();
                 }
@@ -316,10 +315,9 @@ public class MainActivity extends Activity {
                     if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Done parsing...");
                     for (Stop s : sharedManager.getStops()) {
                         boolean result = favoritePreferences.getBoolean(s.getID(), false);
-                        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, s.getName() + " is " + result);
                         s.setFavorite(result);
                     }
-                    new Downloader(versionDownloaderHelper, context).execute(DownloaderHelper.VERSION_URL);;
+                    new Downloader(versionDownloaderHelper, context).execute(DownloaderHelper.VERSION_URL);
                     setStartAndEndStops();
 
                     // Update the map to show the corresponding stops, buses, and segments.
@@ -397,9 +395,9 @@ public class MainActivity extends Activity {
 
     void cacheStartAndEndStops() {
         if (endStop != null)
-            getSharedPreferences(STOP_PREF, MODE_PRIVATE).edit().putString(END_STOP_PREF, endStop.getName()).commit();         // Creates or updates cache file.
+            getSharedPreferences(STOP_PREF, MODE_PRIVATE).edit().putString(END_STOP_PREF, endStop.getName()).apply();         // Creates or updates cache file.
         if (startStop != null)
-            getSharedPreferences(STOP_PREF, MODE_PRIVATE).edit().putString(START_STOP_PREF, startStop.getName()).commit();
+            getSharedPreferences(STOP_PREF, MODE_PRIVATE).edit().putString(START_STOP_PREF, startStop.getName()).apply();
     }
 
     /*
