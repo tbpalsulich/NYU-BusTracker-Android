@@ -125,6 +125,7 @@ public class MainActivity extends Activity {
     private boolean offline = true;
     public static int downloadsOnTheWire = 0;
     public static Handler UIHandler;
+    private boolean routesOnMapDirty = true;
 
     static {
         UIHandler = new Handler(Looper.getMainLooper());
@@ -531,58 +532,61 @@ public class MainActivity extends Activity {
 
     // Clear the map, because we may have just changed what route we wish to display. Then, add everything back onto the map.
     private void updateMapWithNewStartOrEnd() {
-        if (routesBetweenStartAndEnd == null) return;       // Can't update without any routes...
-        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Have " + routesBetweenStartAndEnd.size() + " routes to show.");
-        setUpMapIfNeeded();
-        mMap.clear();
-        clickableMapMarkers = new HashMap<String, Boolean>();
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        boolean validBuilder = false;
-        boolean somethingActive = false;    // Used to make sure we put at least one set of segments on the map.
-        for (Route r : routesBetweenStartAndEnd) {
-            somethingActive = somethingActive || r.isActive(startStop);
-        }
-        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Something active: " + somethingActive);
-        for (Route r : routesBetweenStartAndEnd) {
-            if (r.isActive(startStop) || !somethingActive) {
-                somethingActive = true;
-                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Updating map with route: " + r.getLongName());
-                for (Stop s : r.getStops()) {
-                    for (Stop f : s.getFamily()) {
-                        if ((!f.isHidden() && !f.isRelatedTo(startStop) && !f.isRelatedTo(endStop)) || (f == startStop || f == endStop)) {
-                            // Only put one representative from a family of stops on the p
-                            //if (LOCAL_LOGV) Log.v("MapDebugging", "Not hiding " + f);
-                            Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
-                                                                .position(f.getLocation()).title(f.getName()).anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_map_stop))));
-                            clickableMapMarkers.put(mMarker.getId(), true);
+        if (routesOnMapDirty) {
+            routesOnMapDirty = false;
+            if (routesBetweenStartAndEnd == null) return;       // Can't update without any routes...
+            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Have " + routesBetweenStartAndEnd.size() + " routes to show.");
+            setUpMapIfNeeded();
+            mMap.clear();
+            clickableMapMarkers = new HashMap<String, Boolean>();
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            boolean validBuilder = false;
+            boolean somethingActive = false;    // Used to make sure we put at least one set of segments on the map.
+            for (Route r : routesBetweenStartAndEnd) {
+                somethingActive = somethingActive || r.isActive(startStop);
+            }
+            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Something active: " + somethingActive);
+            for (Route r : routesBetweenStartAndEnd) {
+                if (r.isActive(startStop) || !somethingActive) {
+                    somethingActive = true;
+                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Updating map with route: " + r.getLongName());
+                    for (Stop s : r.getStops()) {
+                        for (Stop f : s.getFamily()) {
+                            if ((!f.isHidden() && !f.isRelatedTo(startStop) && !f.isRelatedTo(endStop)) || (f == startStop || f == endStop)) {
+                                // Only put one representative from a family of stops on the p
+                                //if (LOCAL_LOGV) Log.v("MapDebugging", "Not hiding " + f);
+                                Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
+                                                                    .position(f.getLocation()).title(f.getName()).anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_map_stop))));
+                                clickableMapMarkers.put(mMarker.getId(), true);
+                            }
                         }
                     }
-                }
-                updateMapWithNewBusLocations();
-                // Adds the segments of every Route to the map.
-                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, r + " has " + r.getSegments().size() + " segments.");
-                for (PolylineOptions p : r.getSegments()) {
-                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Trying to add a segment to the map");
-                    if (p != null) {
-                        for (LatLng loc : p.getPoints()) {
-                            validBuilder = true;
-                            builder.include(loc);
+                    updateMapWithNewBusLocations();
+                    // Adds the segments of every Route to the map.
+                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, r + " has " + r.getSegments().size() + " segments.");
+                    for (PolylineOptions p : r.getSegments()) {
+                        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Trying to add a segment to the map");
+                        if (p != null) {
+                            for (LatLng loc : p.getPoints()) {
+                                validBuilder = true;
+                                builder.include(loc);
+                            }
+                            p.color(getResources().getColor(R.color.main_buttons));
+                            mMap.addPolyline(p);
+                            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Success!");
                         }
-                        p.color(getResources().getColor(R.color.main_buttons));
-                        mMap.addPolyline(p);
-                        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Success!");
+                        else if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Segment was null for " + r.getID());
                     }
-                    else if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Segment was null for " + r.getID());
                 }
             }
-        }
-        if (validBuilder) {
-            LatLngBounds bounds = builder.build();
-            try {
-                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 30));
-            } catch (IllegalStateException e) {      // In case the view is not done being created.
-                //e.printStackTrace();
-                mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, this.getResources().getDisplayMetrics().widthPixels, this.getResources().getDisplayMetrics().heightPixels, 100));
+            if (validBuilder) {
+                LatLngBounds bounds = builder.build();
+                try {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 30));
+                } catch (IllegalStateException e) {      // In case the view is not done being created.
+                    //e.printStackTrace();
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, this.getResources().getDisplayMetrics().widthPixels, this.getResources().getDisplayMetrics().heightPixels, 100));
+                }
             }
         }
     }
@@ -741,6 +745,7 @@ public class MainActivity extends Activity {
                     }
                 }
             }
+            if (isADifferenceBetween(routesBetweenStartAndEnd, availableRoutes)) routesOnMapDirty = true;
             routesBetweenStartAndEnd = availableRoutes;
             if (tempTimesBetweenStartAndEnd.size() > 0) {    // We actually found times.
                 // Here, we grab the list of all times of all routes between the start and end, add in the current
@@ -755,30 +760,8 @@ public class MainActivity extends Activity {
                 int index = tempTimesBetweenStartAndEnd.indexOf(currentTime);
                 nextBusTime = tempTimesBetweenStartAndEnd.get((index + 1) % tempTimesBetweenStartAndEnd.size());
 
-                MultipleOrientationSlidingDrawer drawer = (MultipleOrientationSlidingDrawer) findViewById(R.id.sliding_drawer);
                 final String newSwitcherText = currentTime.getTimeAsStringUntil(nextBusTime, getResources());
-                if (!drawer.isMoving() && !mSwitcherCurrentText.equals(newSwitcherText)) {
-                    mSwitcher.setText(newSwitcherText);  // Pass resources so we return the proper string value.
-                    mSwitcherCurrentText = newSwitcherText;
-                }
-                // Handle a bug where the time until text disappears when the drawer is being moved. So, just wait for it to finish.
-                // We don't know if the drawer will end up open or closed, though. So handle both cases.
-                else if (!mSwitcherCurrentText.equals(newSwitcherText)) {
-                    drawer.setOnDrawerCloseListener(new MultipleOrientationSlidingDrawer.OnDrawerCloseListener() {
-                        @Override
-                        public void onDrawerClosed() {
-                            mSwitcher.setText(newSwitcherText);
-                            mSwitcherCurrentText = newSwitcherText;
-                        }
-                    });
-                    drawer.setOnDrawerOpenListener(new MultipleOrientationSlidingDrawer.OnDrawerOpenListener() {
-                        @Override
-                        public void onDrawerOpened() {
-                            mSwitcher.setText(newSwitcherText);
-                            mSwitcherCurrentText = newSwitcherText;
-                        }
-                    });
-                }
+                updateNextTimeSwitcher(newSwitcherText);
 
                 timesAdapter.setDataSet(timesBetweenStartAndEnd);
                 timesAdapter.notifyDataSetChanged();
@@ -822,10 +805,52 @@ public class MainActivity extends Activity {
             else if (startStop.hasTimes()) {
                 setEndStop(startStop);
             }
+            else {
+                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "No times. So, make the switcher say offline.");
+                updateNextTimeSwitcher(getString(R.string.offline));
+            }
+        }
+        else {
+            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "No routes. So, make the switcher say offline.");
+            updateNextTimeSwitcher(getString(R.string.offline));
         }
         if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Have " + availableRoutes.size() + " routes available");
         renewBusRefreshTimer();
         renewTimeUntilTimer();
+    }
+
+    private void updateNextTimeSwitcher(final String newSwitcherText){
+        MultipleOrientationSlidingDrawer drawer = (MultipleOrientationSlidingDrawer) findViewById(R.id.sliding_drawer);
+        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Updating switcher to [" + newSwitcherText + "]");
+        if (drawer != null && !drawer.isMoving() && !mSwitcherCurrentText.equals(newSwitcherText)) {
+            mSwitcher.setText(newSwitcherText);  // Pass resources so we return the proper string value.
+            mSwitcherCurrentText = newSwitcherText;
+        }
+        // Handle a bug where the time until text disappears when the drawer is being moved. So, just wait for it to finish.
+        // We don't know if the drawer will end up open or closed, though. So handle both cases.
+        else if (drawer != null && !mSwitcherCurrentText.equals(newSwitcherText)) {
+            drawer.setOnDrawerCloseListener(new MultipleOrientationSlidingDrawer.OnDrawerCloseListener() {
+                @Override
+                public void onDrawerClosed() {
+                    mSwitcher.setText(newSwitcherText);
+                    mSwitcherCurrentText = newSwitcherText;
+                }
+            });
+            drawer.setOnDrawerOpenListener(new MultipleOrientationSlidingDrawer.OnDrawerOpenListener() {
+                @Override
+                public void onDrawerOpened() {
+                    mSwitcher.setText(newSwitcherText);
+                    mSwitcherCurrentText = newSwitcherText;
+                }
+            });
+        }
+    }
+
+    private boolean isADifferenceBetween(ArrayList<Route> a, ArrayList<Route> b){
+        if (a == null || b == null) return true;
+        for (Route rA : a) if (!b.contains(rA)) return true;
+        for (Route rB : b) if (!a.contains(rB)) return true;
+        return false;
     }
 
     @SuppressWarnings("UnusedParameters")
