@@ -188,6 +188,7 @@ public class MainActivity extends Activity {
         if (networkInfo != null && networkInfo.isConnected()) {
             offline = false;
             // Download and parse everything, put it all in persistent memory, continue.
+            if (progressDialog != null) progressDialog.cancel();
             progressDialog = ProgressDialog.show(this, getString(R.string.downloading), getString(R.string.wait), true, false);
             Context context = getApplicationContext();
             new Downloader(stopDownloaderHelper, context).execute();

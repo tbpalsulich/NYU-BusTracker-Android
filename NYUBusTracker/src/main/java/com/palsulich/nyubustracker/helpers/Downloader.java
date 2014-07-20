@@ -63,7 +63,7 @@ public class Downloader extends AsyncTask<String, Void, JSONObject> {
         }
     }
 
-    protected void execute() {
+    public void execute() {
         super.execute(url);
     }
 
