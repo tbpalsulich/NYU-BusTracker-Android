@@ -1,4 +1,4 @@
-package com.palsulich.nyubustracker.test;
+package com.nyubustracker.test;
 
 import android.app.Activity;
 import android.test.ActivityInstrumentationTestCase2;
@@ -8,7 +8,7 @@ import android.widget.Button;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 
-import com.palsulich.nyubustracker.R;
+import com.nyubustracker.R;
 import com.nyubustracker.activities.MainActivity;
 import com.nyubustracker.helpers.BusManager;
 

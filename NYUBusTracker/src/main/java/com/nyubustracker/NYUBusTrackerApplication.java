@@ -4,7 +4,7 @@ import android.app.Application;
 
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
-import com.palsulich.nyubustracker.R;
+import com.nyubustracker.R;
 
 
 public class NYUBusTrackerApplication extends Application {

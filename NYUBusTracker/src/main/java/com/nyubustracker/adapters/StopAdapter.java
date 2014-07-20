@@ -9,7 +9,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
-import com.palsulich.nyubustracker.R;
+import com.nyubustracker.R;
 import com.nyubustracker.models.Stop;
 
 import java.util.ArrayList;

@@ -21,7 +21,7 @@
     substitute for the full length canonical Activity name in screen view hit. In order to
     specify an alternate screen name use an <screenName> element, with the name attribute
     specifying the canonical name, and the value the alias to use instead. -->
-    <screenName name="com.palsulich.nyubustracker.activities.MainActivity">Main Activity
+    <screenName name="com.nyubustracker.activities.MainActivity">Main Activity
     </screenName>
 
 </resources>

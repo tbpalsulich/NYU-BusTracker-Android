@@ -47,7 +47,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.nyubustracker.NYUBusTrackerApplication;
-import com.palsulich.nyubustracker.R;
+import com.nyubustracker.R;
 import com.nyubustracker.adapters.StopAdapter;
 import com.nyubustracker.adapters.TimeAdapter;
 import com.nyubustracker.helpers.BusDownloaderHelper;

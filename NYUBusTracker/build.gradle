@@ -14,8 +14,8 @@ repositories {
 }
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion '19.1.0'
+    compileSdkVersion 20
+    buildToolsVersion '20'
 
     buildTypes {
         signingConfigs {
@@ -31,7 +31,7 @@ android {
             versionCode 11
             versionName "1.6"
             minSdkVersion 11
-            targetSdkVersion 19
+            targetSdkVersion 20
         }
 
         release {
@@ -58,7 +58,7 @@ sourceSets {
 }
 
 dependencies {
-    compile 'com.google.android.gms:play-services:4.4.52'
+    compile 'com.google.android.gms:play-services:5.0.77'
     compile 'com.google.maps.android:android-maps-utils:0.3+'
-    compile 'se.emilsjolander:stickylistheaders:2.3.0'
+    compile 'se.emilsjolander:stickylistheaders:2.4.1'
 }

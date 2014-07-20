@@ -16,7 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 
-import com.palsulich.nyubustracker.R;
+import com.nyubustracker.R;
 
 /*
  * Copyright (c) 2001 - 2012 Sileria, Inc.

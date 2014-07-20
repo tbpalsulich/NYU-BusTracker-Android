@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.palsulich.nyubustracker.R;
+import com.nyubustracker.R;
 import com.nyubustracker.models.Time;
 
 import java.util.ArrayList;
