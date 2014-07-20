@@ -39,7 +39,7 @@ public class Downloader extends AsyncTask<String, Void, JSONObject> {
     @Override
     public JSONObject doInBackground(String... urls) {
         try {
-            Log.v(MainActivity.REFACTOR_LOG_TAG, "First url: " + urls[0]);
+            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "First url: " + urls[0]);
             return new JSONObject(downloadUrl(urls[0]));
         } catch (IOException e) {
             //Log.e("JSON", "DownloadURL IO error.");
