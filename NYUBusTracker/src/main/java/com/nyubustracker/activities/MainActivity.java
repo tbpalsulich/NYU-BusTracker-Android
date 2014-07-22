@@ -691,7 +691,6 @@ public class MainActivity extends Activity {
         if (timeUntilTimer != null)
             timeUntilTimer.cancel();        // Don't want to be interrupted in the middle of this.
         if (busRefreshTimer != null) busRefreshTimer.cancel();
-        Calendar rightNow = Calendar.getInstance();
         ArrayList<Route> startRoutes = startStop.getUltimateParent().getRoutes();        // All the routes leaving the start stop.
         ArrayList<Route> endRoutes = endStop.getUltimateParent().getRoutes();
         ArrayList<Route> availableRoutes = new ArrayList<Route>();               // All the routes connecting the two.
@@ -757,7 +756,7 @@ public class MainActivity extends Activity {
                 // time, then sort that list of times. That way, we know the first bus Time after the current time
                 // is the Time of the soonest next Bus.
                 timesBetweenStartAndEnd = new ArrayList<Time>(tempTimesBetweenStartAndEnd);
-                final Time currentTime = new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
+                final Time currentTime = Time.getCurrentTime();
                 tempTimesBetweenStartAndEnd.add(currentTime);
                 Collections.sort(tempTimesBetweenStartAndEnd, Time.compare);
                 Collections.sort(timesBetweenStartAndEnd, Time.compare);
@@ -795,7 +794,7 @@ public class MainActivity extends Activity {
                 else {
                     ((TextView) findViewById(R.id.next_route)).setText("");
                     ((TextView) findViewById(R.id.next_bus)).setText("");
-                    if (rightNow.get(Calendar.HOUR_OF_DAY) < 7) {
+                    if (currentTime.getHour() < 7) {
                         findViewById(R.id.safe_ride_button).setVisibility(View.VISIBLE);
                     }
                     else {

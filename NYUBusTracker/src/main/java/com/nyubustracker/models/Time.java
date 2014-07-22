@@ -8,6 +8,7 @@ import com.nyubustracker.helpers.BusManager;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class Time {
     // compare is used to sort the list of times being checked for the "nextBusTime" in MainActivity.
@@ -71,6 +72,7 @@ public class Time {
 
     private TimeOfWeek getCurrentTimeOfWeek() {
         Calendar rightNow = Calendar.getInstance();
+        rightNow.setTimeZone(TimeZone.getTimeZone("America/New_York"));
         String dayOfWeek = rightNow.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault());
         TimeOfWeek timeOfWeek = TimeOfWeek.Weekday;
         if (dayOfWeek.equals("Saturday") || dayOfWeek.equals("Sunday"))
@@ -81,6 +83,7 @@ public class Time {
 
     public static Time getCurrentTime() {
         Calendar rightNow = Calendar.getInstance();
+        rightNow.setTimeZone(TimeZone.getTimeZone("America/New_York"));
         return new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
     }
 
@@ -199,6 +202,10 @@ public class Time {
         if (hour > 0 && AM) return hour;
         if (hour > 12 && !AM) return hour - 12;
         if (hour <= 12 && !AM) return hour;
+        return hour;
+    }
+
+    public int getHour() {
         return hour;
     }
 
