@@ -751,6 +751,7 @@ public class MainActivity extends Activity {
             }
             if (isADifferenceBetween(routesBetweenStartAndEnd, availableRoutes)) routesOnMapDirty = true;
             routesBetweenStartAndEnd = availableRoutes;
+            timesBetweenStartAndEnd = new ArrayList<Time>();
             if (tempTimesBetweenStartAndEnd.size() > 0) {    // We actually found times.
                 // Here, we grab the list of all times of all routes between the start and end, add in the current
                 // time, then sort that list of times. That way, we know the first bus Time after the current time
@@ -766,9 +767,6 @@ public class MainActivity extends Activity {
 
                 final String newSwitcherText = currentTime.getTimeAsStringUntil(nextBusTime, getResources());
                 updateNextTimeSwitcher(newSwitcherText);
-
-                timesAdapter.setDataSet(timesBetweenStartAndEnd);
-                timesAdapter.notifyDataSetChanged();
 
                 final int nextTimeIndex = timesBetweenStartAndEnd.indexOf(nextBusTime);
                 timesList.clearFocus();
@@ -813,6 +811,8 @@ public class MainActivity extends Activity {
                 if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "No times. So, make the switcher say offline.");
                 sayBusIsOffline();
             }
+            timesAdapter.setDataSet(timesBetweenStartAndEnd);
+            timesAdapter.notifyDataSetChanged();
         }
         else {
             if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "No routes. So, make the switcher say offline.");
