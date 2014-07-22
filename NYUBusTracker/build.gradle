@@ -18,32 +18,39 @@ android {
     buildToolsVersion '20'
 
     buildTypes {
-        signingConfigs {
-            release {
-                storeFile file(RELEASE_STORE_FILE)
-                storePassword RELEASE_STORE_PASSWORD
-                keyAlias RELEASE_KEY_ALIAS
-                keyPassword RELEASE_KEY_PASSWORD
-            }
-        }
-
         defaultConfig {
             versionCode 12
             versionName "1.61"
             minSdkVersion 11
             targetSdkVersion 20
         }
+        
+        if (project.hasProperty('RELEASE_STORE_FILE') &&
+            project.hasProperty('RELEASE_STORE_PASSWORD') &&
+            project.hasProperty('RELEASE_KEY_ALIAS') &&
+            project.hasProperty('RELEASE_KEY_PASSWORD')) {
+            signingConfigs {
+                release {
+                    storeFile file(RELEASE_STORE_FILE)
+                    storePassword RELEASE_STORE_PASSWORD
+                    keyAlias RELEASE_KEY_ALIAS
+                    keyPassword RELEASE_KEY_PASSWORD
+                }
+            }
 
-        release {
-            zipAlign true
-            debuggable false
-            jniDebugBuild false
-            signingConfig signingConfigs.release
+            release {
+                zipAlign true
+                debuggable false
+                jniDebugBuild false
+                signingConfig signingConfigs.release
+            }
+
+            beta {
+                signingConfig signingConfigs.release
+                versionNameSuffix "-beta"
+            }
         }
-        beta {
-            signingConfig signingConfigs.release
-            versionNameSuffix "-beta"
-        }
+
         debug {
             applicationIdSuffix ".debug"
             versionNameSuffix "-debug"
