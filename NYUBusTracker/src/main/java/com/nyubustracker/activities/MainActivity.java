@@ -400,6 +400,12 @@ public class MainActivity extends Activity {
             getSharedPreferences(STOP_PREF, MODE_PRIVATE).edit().putString(START_STOP_PREF, startStop.getName()).apply();
     }
 
+    void sayBusIsOffline() {
+        updateNextTimeSwitcher(getString(R.string.offline));
+        ((TextView) findViewById(R.id.next_bus)).setText("");
+        ((TextView) findViewById(R.id.next_route)).setText("");
+    }
+
     /*
     renewTimeUntilTimer() creates a new timer that calls setNextBusTime() every minute on the minute.
      */
@@ -805,12 +811,12 @@ public class MainActivity extends Activity {
             }
             else {
                 if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "No times. So, make the switcher say offline.");
-                updateNextTimeSwitcher(getString(R.string.offline));
+                sayBusIsOffline();
             }
         }
         else {
             if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "No routes. So, make the switcher say offline.");
-            updateNextTimeSwitcher(getString(R.string.offline));
+            sayBusIsOffline();
         }
         if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Have " + availableRoutes.size() + " routes available");
         renewBusRefreshTimer();
