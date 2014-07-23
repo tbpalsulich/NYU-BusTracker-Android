@@ -450,7 +450,6 @@ public class MainActivity extends Activity {
                             offline = false;
                             new Downloader(busDownloaderHelper, getApplicationContext()).execute(DownloaderHelper.VEHICLES_URL);
                             updateMapWithNewBusLocations();
-                            updateMapWithNewStartOrEnd();
                             if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Current start: " + startStop);
                             if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Current end  : " + endStop);
                         }
