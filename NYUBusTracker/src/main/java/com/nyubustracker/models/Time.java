@@ -112,47 +112,47 @@ public class Time {
         //if (MainActivity.LOCAL_LOGV) Log.v("Time Debugging", "Difference: " + difference.hour + ":" + difference.min);
         if (difference != null) {
             if (this.getTimeOfWeek() != t.getTimeOfWeek()) {
-                BusManager.getBusManager().setOnline(false);
+                BusManager.getBusManager().setIsNotDuringSafeRide(false);
                 return resources.getString(R.string.offline);
             }
             if (difference.hour >= 3) {
-                BusManager.getBusManager().setOnline(false);
+                BusManager.getBusManager().setIsNotDuringSafeRide(false);
                 return resources.getString(R.string.offline);
             }
             if (difference.hour == 0 && difference.min == 0) {
-                BusManager.getBusManager().setOnline(true);
+                BusManager.getBusManager().setIsNotDuringSafeRide(true);
                 return resources.getString(R.string.less_one_minute);
             }
             if (difference.hour == 0 && difference.min == 1) {
-                BusManager.getBusManager().setOnline(true);
+                BusManager.getBusManager().setIsNotDuringSafeRide(true);
                 return resources.getString(R.string.one_minute);
             }
             if (difference.hour == 0 && difference.min > 1) {
-                BusManager.getBusManager().setOnline(true);
+                BusManager.getBusManager().setIsNotDuringSafeRide(true);
                 return difference.min + resources.getString(R.string.minutes);
             }
             if (difference.hour > 1 && difference.min == 0) {
-                BusManager.getBusManager().setOnline(true);
+                BusManager.getBusManager().setIsNotDuringSafeRide(true);
                 return difference.hour + resources.getString(R.string.hours);
             }
             if (difference.hour == 1 && difference.min == 0) {
-                BusManager.getBusManager().setOnline(true);
+                BusManager.getBusManager().setIsNotDuringSafeRide(true);
                 return resources.getString(R.string.hour);
             }
             if (difference.hour > 1 && difference.min == 1) {
-                BusManager.getBusManager().setOnline(true);
+                BusManager.getBusManager().setIsNotDuringSafeRide(true);
                 return difference.hour + resources.getString(R.string.hours_and) + difference.min + resources.getString(R.string.one_minute);
             }
             if (difference.hour > 1 && difference.min > 1) {
-                BusManager.getBusManager().setOnline(true);
+                BusManager.getBusManager().setIsNotDuringSafeRide(true);
                 return difference.hour + resources.getString(R.string.hours_and) + difference.min + resources.getString(R.string.minutes);
             }
             if (difference.hour == 1 && difference.min == 1) {
-                BusManager.getBusManager().setOnline(true);
+                BusManager.getBusManager().setIsNotDuringSafeRide(true);
                 return resources.getString(R.string.hour_and_one_min);
             }
             if (difference.hour == 1 && difference.min > 1) {
-                BusManager.getBusManager().setOnline(true);
+                BusManager.getBusManager().setIsNotDuringSafeRide(true);
                 return resources.getString(R.string.hour_and) + difference.min + resources.getString(R.string.minutes);
             }
         }

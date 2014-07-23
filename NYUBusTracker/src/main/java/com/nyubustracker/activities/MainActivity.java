@@ -77,6 +77,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -104,7 +105,7 @@ public class MainActivity extends Activity {
         }
     };
     private final DownloaderHelper busDownloaderHelper = new BusDownloaderHelper();
-    ArrayList<Time> timesBetweenStartAndEnd;        // List of all times between start and end.
+    List<Time> timesBetweenStartAndEnd;        // List of all times between start and end.
     Time nextBusTime;
     static ProgressDialog progressDialog;
     private static SharedPreferences oncePreferences;
@@ -112,7 +113,7 @@ public class MainActivity extends Activity {
     double onStartTime;
     private Stop startStop;     // Stop object to keep track of the start location of the desired route.
     private Stop endStop;       // Keep track of the desired end location.
-    private static ArrayList<Route> routesBetweenStartAndEnd;        // List of all routes between start and end.
+    private static List<Route> routesBetweenStartAndEnd;        // List of all routes between start and end.
     private HashMap<String, Boolean> clickableMapMarkers;   // Hash of all markers which are clickable (so we don't zoom in on buses).
     private ArrayList<Marker> busesOnMap = new ArrayList<Marker>();
     private TextSwitcher mSwitcher;
@@ -125,7 +126,6 @@ public class MainActivity extends Activity {
     private boolean offline = true;
     public static int downloadsOnTheWire = 0;
     public static Handler UIHandler;
-    private boolean routesOnMapDirty = true;
 
     static {
         UIHandler = new Handler(Looper.getMainLooper());
@@ -280,7 +280,7 @@ public class MainActivity extends Activity {
         mSwitcher.setOutAnimation(out);
 
         timesList = (StickyListHeadersListView) findViewById(R.id.times_list);
-        timesAdapter = new TimeAdapter(this, new ArrayList<Time>());
+        timesAdapter = new TimeAdapter(getApplicationContext(), new ArrayList<Time>());
         timesList.setAdapter(timesAdapter);
 
         if (oncePreferences.getBoolean(FIRST_TIME, true)) {
@@ -536,61 +536,58 @@ public class MainActivity extends Activity {
 
     // Clear the map, because we may have just changed what route we wish to display. Then, add everything back onto the map.
     private void updateMapWithNewStartOrEnd() {
-        if (routesOnMapDirty) {
-            routesOnMapDirty = false;
-            if (routesBetweenStartAndEnd == null) return;       // Can't update without any routes...
-            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Have " + routesBetweenStartAndEnd.size() + " routes to show.");
-            setUpMapIfNeeded();
-            mMap.clear();
-            clickableMapMarkers = new HashMap<String, Boolean>();
-            LatLngBounds.Builder builder = new LatLngBounds.Builder();
-            boolean validBuilder = false;
-            boolean somethingActive = false;    // Used to make sure we put at least one set of segments on the map.
-            for (Route r : routesBetweenStartAndEnd) {
-                somethingActive = somethingActive || r.isActive(startStop);
-            }
-            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Something active: " + somethingActive);
-            for (Route r : routesBetweenStartAndEnd) {
-                if (r.isActive(startStop) || !somethingActive) {
-                    somethingActive = true;
-                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Updating map with route: " + r.getLongName());
-                    for (Stop s : r.getStops()) {
-                        for (Stop f : s.getFamily()) {
-                            if ((!f.isHidden() && !f.isRelatedTo(startStop) && !f.isRelatedTo(endStop)) || (f == startStop || f == endStop)) {
-                                // Only put one representative from a family of stops on the p
-                                //if (LOCAL_LOGV) Log.v("MapDebugging", "Not hiding " + f);
-                                Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
-                                                                    .position(f.getLocation()).title(f.getName()).anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_map_stop))));
-                                clickableMapMarkers.put(mMarker.getId(), true);
-                            }
+        if (routesBetweenStartAndEnd == null) return;       // Can't update without any routes...
+        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Have " + routesBetweenStartAndEnd.size() + " routes to show.");
+        setUpMapIfNeeded();
+        mMap.clear();
+        clickableMapMarkers = new HashMap<String, Boolean>();
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        boolean validBuilder = false;
+        boolean somethingActive = false;    // Used to make sure we put at least one set of segments on the map.
+        for (Route r : routesBetweenStartAndEnd) {
+            somethingActive = somethingActive || r.isActive(startStop);
+        }
+        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Something active: " + somethingActive);
+        for (Route r : routesBetweenStartAndEnd) {
+            if (r.isActive(startStop) || !somethingActive) {
+                somethingActive = true;
+                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Updating map with route: " + r.getLongName());
+                for (Stop s : r.getStops()) {
+                    for (Stop f : s.getFamily()) {
+                        if ((!f.isHidden() && !f.isRelatedTo(startStop) && !f.isRelatedTo(endStop)) || (f == startStop || f == endStop)) {
+                            // Only put one representative from a family of stops on the p
+                            //if (LOCAL_LOGV) Log.v("MapDebugging", "Not hiding " + f);
+                            Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
+                                                                .position(f.getLocation()).title(f.getName()).anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_map_stop))));
+                            clickableMapMarkers.put(mMarker.getId(), true);
                         }
                     }
-                    updateMapWithNewBusLocations();
-                    // Adds the segments of every Route to the map.
-                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, r + " has " + r.getSegments().size() + " segments.");
-                    for (PolylineOptions p : r.getSegments()) {
-                        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Trying to add a segment to the map");
-                        if (p != null) {
-                            for (LatLng loc : p.getPoints()) {
-                                validBuilder = true;
-                                builder.include(loc);
-                            }
-                            p.color(getResources().getColor(R.color.main_buttons));
-                            mMap.addPolyline(p);
-                            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Success!");
+                }
+                updateMapWithNewBusLocations();
+                // Adds the segments of every Route to the map.
+                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, r + " has " + r.getSegments().size() + " segments.");
+                for (PolylineOptions p : r.getSegments()) {
+                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Trying to add a segment to the map");
+                    if (p != null) {
+                        for (LatLng loc : p.getPoints()) {
+                            validBuilder = true;
+                            builder.include(loc);
                         }
-                        else if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Segment was null for " + r.getID());
+                        p.color(getResources().getColor(R.color.main_buttons));
+                        mMap.addPolyline(p);
+                        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Success!");
                     }
+                    else if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Segment was null for " + r.getID());
                 }
             }
-            if (validBuilder) {
-                LatLngBounds bounds = builder.build();
-                try {
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 30));
-                } catch (IllegalStateException e) {      // In case the view is not done being created.
-                    //e.printStackTrace();
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, this.getResources().getDisplayMetrics().widthPixels, this.getResources().getDisplayMetrics().heightPixels, 100));
-                }
+        }
+        if (validBuilder) {
+            LatLngBounds bounds = builder.build();
+            try {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 30));
+            } catch (IllegalStateException e) {      // In case the view is not done being created.
+                //e.printStackTrace();
+                mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, this.getResources().getDisplayMetrics().widthPixels, this.getResources().getDisplayMetrics().heightPixels, 100));
             }
         }
     }
@@ -678,148 +675,75 @@ public class MainActivity extends Activity {
     }
 
     private void setNextBusTime() {
-        /*
-        Have a start stop that may have children, and an end stop that may have children.
-        Find all routes that have both stops (or their children).
-        Figure out which direction the user is going.
-        Get all times in that direction, on all available routes, from that start stop (or its children).
-        Insert the current time into that list and sort the list.
-        Next bus time is the first element after the current time.
-        Set the view values.
-         */
-
-        if (timeUntilTimer != null)
-            timeUntilTimer.cancel();        // Don't want to be interrupted in the middle of this.
+        if (timeUntilTimer != null) timeUntilTimer.cancel();
         if (busRefreshTimer != null) busRefreshTimer.cancel();
-        ArrayList<Route> startRoutes = startStop.getUltimateParent().getRoutes();        // All the routes leaving the start stop.
-        ArrayList<Route> endRoutes = endStop.getUltimateParent().getRoutes();
-        ArrayList<Route> availableRoutes = new ArrayList<Route>();               // All the routes connecting the two.
-        for (Route r : startRoutes) {
-            //if (LOCAL_LOGV) Log.v("Routes", "Start Route: " + r);
-            if (endRoutes.contains(r) && !availableRoutes.contains(r)) {
-                //if (LOCAL_LOGV) Log.v("Greenwich", "*  " + r + " is available.");
-                availableRoutes.add(r);
+
+        // Find the best pair of start and end related to this pair, since Stops can "combine"
+        // and have child stops, like at 14th Street and 3rd Ave.
+        Stop[] newStartAndEnd = Stop.getBestRelatedStartAndEnd(startStop, endStop);
+        startStop = newStartAndEnd[0];
+        endStop = newStartAndEnd[1];
+        routesBetweenStartAndEnd = startStop.getRoutesTo(endStop);
+        timesBetweenStartAndEnd = startStop.getTimesOn(routesBetweenStartAndEnd);
+        timesAdapter.setDataSet(timesBetweenStartAndEnd);
+        timesAdapter.notifyDataSetChanged();
+        if (routesBetweenStartAndEnd == null || // No routes between the two. Should not happen.
+            timesBetweenStartAndEnd == null  || // Should definitely not be here. But, just in case.
+            timesBetweenStartAndEnd.size() == 0){   // Have a route, but no time.
+            sayBusIsOffline();
+            showSafeRideInfoIfNeeded(Time.getCurrentTime());
+            return;
+        }
+        final Time currentTime = Time.getCurrentTime();
+        ArrayList<Time> tempTimesBetweenStartAndEnd = new ArrayList<Time>(timesBetweenStartAndEnd);
+        tempTimesBetweenStartAndEnd.add(currentTime);
+        Collections.sort(tempTimesBetweenStartAndEnd, Time.compare);
+        Collections.sort(timesBetweenStartAndEnd, Time.compare);
+
+        int index = tempTimesBetweenStartAndEnd.indexOf(currentTime);
+        final int nextTimeIndex = (index + 1) % tempTimesBetweenStartAndEnd.size();
+        nextBusTime = tempTimesBetweenStartAndEnd.get(nextTimeIndex);
+
+        updateNextTimeSwitcher(currentTime.getTimeAsStringUntil(nextBusTime, getResources()));
+
+        timesList.clearFocus();
+        timesList.post(new Runnable() {
+            @Override
+            public void run() {
+                timesList.setSelection(nextTimeIndex);
             }
-        }
-        BusManager sharedManager = BusManager.getBusManager();
-        int bestDistance = sharedManager.distanceBetween(startStop, endStop);
+        });
+        timesAdapter.setTime(currentTime);
 
-        int testDistance = sharedManager.distanceBetween(startStop.getOppositeStop(), endStop.getOppositeStop());
-        if (testDistance < bestDistance) {
-            startStop = startStop.getOppositeStop();
-            endStop = endStop.getOppositeStop();
-        }
-
-        testDistance = sharedManager.distanceBetween(startStop, endStop.getOppositeStop());
-        if (testDistance < bestDistance) {
-            endStop = endStop.getOppositeStop();
-        }
-
-        testDistance = sharedManager.distanceBetween(startStop.getOppositeStop(), endStop);
-        if (testDistance < bestDistance) {
-            startStop = startStop.getOppositeStop();
-        }
-
-        if (availableRoutes.size() > 0) {
-            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Have a route available from " + startStop + " to " + endStop);
-            ArrayList<Time> tempTimesBetweenStartAndEnd = new ArrayList<Time>();
-            for (Route r : availableRoutes) {
-                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "  " + r + " is available");
-                //if (!startStop.getOtherRoute().isEmpty()) Log.d("Greenwich", "  " + startStop.getOtherRoute() + " is available too!");
-                //if (!r.getOtherLongName().isEmpty()) Log.d("Greenwich", "  " + r.getOtherLongName() + " is available too!");
-                // Get the Times at this stop for this route.
-                ArrayList<Time> times = startStop.getTimesOfRoute(r.getLongName());
-                ArrayList<Time> otherTimes = startStop.getTimesOfRoute(r.getOtherLongName());
-                //Log.d("Greenwich", "  has " + times.size() + " times ");
-                //Log.d("Greenwich", "  has " + otherTimes.size() + " other times.");
-
-                if (otherTimes.size() > 0 && endStop.getTimesOfRoute(r.getOtherLongName()).size() > 0) {
-                    for (Time t : otherTimes) {
-                        if (!tempTimesBetweenStartAndEnd.contains(t)) {
-                            tempTimesBetweenStartAndEnd.add(t);
-                        }
-                    }
-                }
-                else if (times.size() > 0) {
-                    for (Time t : times) {
-                        if (!tempTimesBetweenStartAndEnd.contains(t)) {
-                            tempTimesBetweenStartAndEnd.add(t);
-                        }
-                    }
-                }
-            }
-            if (isADifferenceBetween(routesBetweenStartAndEnd, availableRoutes)) routesOnMapDirty = true;
-            routesBetweenStartAndEnd = availableRoutes;
-            timesBetweenStartAndEnd = new ArrayList<Time>();
-            if (tempTimesBetweenStartAndEnd.size() > 0) {    // We actually found times.
-                // Here, we grab the list of all times of all routes between the start and end, add in the current
-                // time, then sort that list of times. That way, we know the first bus Time after the current time
-                // is the Time of the soonest next Bus.
-                timesBetweenStartAndEnd = new ArrayList<Time>(tempTimesBetweenStartAndEnd);
-                final Time currentTime = Time.getCurrentTime();
-                tempTimesBetweenStartAndEnd.add(currentTime);
-                Collections.sort(tempTimesBetweenStartAndEnd, Time.compare);
-                Collections.sort(timesBetweenStartAndEnd, Time.compare);
-
-                int index = tempTimesBetweenStartAndEnd.indexOf(currentTime);
-                nextBusTime = tempTimesBetweenStartAndEnd.get((index + 1) % tempTimesBetweenStartAndEnd.size());
-
-                final String newSwitcherText = currentTime.getTimeAsStringUntil(nextBusTime, getResources());
-                updateNextTimeSwitcher(newSwitcherText);
-
-                final int nextTimeIndex = timesBetweenStartAndEnd.indexOf(nextBusTime);
-                timesList.clearFocus();
-                timesList.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        timesList.setSelection(nextTimeIndex);
-                    }
-                });
-                timesAdapter.setTime(currentTime);
-
-                if (BusManager.getBusManager().isOnline()) {
-                    String routeText;
-                    String[] routeArray = nextBusTime.getRoute().split("\\s");
-                    String route = nextBusTime.getRoute();
-                    if (routeArray[0].length() == 1) {
-                        routeText = getString(R.string.route) + route;
-                    }
-                    else {
-                        routeText = route;
-                    }
-                    ((TextView) findViewById(R.id.next_route)).setText(getString(R.string.via) + routeText);
-                    ((TextView) findViewById(R.id.next_bus)).setText(getString(R.string.next_bus_in));
-                    findViewById(R.id.safe_ride_button).setVisibility(View.GONE);
-                }
-                else {
-                    ((TextView) findViewById(R.id.next_route)).setText("");
-                    ((TextView) findViewById(R.id.next_bus)).setText("");
-                    if (currentTime.getHour() < 7) {
-                        findViewById(R.id.safe_ride_button).setVisibility(View.VISIBLE);
-                    }
-                    else {
-                        findViewById(R.id.safe_ride_button).setVisibility(View.GONE);
-                    }
-                }
-                updateMapWithNewStartOrEnd();
-            }
-            else if (startStop.hasTimes()) {
-                setEndStop(startStop);
+        if (BusManager.getBusManager().isNotDuringSafeRide()) {
+            String routeText;
+            String[] routeArray = nextBusTime.getRoute().split("\\s");
+            String route = nextBusTime.getRoute();
+            if (routeArray[0].length() == 1) {      // We have the A, B, C, E, etc. So, prepend route.
+                routeText = getString(R.string.route) + route;
             }
             else {
-                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "No times. So, make the switcher say offline.");
-                sayBusIsOffline();
+                routeText = route;
             }
-            timesAdapter.setDataSet(timesBetweenStartAndEnd);
-            timesAdapter.notifyDataSetChanged();
+            ((TextView) findViewById(R.id.next_route)).setText(getString(R.string.via) + routeText);
+            ((TextView) findViewById(R.id.next_bus)).setText(getString(R.string.next_bus_in));
+            findViewById(R.id.safe_ride_button).setVisibility(View.GONE);
         }
-        else {
-            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "No routes. So, make the switcher say offline.");
-            sayBusIsOffline();
-        }
-        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Have " + availableRoutes.size() + " routes available");
+        else showSafeRideInfoIfNeeded(currentTime);
         renewBusRefreshTimer();
         renewTimeUntilTimer();
+    }
+
+    private void showSafeRideInfoIfNeeded(Time currentTime) {
+        if (!BusManager.getBusManager().isNotDuringSafeRide()) {
+            ((TextView) findViewById(R.id.next_route)).setText("");
+            ((TextView) findViewById(R.id.next_bus)).setText("");
+            if (currentTime.getHour() < 7) {
+                findViewById(R.id.safe_ride_button).setVisibility(View.VISIBLE);
+            } else {
+                findViewById(R.id.safe_ride_button).setVisibility(View.GONE);
+            }
+        }
     }
 
     private void updateNextTimeSwitcher(final String newSwitcherText){
@@ -847,13 +771,6 @@ public class MainActivity extends Activity {
                 }
             });
         }
-    }
-
-    private boolean isADifferenceBetween(ArrayList<Route> a, ArrayList<Route> b){
-        if (a == null || b == null) return true;
-        for (Route rA : a) if (!b.contains(rA)) return true;
-        for (Route rB : b) if (!a.contains(rB)) return true;
-        return false;
     }
 
     @SuppressWarnings("UnusedParameters")

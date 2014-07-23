@@ -11,13 +11,14 @@ import com.nyubustracker.R;
 import com.nyubustracker.models.Time;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 
 public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter {
 
     private LayoutInflater inflater;
-    private ArrayList<Time> times;
+    private List<Time> times;
     private Time currentTime;
     private Context context;
 
@@ -28,7 +29,7 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
         this.context = context;
     }
 
-    public void setDataSet(ArrayList<Time> mTimes) {
+    public void setDataSet(List<Time> mTimes) {
         times = mTimes;
     }
 

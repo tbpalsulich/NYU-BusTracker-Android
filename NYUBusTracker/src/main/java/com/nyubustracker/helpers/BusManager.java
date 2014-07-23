@@ -46,7 +46,7 @@ public final class BusManager {
     private static ArrayList<Bus> buses = null;
     private static ArrayList<String> timesToDownload = null;
     private static HashMap<String, Integer> timesVersions = null;
-    private static boolean online;
+    private static boolean isNotDuringSafeRide;
 
     private BusManager() {
         stops = new ArrayList<Stop>();
@@ -55,7 +55,7 @@ public final class BusManager {
         buses = new ArrayList<Bus>();
         timesToDownload = new ArrayList<String>();
         timesVersions = new HashMap<String, Integer>();
-        online = false;
+        isNotDuringSafeRide = false;
     }
 
     /*
@@ -237,12 +237,12 @@ public final class BusManager {
         return routes;
     }
 
-    public boolean isOnline() {
-        return online;
+    public boolean isNotDuringSafeRide() {
+        return isNotDuringSafeRide;
     }
 
-    public void setOnline(boolean state) {
-        online = state;
+    public void setIsNotDuringSafeRide(boolean state) {
+        isNotDuringSafeRide = state;
     }
 
     public ArrayList<String> getTimesToDownload() {

@@ -12,6 +12,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 public class Stop {
     public static final String FAVORITES_PREF = "favorites";
@@ -300,4 +301,70 @@ public class Stop {
     public void setName(String name) {
         this.name = name;
     }
+
+    public List<Route> getRoutesTo(Stop endStop) {
+        Stop startStop = this;
+        ArrayList<Route> startRoutes = startStop.getUltimateParent().getRoutes();        // All the routes leaving the start stop.
+        ArrayList<Route> endRoutes = endStop.getUltimateParent().getRoutes();
+        boolean foundAValidRoute = false;
+        ArrayList<Route> availableRoutes = new ArrayList<Route>();               // All the routes connecting the two.
+        for (Route r : startRoutes) {
+            //if (LOCAL_LOGV) Log.v("Routes", "Start Route: " + r);
+            if (endRoutes.contains(r) && !availableRoutes.contains(r)) {
+                //if (LOCAL_LOGV) Log.v("Greenwich", "*  " + r + " is available.");
+                foundAValidRoute = true;
+                availableRoutes.add(r);
+            }
+        }
+        if (foundAValidRoute) return availableRoutes;
+        else return null;
+    }
+
+    public List<Time> getTimesOn(List<Route> routes){
+        if (routes == null) return new ArrayList<Time>();
+        ArrayList<Time> timesBetweenStartAndEnd = new ArrayList<Time>();
+        for (Route r : routes) {
+            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "  " + r + " is available");
+            // Get the Times at this stop for this route.
+            ArrayList<Time> times = this.getTimesOfRoute(r.getLongName());
+            ArrayList<Time> otherTimes = this.getTimesOfRoute(r.getOtherLongName());
+            //Log.d("Greenwich", "  has " + times.size() + " times ");
+            //Log.d("Greenwich", "  has " + otherTimes.size() + " other times.");
+
+            for (Time t : otherTimes) {
+                if (!timesBetweenStartAndEnd.contains(t)) {
+                    timesBetweenStartAndEnd.add(t);
+                }
+            }
+            for (Time t : times) {
+                if (!timesBetweenStartAndEnd.contains(t)) {
+                    timesBetweenStartAndEnd.add(t);
+                }
+            }
+        }
+        return timesBetweenStartAndEnd;
+    }
+
+    public static Stop[] getBestRelatedStartAndEnd(Stop startStop, Stop endStop) {
+        BusManager sharedManager = BusManager.getBusManager();
+        int bestDistance = sharedManager.distanceBetween(startStop, endStop);
+
+        int testDistance = sharedManager.distanceBetween(startStop.getOppositeStop(), endStop.getOppositeStop());
+        if (testDistance < bestDistance) {
+            startStop = startStop.getOppositeStop();
+            endStop = endStop.getOppositeStop();
+        }
+
+        testDistance = sharedManager.distanceBetween(startStop, endStop.getOppositeStop());
+        if (testDistance < bestDistance) {
+            endStop = endStop.getOppositeStop();
+        }
+
+        testDistance = sharedManager.distanceBetween(startStop.getOppositeStop(), endStop);
+        if (testDistance < bestDistance) {
+            startStop = startStop.getOppositeStop();
+        }
+        return new Stop[] {startStop, endStop};
+    }
+
 }
