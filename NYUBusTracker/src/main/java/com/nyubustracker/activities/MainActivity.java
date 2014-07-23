@@ -278,8 +278,8 @@ public class MainActivity extends Activity {
         });
 
         // Declare the in and out animations and initialize them
-        Animation out = AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_in_left);
-        Animation in = AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_out_right);
+        Animation in = AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_in_left);
+        Animation out = AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_out_right);
 
         // set the animation type of textSwitcher
         mSwitcher.setInAnimation(in);
