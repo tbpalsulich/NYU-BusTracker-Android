@@ -37,6 +37,7 @@ import android.widget.ViewSwitcher;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -142,6 +143,11 @@ public class MainActivity extends Activity {
     }
 
     private void setUpMapIfNeeded() {
+        // First check if GPS is available.
+        int retCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
+        if (retCode != ConnectionResult.SUCCESS) {
+            GooglePlayServicesUtil.getErrorDialog(retCode, this, 1).show();
+        }
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
             MapFragment mFrag = ((MapFragment) getFragmentManager().findFragmentById(R.id.map));
@@ -152,6 +158,18 @@ public class MainActivity extends Activity {
                 mMap.getUiSettings().setRotateGesturesEnabled(false);
                 mMap.getUiSettings().setZoomControlsEnabled(false);
                 mMap.setMyLocationEnabled(true);
+                mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        return !clickableMapMarkers.get(marker.getId());    // Return true to consume the event.
+                    }
+                });
+                CameraUpdate center=
+                        CameraUpdateFactory.newLatLng(new LatLng(40.729146, -73.993756));
+                CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
+
+                mMap.moveCamera(center);
+                mMap.animateCamera(zoom);
             }
         }
     }
@@ -238,19 +256,7 @@ public class MainActivity extends Activity {
 
         oncePreferences = getSharedPreferences(RUN_ONCE_PREF, MODE_PRIVATE);
 
-        int retCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
-        if (retCode != ConnectionResult.SUCCESS) {
-            GooglePlayServicesUtil.getErrorDialog(retCode, this, 1).show();
-        }
-
         setUpMapIfNeeded(); // Instantiates mMap, if it needs to be.
-
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                return !clickableMapMarkers.get(marker.getId());    // Return true to consume the event.
-            }
-        });
 
         // Singleton BusManager to keep track of all stops, routes, etc.
         final BusManager sharedManager = BusManager.getBusManager();
