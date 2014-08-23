@@ -41,8 +41,8 @@ route + stop, instead of stop + stop).
 
 Install
 -------
-1. Install and open [Android Studio](https://developer.android.com/sdk/installing/studio.html)
-2. Open the SDK Manager (Tools > Android > SDK Manager).
+1. Install and open [Android Studio](https://developer.android.com/sdk/installing/studio.html).
+2. Open the SDK Manager (Tools > Android > SDK Manager) from Android Studio.
 3. Install API 20, Android Support Repository, Android Support Library, 
 Google Analytics App Tracking SDK, Google Play Services, and Google Repository. You can then close 
 the SDK Manager.
