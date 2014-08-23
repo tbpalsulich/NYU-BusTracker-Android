@@ -53,7 +53,7 @@ the SDK Manager.
   following the directions 
   [here](https://developers.google.com/maps/documentation/android/start#get_an_android_certificate_and_the_google_maps_api_key).
   * A [Mashape](https://www.mashape.com) application consuming the Transloc OpenAPI 1.2 API.
-5. Either an Android phone or an emulator. In my opinion, a physical phone is easier to use. But,
+5. Connect an Android phone or an emulator. In my opinion, a physical phone is easier to use. But,
 if you don't have one, you can try the built in Android emulator or a (much faster) 
 [Genymotion](http://www.genymotion.com/) emulator. As a warning, you may have to do some extra work 
 to get maps working in an emulator.
