@@ -46,16 +46,26 @@ Install
 3. Install API 20, Android Support Repository, Android Support Library, 
 Google Analytics App Tracking SDK, Google Play Services, and Google Repository. You can then close 
 the SDK Manager.
-4. Set your API keys in the 
+4. Fork this repository on GitHub by clicking the Fork button at the top right.
+5. Clone your fork (VCS > Checkout from Version Control > Log in to GitHub > Select your fork > 
+Click clone).
+6. Select use default gradle wrapper and click OK.
+7. If needed, open the project view by hovering over the icon at the bottom left of Android Studio.
+8. Set your API keys in the 
 [API keys](../master/NYUBusTracker/src/main/res/values/api-keys.xml) file. You will need:
-  * A [Google Analytics](http://www.google.com/analytics/) application with a production and debug property.
   * A [Google Developer](https://console.developers.google.com) project consuming the Maps API,
   following the directions 
   [here](https://developers.google.com/maps/documentation/android/start#get_an_android_certificate_and_the_google_maps_api_key).
-  * A [Mashape](https://www.mashape.com) application consuming the Transloc OpenAPI 1.2 API.
-5. Connect an Android phone or an emulator. In my opinion, a physical phone is easier to use. But,
+  * A [Mashape](https://www.mashape.com) application consuming the 
+  [Transloc OpenAPI 1.2 API](https://www.mashape.com/transloc/openapi-1-2).
+  * Optionally a [Google Analytics](http://www.google.com/analytics/) application with production 
+  and debug properties.
+  * Optionally a [Flurry Analytics](http://www.flurry.com/) company with production and debug 
+  application.
+9. Connect an Android phone or an emulator. In my opinion, a physical phone is easier to use. But,
 if you don't have one, you can try the built in Android emulator or a (much faster) 
 [Genymotion](http://www.genymotion.com/) emulator. As a warning, you may have to do some extra work 
 to get maps working in an emulator.
+10. Run the app (green arrow at the top of Android Studio)!
 
 Please see the LICENSE file for license information.
