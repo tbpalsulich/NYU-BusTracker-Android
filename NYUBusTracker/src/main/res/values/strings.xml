@@ -29,5 +29,6 @@
     <string name="random_text">Random Text</string>
     <string name="route">"Route "</string>
     <string name="no_stops_available">We\'re sorry. No stops currently available.</string>
+    <string name="not_connected">We\'re sorry. Those stops aren\'t connected.</string>
 
 </resources>

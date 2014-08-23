@@ -554,7 +554,7 @@ public class MainActivity extends Activity {
         }
         if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Something active: " + somethingActive);
         for (Route r : routesBetweenStartAndEnd) {
-            if (r.isActive(startStop) || !somethingActive) {
+            if ((r.isActive(startStop) || !somethingActive) && !r.getSegments().isEmpty()) {
                 somethingActive = true;
                 if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Updating map with route: " + r.getLongName());
                 for (Stop s : r.getStops()) {
@@ -598,37 +598,31 @@ public class MainActivity extends Activity {
     }
 
     private void setEndStop(Stop stop) {
-        if (stop != null) {     // Make sure we actually have a stop!
-            // Check there is a route between these stops.
-            ArrayList<Route> routes = new ArrayList<Route>();               // All the routes connecting the two.
-            for (Route r : startStop.getRoutes()) {
-                if (r.hasStop(stop)) {
-                    routes.add(r);
-                }
+        if (stop == null) return;
+        // Check there is a route between these stops.
+        List<Route> routes = startStop.getRoutesTo(stop);
+        if (routes.size() > 0 && stop != startStop) {
+            endStop = stop;
+            ((TextView) findViewById(R.id.end_stop)).setText(stop.getUltimateName());
+            if (startStop != null) {
+                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Start stop: " + startStop);
+                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "End stop: " + endStop);
+                setNextBusTime();    // Don't set the next bus if we don't have a valid route.
+                if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
             }
-            if (routes.size() > 0 && stop != startStop) {
-                endStop = stop;
-                ((TextView) findViewById(R.id.end_stop)).setText(stop.getUltimateName());
-                if (startStop != null) {
-                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Start stop: " + startStop);
-                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "End stop: " + endStop);
-                    setNextBusTime();    // Don't set the next bus if we don't have a valid route.
-                    if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
-                }
+        }
+        else {
+            ArrayList<Stop> connected = BusManager.getBusManager().getConnectedStops(startStop);
+            if (connected.size() == 1) {
+                displayStopError();
             }
             else {
-                ArrayList<Stop> connected = BusManager.getBusManager().getConnectedStops(startStop);
-                if (connected.size() == 1) {
-                    displayStopError();
+                int stopIndex = 0;
+                while (connected.size() > stopIndex && !checkStop(connected.get(stopIndex))) {
+                    stopIndex++;
                 }
-                else {
-                    int stopIndex = 0;
-                    while (connected.size() > stopIndex && !checkStop(connected.get(stopIndex))) {
-                        stopIndex++;
-                    }
-                    if (stopIndex < connected.size()) setEndStop(connected.get(stopIndex));
-                    else downloadEverything();
-                }
+                if (stopIndex < connected.size()) setEndStop(connected.get(stopIndex));
+                else downloadEverything();
             }
         }
     }
@@ -650,30 +644,31 @@ public class MainActivity extends Activity {
     }
 
     private void setStartStop(Stop stop) {
-        if (stop != null) {
-            if (endStop == stop) {    // We have an end stop and its name is the same as stopName.
-                // Swap the start and end stops.
-                Stop temp = startStop;
-                startStop = endStop;
-                ((TextView) findViewById(R.id.start_stop)).setText(startStop.getUltimateName());
-                setEndStop(temp);
-            }
-            else { // We have a new start. So, we must ensure the end is actually connected. If not, pick a random connected stop.
-                startStop = stop;
-                ((TextView) findViewById(R.id.start_stop)).setText(stop.getUltimateName());
-                if (endStop != null) {
-                    // Loop through all connected Routes.
-                    for (Route r : startStop.getRoutes()) {
-                        if (r.hasStop(endStop) && startStop.getTimesOfRoute(r.getLongName()).size() > 0) {  // If the current endStop is connected, we don't have to change endStop.
-                            setNextBusTime();
-                            updateMapWithNewStartOrEnd();
-                            return;
+        if (stop == null) return;
+        if (endStop == stop) {    // We have an end stop and its name is the same as stopName.
+            // Swap the start and end stops.
+            Stop temp = startStop;
+            startStop = endStop;
+            ((TextView) findViewById(R.id.start_stop)).setText(startStop.getUltimateName());
+            setEndStop(temp);
+        }
+        else { // We have a new start. So, we must ensure the end is actually connected. If not, pick the first connected stop.
+            startStop = stop;
+            ((TextView) findViewById(R.id.start_stop)).setText(stop.getUltimateName());
+            if (endStop != null) {
+                List<Route> routes = startStop.getRoutesTo(endStop);
+                if (routes == null) {   // Stops aren't connected.
+                    routes = startStop.getRoutes();     // Routes the stop actually has.
+                    if (routes != null && !routes.isEmpty()){
+                        List<Stop> stops = routes.get(0).getStops();
+                        if (!stops.isEmpty() && stops.get(0) != endStop){
+                            setEndStop(stops.get(0));
                         }
                     }
-                    // If we did not return above, the current endStop is not connected to the new
-                    // startStop. So, by default, pick the first connected stop.
-                    BusManager sharedManager = BusManager.getBusManager();
-                    setEndStop(sharedManager.getStopByName("715 Broadway @ Washington Square"));
+                }
+                else {
+                    setNextBusTime();
+                    updateMapWithNewStartOrEnd();
                 }
             }
         }
@@ -851,6 +846,16 @@ public class MainActivity extends Activity {
         Context context = getApplicationContext();
         CharSequence text = getString(R.string.no_stops_available);
         int duration = Toast.LENGTH_LONG;
+
+        if (context != null) {
+            Toast.makeText(context, text, duration).show();
+        }
+    }
+
+    public void displayNotConnectedError() {
+        Context context = getApplicationContext();
+        CharSequence text = getString(R.string.not_connected);
+        int duration = Toast.LENGTH_SHORT;
 
         if (context != null) {
             Toast.makeText(context, text, duration).show();
