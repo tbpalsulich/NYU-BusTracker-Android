@@ -810,7 +810,7 @@ public class MainActivity extends Activity {
             dialog.setCanceledOnTouchOutside(true);
             dialog.show();  // Dismissed when a stop is clicked.
         }
-        else {
+        else if (startStop != null) {
             displayStopError();
         }
     }
