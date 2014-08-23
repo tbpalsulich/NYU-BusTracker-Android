@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.nyubustracker.R;
 import com.nyubustracker.activities.MainActivity;
 
 import org.json.JSONException;
@@ -78,7 +79,7 @@ public class Downloader extends AsyncTask<String, Void, JSONObject> {
             conn.setConnectTimeout(15000 /* milliseconds */);
             conn.setRequestMethod("GET");
             conn.setDoInput(true);
-            conn.setRequestProperty("X-Mashape-Authorization", "0gpwrDtINCQRxnhWEyJpEgdfYdQjZYSp");
+            conn.setRequestProperty("X-Mashape-Authorization", context.getString(R.string.mashape_api_key));
             // Starts the QUERY
             conn.connect();
             //int response = conn.getResponseCode();
