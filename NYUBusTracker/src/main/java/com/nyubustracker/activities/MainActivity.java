@@ -34,6 +34,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
+import com.flurry.android.FlurryAgent;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -353,6 +354,7 @@ public class MainActivity extends Activity {
         //        if (LOCAL_LOGV) Log.v("General Debugging", "onStart!");
         onStartTime = System.currentTimeMillis();
         GoogleAnalytics.getInstance(this).reportActivityStart(this);
+        FlurryAgent.onStartSession(this, getString(LOCAL_LOGV ? R.string.flurry_debug_api_key : R.string.flurry_api_key));
     }
 
     @Override
@@ -381,6 +383,7 @@ public class MainActivity extends Activity {
         super.onStop();
         //        if (LOCAL_LOGV) Log.v("General Debugging", "onStop!");
         GoogleAnalytics.getInstance(this).reportActivityStop(this);
+        FlurryAgent.onEndSession(this);
     }
 
     @Override

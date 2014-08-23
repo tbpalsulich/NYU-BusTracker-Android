@@ -68,4 +68,5 @@ dependencies {
     compile 'com.google.android.gms:play-services:5.0.89'
     compile 'com.google.maps.android:android-maps-utils:0.3.1'
     compile 'se.emilsjolander:stickylistheaders:2.4.1'
+    compile fileTree(dir: 'libs', include: '*.jar')
 }
