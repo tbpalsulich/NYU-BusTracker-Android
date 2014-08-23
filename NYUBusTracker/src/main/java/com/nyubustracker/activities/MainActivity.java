@@ -144,8 +144,7 @@ public class MainActivity extends Activity {
 
     private void setUpMapIfNeeded() {
         // First check if GPS is available.
-        final double DEFAULT_LAT = 40.729146;
-        final double DEFAULT_LNG = -73.993756;
+        final LatLng BROADWAY = new LatLng(40.729146, -73.993756);
         int retCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
         if (retCode != ConnectionResult.SUCCESS) {
             GooglePlayServicesUtil.getErrorDialog(retCode, this, 1).show();
@@ -167,7 +166,7 @@ public class MainActivity extends Activity {
                     }
                 });
                 CameraUpdate center=
-                        CameraUpdateFactory.newLatLng(new LatLng(DEFAULT_LAT, DEFAULT_LNG));
+                        CameraUpdateFactory.newLatLng(BROADWAY);
                 CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
 
                 mMap.moveCamera(center);
