@@ -2,4 +2,6 @@
 <resources>
     <string name="google_maps_api_key">dummy-key</string>
     <string name="mashape_api_key">dummy-key</string>
+    <string name="google_analytics_tracker">dummy-key</string>
+    <string name="google_analytics_debug_tracker">dummy-key</string>
 </resources>
