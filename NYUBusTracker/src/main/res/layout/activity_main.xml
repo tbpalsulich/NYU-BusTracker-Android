@@ -33,7 +33,8 @@
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingEnd="@dimen/activity_horizontal_margin"
             android:textColor="@color/main_text"
-            android:textSize="@dimen/main_text_size"/>
+            android:textSize="@dimen/main_text_size"
+            android:text="@string/default_start"/>
     </LinearLayout>
 
     <LinearLayout

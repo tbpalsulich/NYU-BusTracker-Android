@@ -672,6 +672,9 @@ public class MainActivity extends Activity {
                     updateMapWithNewStartOrEnd();
                 }
             }
+            else {
+                ((TextView) findViewById(R.id.end_stop)).setText(getString(R.string.default_end));
+            }
         }
     }
 

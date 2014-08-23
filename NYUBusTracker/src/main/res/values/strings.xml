@@ -4,7 +4,9 @@
     <string name="app_name">NYU Bus Tracker</string>
     <string name="call_safe_ride">Tap to call Safe Ride</string>
     <string name="start">Start:</string>
+    <string name="default_start">Click to set start stop</string>
     <string name="end">End:</string>
+    <string name="default_end">Click to set end stop</string>
     <string name="unable_to_connect">Unable to connect to the network.</string>
     <string name="downloading">Downloading Data</string>
     <string name="wait">Please Wait&#8230;</string>
