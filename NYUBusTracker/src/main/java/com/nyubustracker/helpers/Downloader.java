@@ -109,12 +109,14 @@ public class Downloader extends AsyncTask<String, Void, JSONObject> {
     }
 
     public static void cache(String fileName, JSONObject jsonObject) throws IOException {
-        File path = new File(context.getFilesDir(), CREATED_FILES_DIR);
-        path.mkdir();
-        File file = new File(path, fileName);
-        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
-        bufferedWriter.write(jsonObject.toString());
-        bufferedWriter.close();
+        if (jsonObject != null && !jsonObject.toString().isEmpty()) {
+            File path = new File(context.getFilesDir(), CREATED_FILES_DIR);
+            path.mkdir();
+            File file = new File(path, fileName);
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
+            bufferedWriter.write(jsonObject.toString());
+            bufferedWriter.close();
+        }
     }
 
     public static String makeQuery(String param, String value, String charset) {
