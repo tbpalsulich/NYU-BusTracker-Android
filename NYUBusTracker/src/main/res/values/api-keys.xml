@@ -4,4 +4,6 @@
     <string name="mashape_api_key">dummy-key</string>
     <string name="google_analytics_tracker">dummy-key</string>
     <string name="google_analytics_debug_tracker">dummy-key</string>
+    <string name="flurry_api_key">dummy-key</string>
+    <string name="flurry_debug_api_key">dummy-key</string>
 </resources>
