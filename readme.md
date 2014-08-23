@@ -16,12 +16,12 @@ pull requests are welcome! Please let me know if you have any issues or question
 Design
 ------
 * The data is modeled by
-[Bus](../blob/master/NYUBusTracker/src/main/java/com/palsulich/nyubustracker/models/Bus.java),
-[Route](../blob/master/NYUBusTracker/src/main/java/com/palsulich/nyubustracker/models/Route.java),
-[Stop](../blob/master/NYUBusTracker/src/main/java/com/palsulich/nyubustracker/models/Stop.java), and
-[Time](../blob/master/NYUBusTracker/src/main/java/com/palsulich/nyubustracker/models/Time.java)
+[Bus](../master/NYUBusTracker/src/main/java/com/nyubustracker/models/Bus.java),
+[Route](../master/NYUBusTracker/src/main/java/com/nyubustracker/models/Route.java),
+[Stop](../master/NYUBusTracker/src/main/java/com/nyubustracker/models/Stop.java), and
+[Time](../master/NYUBusTracker/src/main/java/com/nyubustracker/models/Time.java)
 classes. They are all managed by a singleton
-[BusManager](../blob/master/NYUBusTracker/src/main/java/com/palsulich/nyubustracker/helpers/BusManager.java)
+[BusManager](../master/NYUBusTracker/src/main/java/com/nyubustracker/helpers/BusManager.java)
 class. Routes have an in order list of Stops. Stops have a list of Routes that service that stop and
 a list of Times corresponding to that particular route. Data accesses from the activities go through
 BusManager. Tests for connection between stops generally go through BusManager, as well.
@@ -29,13 +29,13 @@ BusManager. Tests for connection between stops generally go through BusManager, 
 * Every JSON file (segments, routes, stops, times) is cached when retrieved (except for bus
 locations). Background network calls are made to ensure data is up to date.
 
-* [Adapters](../tree/master/NYUBusTracker/src/main/java/com/palsulich/nyubustracker/adapters)
+* [Adapters](../../tree/master/NYUBusTracker/src/main/java/com/nyubustracker/adapters)
 are required to display the list of stops and times. Stops can be selected as the start or end, or
 favorited by the user (so it appears at the top of the list). Times display which route they
 correspond to (sometimes, more than one route travels between stops A and B).
 
 * There is only one activity: [MainActivity]
-(../blob/master/NYUBusTracker/src/main/java/com/palsulich/nyubustracker/activities/MainActivity.java).
+(../master/NYUBusTracker/src/main/java/com/nyubustracker/activities/MainActivity.java).
 In the future, we may add additional activities to access times in an alternate format (like by
 route + stop, instead of stop + stop).
 
@@ -47,7 +47,7 @@ Install
 Google Analytics App Tracking SDK, Google Play Services, and Google Repository. You can then close 
 the SDK Manager.
 4. Set your API keys in the 
-[API keys](../blob/master/NYUBusTracker/src/main/res/values/api-keys.xml) file. You will need:
+[API keys](../master/NYUBusTracker/src/main/res/values/api-keys.xml) file. You will need:
   * A [Google Analytics](http://www.google.com/analytics/) application with a production and debug property.
   * A [Google Developer](https://console.developers.google.com) project consuming the Maps API,
   following the directions 
