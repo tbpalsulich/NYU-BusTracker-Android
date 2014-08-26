@@ -96,6 +96,7 @@ public class MainActivity extends Activity {
     private final DownloaderHelper routeDownloaderHelper = new RouteDownloaderHelper();
     private final DownloaderHelper segmentDownloaderHelper = new SegmentDownloaderHelper();
     public static final String REFACTOR_LOG_TAG = "refactor";
+    public static final String LOG_TAG = "nyu_log_tag";
     private final DownloaderHelper versionDownloaderHelper = new VersionDownloaderHelper();
     private final DownloaderHelper timeDownloaderHelper = new TimeDownloaderHelper();
     private final CompoundButton.OnCheckedChangeListener cbListener = new CompoundButton.OnCheckedChangeListener() {
@@ -697,6 +698,12 @@ public class MainActivity extends Activity {
         if (routesBetweenStartAndEnd == null || // No routes between the two. Should not happen.
             timesBetweenStartAndEnd == null  || // Should definitely not be here. But, just in case.
             timesBetweenStartAndEnd.size() == 0){   // Have a route, but no time.
+            if (LOCAL_LOGV) {
+                Log.v(LOG_TAG, "Returning early!!!!");
+                Log.v(LOG_TAG, "Routes Null: " + (routesBetweenStartAndEnd == null));
+                Log.v(LOG_TAG, "Times Null: " + (timesBetweenStartAndEnd == null));
+                Log.v(LOG_TAG, "No times: " + timesBetweenStartAndEnd.size());
+            }
             sayBusIsOffline();
             showSafeRideInfoIfNeeded(Time.getCurrentTime());
             return;
@@ -708,6 +715,7 @@ public class MainActivity extends Activity {
         Collections.sort(timesBetweenStartAndEnd, Time.compare);
 
         int index = tempTimesBetweenStartAndEnd.indexOf(currentTime);
+        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Index: " + index + " | size: " + tempTimesBetweenStartAndEnd.size());
         final int nextTimeIndex = (index + 1) % tempTimesBetweenStartAndEnd.size();
         nextBusTime = tempTimesBetweenStartAndEnd.get(nextTimeIndex);
 

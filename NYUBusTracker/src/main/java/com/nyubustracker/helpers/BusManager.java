@@ -134,7 +134,7 @@ public final class BusManager {
             JSONObject stopObject = jVersion.getJSONObject(j);
             String file = stopObject.getString("file");
             //if (MainActivity.LOCAL_LOGV) Log.v("Debugging", "Looking for times for " + file);
-            timesToDownload.add("https://s3.amazonaws.com/nyubustimes/1.0/" + file);
+            timesToDownload.add(DownloaderHelper.AMAZON_URL + file);
             timesVersions.put(file.substring(0, file.indexOf(".json")), stopObject.getInt("version"));
         }
     }

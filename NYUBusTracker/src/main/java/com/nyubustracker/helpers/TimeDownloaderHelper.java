@@ -15,11 +15,18 @@ import java.io.IOException;
 public class TimeDownloaderHelper implements DownloaderHelper {
     @Override
     public void parse(JSONObject jsonObject) throws JSONException, IOException {
-        BusManager.parseTime(jsonObject);
-        if (jsonObject != null && jsonObject.length() > 0) {
-            if (MainActivity.LOCAL_LOGV)
-                Log.v(MainActivity.REFACTOR_LOG_TAG, "Creating time cache file: " + jsonObject.getString("stop_id"));
+        if (jsonObject != null && jsonObject.toString().length() > 0) {
+            BusManager.parseTime(jsonObject);
+            if (MainActivity.LOCAL_LOGV) {
+                Log.v(MainActivity.LOG_TAG, "Creating time cache file: " + jsonObject.getString("stop_id"));
+                Log.v(MainActivity.LOG_TAG, "*   result: " + jsonObject.toString());
+            }
             Downloader.cache(jsonObject.getString("stop_id"), jsonObject);
+        }
+        else {
+            throw new JSONException(jsonObject == null
+                    ? "TimeDownloaderHelper#parse given null jsonObject"
+                    : "TimeDownloaderHelper#parse given empty jsonObject");
         }
     }
 }

@@ -271,7 +271,9 @@ public class Stop {
 
     public ArrayList<Time> getTimesOfRoute(String route) {
         ArrayList<Time> result = new ArrayList<Time>();
+        if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.LOG_TAG, "Times for route: " + route + " (" + times.size() + " possible for " + this.getName() + ")");
         for (Time t : times) {
+            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.LOG_TAG, "Time route: " + t.getRoute());
             if (t.getRoute().equals(route)) {
                 result.add(t);
             }
@@ -324,12 +326,14 @@ public class Stop {
         if (routes == null) return new ArrayList<Time>();
         ArrayList<Time> timesBetweenStartAndEnd = new ArrayList<Time>();
         for (Route r : routes) {
-            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "  " + r + " is available");
+            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.LOG_TAG, "  " + r + " is available");
             // Get the Times at this stop for this route.
             ArrayList<Time> times = this.getTimesOfRoute(r.getLongName());
             ArrayList<Time> otherTimes = this.getTimesOfRoute(r.getOtherLongName());
-            //Log.d("Greenwich", "  has " + times.size() + " times ");
-            //Log.d("Greenwich", "  has " + otherTimes.size() + " other times.");
+            if (MainActivity.LOCAL_LOGV) {
+                Log.d(MainActivity.LOG_TAG, "  has " + times.size() + " times ");
+                Log.d(MainActivity.LOG_TAG, "  has " + otherTimes.size() + " other times.");
+            }
 
             for (Time t : otherTimes) {
                 if (!timesBetweenStartAndEnd.contains(t)) {
