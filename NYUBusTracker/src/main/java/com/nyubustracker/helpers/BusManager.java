@@ -106,10 +106,12 @@ public final class BusManager {
             String second = combineObject.getString("second");
             Stop firstStop = sharedBusManager.getStopByID(first);
             Stop secondStop = sharedBusManager.getStopByID(second);
-            firstStop.addChildStop(secondStop);
-            firstStop.setName(name);
-            secondStop.setParentStop(firstStop);
-            secondStop.setHidden(true);
+            if (firstStop != null && secondStop != null) {
+                firstStop.addChildStop(secondStop);
+                firstStop.setName(name);
+                secondStop.setParentStop(firstStop);
+                secondStop.setHidden(true);
+            }
         }
 
         JSONArray jOpposites = new JSONArray();
@@ -121,11 +123,13 @@ public final class BusManager {
             String second = oppositeObject.getString("second");
             Stop firstStop = sharedBusManager.getStopByID(first);
             Stop secondStop = sharedBusManager.getStopByID(second);
-            firstStop.setOppositeStop(secondStop);
-            firstStop.setName(name);
-            secondStop.setOppositeStop(firstStop);
-            secondStop.setParentStop(firstStop);
-            secondStop.setHidden(true);
+            if (firstStop != null && secondStop != null) {
+                firstStop.setOppositeStop(secondStop);
+                firstStop.setName(name);
+                secondStop.setOppositeStop(firstStop);
+                secondStop.setParentStop(firstStop);
+                secondStop.setHidden(true);
+            }
         }
 
         JSONArray jVersion = new JSONArray();
