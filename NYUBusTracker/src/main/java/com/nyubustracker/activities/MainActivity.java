@@ -92,13 +92,8 @@ public class MainActivity extends Activity {
     private static final String START_STOP_PREF = "startStop";
     private static final String END_STOP_PREF = "endStop";
     private static final String FIRST_TIME = "firstTime";
-    private final DownloaderHelper stopDownloaderHelper = new StopDownloaderHelper();
-    private final DownloaderHelper routeDownloaderHelper = new RouteDownloaderHelper();
-    private final DownloaderHelper segmentDownloaderHelper = new SegmentDownloaderHelper();
     public static final String REFACTOR_LOG_TAG = "refactor";
     public static final String LOG_TAG = "nyu_log_tag";
-    private final DownloaderHelper versionDownloaderHelper = new VersionDownloaderHelper();
-    private final DownloaderHelper timeDownloaderHelper = new TimeDownloaderHelper();
     private final CompoundButton.OnCheckedChangeListener cbListener = new CompoundButton.OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -107,7 +102,6 @@ public class MainActivity extends Activity {
             getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(s.getID(), isChecked).commit();
         }
     };
-    private final DownloaderHelper busDownloaderHelper = new BusDownloaderHelper();
     List<Time> timesBetweenStartAndEnd;        // List of all times between start and end.
     Time nextBusTime;
     static ProgressDialog progressDialog;
@@ -212,10 +206,10 @@ public class MainActivity extends Activity {
             progressDialog = ProgressDialog.show(this, getString(R.string.downloading), getString(R.string.wait), true, false);
             Context context = getApplicationContext();
             downloadsOnTheWire += 4;
-            new Downloader(stopDownloaderHelper, context).execute(DownloaderHelper.STOPS_URL);
-            new Downloader(routeDownloaderHelper, context).execute(DownloaderHelper.ROUTES_URL);
-            new Downloader(segmentDownloaderHelper, context).execute(DownloaderHelper.SEGMENTS_URL);
-            new Downloader(versionDownloaderHelper, context).execute(DownloaderHelper.VERSION_URL);
+            new Downloader(new StopDownloaderHelper(), context).execute(DownloaderHelper.STOPS_URL);
+            new Downloader(new RouteDownloaderHelper(), context).execute(DownloaderHelper.ROUTES_URL);
+            new Downloader(new SegmentDownloaderHelper(), context).execute(DownloaderHelper.SEGMENTS_URL);
+            new Downloader(new VersionDownloaderHelper(), context).execute(DownloaderHelper.VERSION_URL);
         }
         else if (!offline) {    // Only show the offline dialog once.
             offline = true;
@@ -317,7 +311,7 @@ public class MainActivity extends Activity {
                         } catch (JSONException e) {
                             if (LOCAL_LOGV)
                                 Log.v(REFACTOR_LOG_TAG, "Didn't find time file, so downloading it: " + timeURL);
-                            new Downloader(timeDownloaderHelper, context).execute(timeURL);
+                            new Downloader(new TimeDownloaderHelper(), context).execute(timeURL);
                         }
                     }
                     SharedPreferences favoritePreferences = getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE);
@@ -326,7 +320,7 @@ public class MainActivity extends Activity {
                         boolean result = favoritePreferences.getBoolean(s.getID(), false);
                         s.setFavorite(result);
                     }
-                    new Downloader(versionDownloaderHelper, context).execute(DownloaderHelper.VERSION_URL);
+                    new Downloader(new VersionDownloaderHelper(), context).execute(DownloaderHelper.VERSION_URL);
                     setStartAndEndStops();
 
                     // Update the map to show the corresponding stops, buses, and segments.
@@ -453,7 +447,7 @@ public class MainActivity extends Activity {
                         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
                         if (networkInfo != null && networkInfo.isConnected()) {
                             offline = false;
-                            new Downloader(busDownloaderHelper, getApplicationContext()).execute(DownloaderHelper.VEHICLES_URL);
+                            new Downloader(new BusDownloaderHelper(), getApplicationContext()).execute(DownloaderHelper.VEHICLES_URL);
                             updateMapWithNewBusLocations();
                             if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Current start: " + startStop);
                             if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Current end  : " + endStop);
