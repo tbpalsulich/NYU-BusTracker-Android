@@ -86,7 +86,7 @@ import java.util.TimerTask;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 public class MainActivity extends Activity {
-    public static final boolean LOCAL_LOGV = true;
+    public static final boolean LOCAL_LOGV = false;
     private static final String RUN_ONCE_PREF = "runOnce";
     private static final String STOP_PREF = "stops";
     private static final String START_STOP_PREF = "startStop";
@@ -196,14 +196,15 @@ public class MainActivity extends Activity {
         return buffer.toString();
     }
 
-    private void downloadEverything() {
+    private void downloadEverything(boolean block) {
         deleteEverythingInMemory();
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
             offline = false;
             // Download and parse everything, put it all in persistent memory, continue.
-            progressDialog = ProgressDialog.show(this, getString(R.string.downloading), getString(R.string.wait), true, false);
+            if (block) progressDialog = ProgressDialog.show(this, getString(R.string.downloading), getString(R.string.wait), true, false);
+            else progressDialog = null;
             Context context = getApplicationContext();
             downloadsOnTheWire += 4;
             new Downloader(new StopDownloaderHelper(), context).execute(DownloaderHelper.STOPS_URL);
@@ -229,15 +230,17 @@ public class MainActivity extends Activity {
         if (downloadsOnTheWire == 0) {
             if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Downloading finished!");
             oncePreferences.edit().putBoolean(FIRST_TIME, false).apply();
-            runOnUI(new Runnable() {
+            if (progressDialog != null) {
+                runOnUI(new Runnable() {
                 @Override
                 public void run() {
-                    Stop broadway = BusManager.getBusManager().getStopByName("715 Broadway @ Washington Square");
-                    context.getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).apply();
-                    broadway.setFavorite(true);
-                    progressDialog.dismiss();
-                }
-            });
+                        Stop broadway = BusManager.getBusManager().getStopByName("715 Broadway @ Washington Square");
+                        context.getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).apply();
+                        broadway.setFavorite(true);
+                        progressDialog.dismiss();
+                    }
+                });
+            }
         }
         // Else, we have nothing to do, since not all downloads are finished.
     }
@@ -288,7 +291,7 @@ public class MainActivity extends Activity {
 
         if (oncePreferences.getBoolean(FIRST_TIME, true)) {
             if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Downloading because of first time");
-            downloadEverything();
+            downloadEverything(true);
         }
         else {
             if (!sharedManager.hasRoutes() || !sharedManager.hasStops()) {
@@ -333,7 +336,7 @@ public class MainActivity extends Activity {
                 } catch (JSONException e) {
                     if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Re-downloading because of an error.");
                     e.printStackTrace();
-                    downloadEverything();
+                    downloadEverything(true);
                 }
             }
             else {
@@ -600,7 +603,7 @@ public class MainActivity extends Activity {
         if (stop == null) return;
         // Check there is a route between these stops.
         List<Route> routes = startStop.getRoutesTo(stop);
-        if (routes.size() > 0 && stop != startStop) {
+        if (routes != null && routes.size() > 0 && stop != startStop) {
             endStop = stop;
             ((TextView) findViewById(R.id.end_stop)).setText(stop.getUltimateName());
             if (startStop != null) {
@@ -621,7 +624,7 @@ public class MainActivity extends Activity {
                     stopIndex++;
                 }
                 if (stopIndex < connected.size()) setEndStop(connected.get(stopIndex));
-                else downloadEverything();
+                else downloadEverything(true);
             }
         }
     }
