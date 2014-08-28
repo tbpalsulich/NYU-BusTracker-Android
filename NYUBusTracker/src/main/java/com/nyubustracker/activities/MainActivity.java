@@ -734,8 +734,9 @@ public class MainActivity extends Activity {
 
         int index = tempTimesBetweenStartAndEnd.indexOf(currentTime);
         if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Index: " + index + " | size: " + tempTimesBetweenStartAndEnd.size());
-        final int nextTimeIndex = (index + 1) % tempTimesBetweenStartAndEnd.size();
-        nextBusTime = tempTimesBetweenStartAndEnd.get(nextTimeIndex);
+        int nextTimeTempIndex = (index + 1) % tempTimesBetweenStartAndEnd.size();
+        nextBusTime = tempTimesBetweenStartAndEnd.get(nextTimeTempIndex);
+        final int nextTimeIndex = timesBetweenStartAndEnd.indexOf(nextBusTime);
 
         updateNextTimeSwitcher(currentTime.getTimeAsStringUntil(nextBusTime, getResources()));
 
