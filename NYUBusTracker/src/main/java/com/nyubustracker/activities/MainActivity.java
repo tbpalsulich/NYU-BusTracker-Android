@@ -86,7 +86,7 @@ import java.util.TimerTask;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 public class MainActivity extends Activity {
-    public static final boolean LOCAL_LOGV = false;
+    public static final boolean LOCAL_LOGV = true;
     private static final String RUN_ONCE_PREF = "runOnce";
     private static final String STOP_PREF = "stops";
     private static final String START_STOP_PREF = "startStop";
@@ -121,6 +121,7 @@ public class MainActivity extends Activity {
     private Timer busRefreshTimer; // Timer used to refresh the bus locations every few seconds.
     private GoogleMap mMap;     // Map to display all stops, segments, and buses.
     private boolean offline = true;
+    private MultipleOrientationSlidingDrawer drawer;
     public static int downloadsOnTheWire = 0;
     public static Handler UIHandler;
 
@@ -285,6 +286,10 @@ public class MainActivity extends Activity {
         mSwitcher.setInAnimation(in);
         mSwitcher.setOutAnimation(out);
 
+        drawer = (MultipleOrientationSlidingDrawer) findViewById(R.id.sliding_drawer);
+        drawer.setAllowSingleTap(false);
+        drawer.lock();
+
         timesList = (StickyListHeadersListView) findViewById(R.id.times_list);
         timesAdapter = new TimeAdapter(getApplicationContext(), new ArrayList<Time>());
         timesList.setAdapter(timesAdapter);
@@ -396,7 +401,6 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        MultipleOrientationSlidingDrawer drawer = (MultipleOrientationSlidingDrawer) findViewById(R.id.sliding_drawer);
         if (drawer.isOpened()) drawer.animateClose();
         else super.onBackPressed();
     }
@@ -665,17 +669,17 @@ public class MainActivity extends Activity {
                         List<Stop> stops = routes.get(0).getStops();
                         if (!stops.isEmpty() && stops.get(0) != endStop){
                             setEndStop(stops.get(0));
+                            return;
                         }
                     }
                 }
                 else {
                     setNextBusTime();
                     updateMapWithNewStartOrEnd();
+                    return;
                 }
             }
-            else {
-                ((TextView) findViewById(R.id.end_stop)).setText(getString(R.string.default_end));
-            }
+            ((TextView) findViewById(R.id.end_stop)).setText(getString(R.string.default_end));
         }
     }
 
@@ -701,10 +705,14 @@ public class MainActivity extends Activity {
                 Log.v(LOG_TAG, "Times Null: " + (timesBetweenStartAndEnd == null));
                 Log.v(LOG_TAG, "No times: " + timesBetweenStartAndEnd.size());
             }
+            drawer.setAllowSingleTap(false);
+            drawer.lock();
             sayBusIsOffline();
             showSafeRideInfoIfNeeded(Time.getCurrentTime());
             return;
         }
+        drawer.setAllowSingleTap(true);
+        drawer.unlock();
         final Time currentTime = Time.getCurrentTime();
         ArrayList<Time> tempTimesBetweenStartAndEnd = new ArrayList<Time>(timesBetweenStartAndEnd);
         tempTimesBetweenStartAndEnd.add(currentTime);
@@ -759,7 +767,6 @@ public class MainActivity extends Activity {
     }
 
     private void updateNextTimeSwitcher(final String newSwitcherText){
-        MultipleOrientationSlidingDrawer drawer = (MultipleOrientationSlidingDrawer) findViewById(R.id.sliding_drawer);
         if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Updating switcher to [" + newSwitcherText + "]");
         if (drawer != null && !drawer.isMoving() && !mSwitcherCurrentText.equals(newSwitcherText)) {
             mSwitcher.setText(newSwitcherText);  // Pass resources so we return the proper string value.

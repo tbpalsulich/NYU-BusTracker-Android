@@ -199,17 +199,15 @@ public final class BusManager {
     private static void getTimes(JSONObject routeTimes, String tag, Stop s, Time.TimeOfWeek timeOfWeek) throws JSONException {
         if (routeTimes.has(tag)) {
             JSONArray timesJson = routeTimes.getJSONArray(tag);
-            //if (MainActivity.LOCAL_LOGV) Log.v("Debugging", "Found " + weekendTimesJson.length() + " weekend times.");
-            if (timesJson != null) {
-                String route = routeTimes.getString(BusManager.TAG_ROUTE);
+            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.LOG_TAG, "Found " + timesJson.length() + " " + timeOfWeek + " times.");
+            String route = routeTimes.getString(BusManager.TAG_ROUTE);
 
-                if (route.contains("Route ")) {
-                    route = route.substring(route.indexOf("Route ") + "Route ".length());
-                }
-                //if (MainActivity.LOCAL_LOGV) Log.d("Greenwich", route + " times for " + s);
-                for (int k = 0; k < timesJson.length(); k++) {
-                    s.addTime(new Time(timesJson.getString(k), timeOfWeek, route));
-                }
+            if (route.contains("Route ")) {
+                route = route.substring(route.indexOf("Route ") + "Route ".length());
+            }
+            if (MainActivity.LOCAL_LOGV) Log.d(MainActivity.LOG_TAG, timesJson.length() + " times for " + s);
+            for (int k = 0; k < timesJson.length(); k++) {
+                s.addTime(new Time(timesJson.getString(k), timeOfWeek, route));
             }
         }
     }

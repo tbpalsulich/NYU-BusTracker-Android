@@ -12,7 +12,7 @@ public interface DownloaderHelper {
     static final String ROUTES_URL = TRANSLOC_URL + "/routes.json?" + QUERY;
     static final String SEGMENTS_URL = TRANSLOC_URL + "/segments.json?" + QUERY;
     static final String VEHICLES_URL = TRANSLOC_URL + "/vehicles.json?" + QUERY;
-    static final String AMAZON_URL = "https://s3.amazonaws.com/nyubustimes/test/";
+    static final String AMAZON_URL = "https://s3.amazonaws.com/nyubustimes/1.0/";
     static final String VERSION_URL = AMAZON_URL + "version.json";
 
     public abstract void parse(JSONObject jsonObject) throws JSONException, IOException;

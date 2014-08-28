@@ -34,7 +34,6 @@ public class Downloader extends AsyncTask<String, Void, JSONObject> {
     public Downloader(DownloaderHelper helper, Context mContext) {
         this.helper = helper;
         context = mContext;
-        Log.v("Context Tag", (context == null) + " that context is null");
     }
 
     @Override
