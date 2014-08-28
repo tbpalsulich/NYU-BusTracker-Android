@@ -341,9 +341,11 @@ public class Stop {
                     }
                 }
             }
-            for (Time t : times) {
-                if (!timesBetweenStartAndEnd.contains(t)) {
-                    timesBetweenStartAndEnd.add(t);
+            if (endStop.getTimesOfRoute(r.getOtherLongName()).isEmpty()) {
+                for (Time t : times) {
+                    if (!timesBetweenStartAndEnd.contains(t)) {
+                        timesBetweenStartAndEnd.add(t);
+                    }
                 }
             }
         }
