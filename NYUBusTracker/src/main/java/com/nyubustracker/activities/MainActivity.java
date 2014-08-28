@@ -332,7 +332,7 @@ public class MainActivity extends Activity {
                     setStartAndEndStops();
 
                     // Update the map to show the corresponding stops, buses, and segments.
-                    if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
+                    updateMapWithNewStartOrEnd();
 
                     // Get the location of the buses every 10 sec.
                     renewBusRefreshTimer();
@@ -504,14 +504,9 @@ public class MainActivity extends Activity {
             startLoc.setLongitude(startStop.getLocation().longitude);
             endLoc.setLatitude(endStop.getLocation().latitude);
             endLoc.setLongitude(endStop.getLocation().longitude);
-            //            Log.d(REFACTOR_LOG_TAG, "start: " + startStop);
-            //            Log.d(REFACTOR_LOG_TAG, "end: " + endStop);
-            //            Log.d(REFACTOR_LOG_TAG, "s dist: " + l.distanceTo(startLoc));
-            //            Log.d(REFACTOR_LOG_TAG, "e dist: " + l.distanceTo(endLoc));
             if (l.distanceTo(startLoc) > l.distanceTo(endLoc)) {
                 setStartStop(endStop);
             }
-            //            Log.d(REFACTOR_LOG_TAG, "Location: " + l.getLatitude() + ", " + l.getLongitude());
         }
     }
 
@@ -543,11 +538,19 @@ public class MainActivity extends Activity {
                 }
             }
         }
+        else {
+            mMap.clear();
+        }
     }
 
     // Clear the map, because we may have just changed what route we wish to display. Then, add everything back onto the map.
     private void updateMapWithNewStartOrEnd() {
-        if (routesBetweenStartAndEnd == null) return;       // Can't update without any routes...
+        // Can't update without any routes...
+        if (LOCAL_LOGV) Log.v(LOG_TAG, "routesBetween is " + ((routesBetweenStartAndEnd == null) ? "" : "not ") + "null");
+        if (routesBetweenStartAndEnd == null) {
+            mMap.clear();
+            return;
+        }
         if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Have " + routesBetweenStartAndEnd.size() + " routes to show.");
         setUpMapIfNeeded();
         mMap.clear();
@@ -604,7 +607,14 @@ public class MainActivity extends Activity {
     }
 
     private void setEndStop(Stop stop) {
-        if (stop == null) return;
+        if (stop == null) {
+            ((TextView) findViewById(R.id.end_stop)).setText(getString(R.string.default_end));
+            endStop = null;
+            routesBetweenStartAndEnd = null;
+            timesBetweenStartAndEnd = null;
+            updateMapWithNewStartOrEnd();
+            return;
+        }
         // Check there is a route between these stops.
         List<Route> routes = startStop.getRoutesTo(stop);
         if (routes != null && routes.size() > 0 && stop != startStop) {
@@ -614,7 +624,7 @@ public class MainActivity extends Activity {
                 if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Start stop: " + startStop);
                 if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "End stop: " + endStop);
                 setNextBusTime();    // Don't set the next bus if we don't have a valid route.
-                if (routesBetweenStartAndEnd != null) updateMapWithNewStartOrEnd();
+                updateMapWithNewStartOrEnd();
             }
         }
         else {
@@ -651,7 +661,7 @@ public class MainActivity extends Activity {
 
     private void setStartStop(Stop stop) {
         if (stop == null) return;
-        if (endStop == stop) {    // We have an end stop and its name is the same as stopName.
+        if (endStop == stop) {    // Selected the end as the new start.
             // Swap the start and end stops.
             Stop temp = startStop;
             startStop = endStop;
@@ -679,7 +689,7 @@ public class MainActivity extends Activity {
                     return;
                 }
             }
-            ((TextView) findViewById(R.id.end_stop)).setText(getString(R.string.default_end));
+            setEndStop(null);
         }
     }
 
@@ -693,7 +703,7 @@ public class MainActivity extends Activity {
         startStop = newStartAndEnd[0];
         endStop = newStartAndEnd[1];
         routesBetweenStartAndEnd = startStop.getRoutesTo(endStop);
-        timesBetweenStartAndEnd = startStop.getTimesOn(routesBetweenStartAndEnd);
+        timesBetweenStartAndEnd = startStop.getTimesToOn(endStop, routesBetweenStartAndEnd);
         timesAdapter.setDataSet(timesBetweenStartAndEnd);
         timesAdapter.notifyDataSetChanged();
         if (routesBetweenStartAndEnd == null || // No routes between the two. Should not happen.

@@ -273,7 +273,7 @@ public class Stop {
         ArrayList<Time> result = new ArrayList<Time>();
         if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.LOG_TAG, "Times for route: " + route + " (" + times.size() + " possible for " + this.getName() + ")");
         for (Time t : times) {
-            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.LOG_TAG, "Time route: " + t.getRoute());
+            //if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.LOG_TAG, "Time route: " + t.getRoute());
             if (t.getRoute().equals(route)) {
                 result.add(t);
             }
@@ -311,9 +311,9 @@ public class Stop {
         boolean foundAValidRoute = false;
         ArrayList<Route> availableRoutes = new ArrayList<Route>();               // All the routes connecting the two.
         for (Route r : startRoutes) {
-            //if (LOCAL_LOGV) Log.v("Routes", "Start Route: " + r);
+            if (MainActivity.LOCAL_LOGV) Log.v("Routes", "Start Route: " + r);
             if (endRoutes.contains(r) && !availableRoutes.contains(r)) {
-                //if (LOCAL_LOGV) Log.v("Greenwich", "*  " + r + " is available.");
+                if (MainActivity.LOCAL_LOGV) Log.v("Greenwich", "*  " + r + " is available.");
                 foundAValidRoute = true;
                 availableRoutes.add(r);
             }
@@ -322,7 +322,7 @@ public class Stop {
         else return null;
     }
 
-    public List<Time> getTimesOn(List<Route> routes){
+    public List<Time> getTimesToOn(Stop endStop, List<Route> routes){
         if (routes == null) return new ArrayList<Time>();
         ArrayList<Time> timesBetweenStartAndEnd = new ArrayList<Time>();
         for (Route r : routes) {
@@ -334,10 +334,11 @@ public class Stop {
                 Log.d(MainActivity.LOG_TAG, "  has " + times.size() + " times ");
                 Log.d(MainActivity.LOG_TAG, "  has " + otherTimes.size() + " other times.");
             }
-
-            for (Time t : otherTimes) {
-                if (!timesBetweenStartAndEnd.contains(t)) {
-                    timesBetweenStartAndEnd.add(t);
+            if (!endStop.getTimesOfRoute(r.getOtherLongName()).isEmpty()) {
+                for (Time t : otherTimes) {
+                    if (!timesBetweenStartAndEnd.contains(t)) {
+                        timesBetweenStartAndEnd.add(t);
+                    }
                 }
             }
             for (Time t : times) {
