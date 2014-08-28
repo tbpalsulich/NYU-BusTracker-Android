@@ -334,14 +334,14 @@ public class Stop {
                 Log.d(MainActivity.LOG_TAG, "  has " + times.size() + " times ");
                 Log.d(MainActivity.LOG_TAG, "  has " + otherTimes.size() + " other times.");
             }
-            if (!endStop.getTimesOfRoute(r.getOtherLongName()).isEmpty()) {
+            if (!otherTimes.isEmpty() && !endStop.getTimesOfRoute(r.getOtherLongName()).isEmpty()) {
                 for (Time t : otherTimes) {
                     if (!timesBetweenStartAndEnd.contains(t)) {
                         timesBetweenStartAndEnd.add(t);
                     }
                 }
             }
-            if (endStop.getTimesOfRoute(r.getOtherLongName()).isEmpty()) {
+            else {
                 for (Time t : times) {
                     if (!timesBetweenStartAndEnd.contains(t)) {
                         timesBetweenStartAndEnd.add(t);
