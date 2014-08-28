@@ -609,10 +609,13 @@ public class MainActivity extends Activity {
     private void setEndStop(Stop stop) {
         if (stop == null) {
             ((TextView) findViewById(R.id.end_stop)).setText(getString(R.string.default_end));
+            if (drawer.isOpened()) drawer.animateClose();
             endStop = null;
             routesBetweenStartAndEnd = null;
             timesBetweenStartAndEnd = null;
             updateMapWithNewStartOrEnd();
+            drawer.lock();
+            drawer.setAllowSingleTap(false);
             return;
         }
         // Check there is a route between these stops.
