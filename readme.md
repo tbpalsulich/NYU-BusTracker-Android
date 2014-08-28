@@ -67,4 +67,17 @@ if you don't have one, you can try the built in Android emulator or a (much fast
 to get maps working in an emulator.
 10. Run the app (green arrow at the top of Android Studio)!
 
+Release
+-------
+Here is the release process, for when you're ready to push a new version to the Play Store.
+
+1. Make sure `MainActivity.LOCAL_LOGV = false`. Run the app and make sure there is no logging.
+2. Make sure the `DownloaderHelper.AMAZON_URL` is correct.
+3. Make sure your API keys are correct.
+4. Bump the release version in build.gradle.
+5. Tag a release on GitHub.
+6. ./gradlew assembleRelease
+7. Run the app as a last minute check, to make sure everything is in working order.
+8. Upload.
+
 Please see the LICENSE file for license information.
