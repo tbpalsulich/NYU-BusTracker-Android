@@ -1,0 +1,635 @@
+Refresh Sources:
+  Fetching https://dl-ssl.google.com/android/repository/addons_list-2.xml
+  Validate XML
+  Parse XML
+  Fetched Add-ons List successfully
+  Refresh Sources
+  Fetching URL: https://dl-ssl.google.com/android/repository/repository-10.xml
+  Validate XML: https://dl-ssl.google.com/android/repository/repository-10.xml
+  Parse XML:    https://dl-ssl.google.com/android/repository/repository-10.xml
+  Fetching URL: https://dl-ssl.google.com/android/repository/addon.xml
+  Validate XML: https://dl-ssl.google.com/android/repository/addon.xml
+  Parse XML:    https://dl-ssl.google.com/android/repository/addon.xml
+  Fetching URL: https://dl-ssl.google.com/android/repository/addon-6.xml
+  Validate XML: https://dl-ssl.google.com/android/repository/addon-6.xml
+  Parse XML:    https://dl-ssl.google.com/android/repository/addon-6.xml
+  Fetching URL: https://dl-ssl.google.com/glass/gdk/addon.xml
+  Validate XML: https://dl-ssl.google.com/glass/gdk/addon.xml
+  Parse XML:    https://dl-ssl.google.com/glass/gdk/addon.xml
+  Fetching URL: https://dl-ssl.google.com/android/repository/extras/intel/addon.xml
+  Validate XML: https://dl-ssl.google.com/android/repository/extras/intel/addon.xml
+  Parse XML:    https://dl-ssl.google.com/android/repository/extras/intel/addon.xml
+  Fetching URL: https://dl-ssl.google.com/android/repository/sys-img/android/sys-img.xml
+  Validate XML: https://dl-ssl.google.com/android/repository/sys-img/android/sys-img.xml
+  Parse XML:    https://dl-ssl.google.com/android/repository/sys-img/android/sys-img.xml
+  Fetching URL: https://dl-ssl.google.com/android/repository/sys-img/android-wear/sys-img.xml
+  Validate XML: https://dl-ssl.google.com/android/repository/sys-img/android-wear/sys-img.xml
+  Parse XML:    https://dl-ssl.google.com/android/repository/sys-img/android-wear/sys-img.xml
+  Fetching URL: https://dl-ssl.google.com/android/repository/sys-img/android-tv/sys-img.xml
+  Validate XML: https://dl-ssl.google.com/android/repository/sys-img/android-tv/sys-img.xml
+  Parse XML:    https://dl-ssl.google.com/android/repository/sys-img/android-tv/sys-img.xml
+  Fetching URL: https://dl-ssl.google.com/android/repository/sys-img/x86/addon-x86.xml
+  Validate XML: https://dl-ssl.google.com/android/repository/sys-img/x86/addon-x86.xml
+  Parse XML:    https://dl-ssl.google.com/android/repository/sys-img/x86/addon-x86.xml
+Packages available for installation or update: 110
+----------
+id: 1 or "tools"
+     Type: Tool
+     Desc: Android SDK Tools, revision 23.0.2
+----------
+id: 2 or "platform-tools"
+     Type: PlatformTool
+     Desc: Android SDK Platform-tools, revision 20
+----------
+id: 3 or "build-tools-20.0.0"
+     Type: BuildTool
+     Desc: Android SDK Build-tools, revision 20
+----------
+id: 4 or "build-tools-19.1.0"
+     Type: BuildTool
+     Desc: Android SDK Build-tools, revision 19.1
+----------
+id: 5 or "build-tools-19.0.3"
+     Type: BuildTool
+     Desc: Android SDK Build-tools, revision 19.0.3
+----------
+id: 6 or "build-tools-19.0.2"
+     Type: BuildTool
+     Desc: Android SDK Build-tools, revision 19.0.2
+----------
+id: 7 or "build-tools-19.0.1"
+     Type: BuildTool
+     Desc: Android SDK Build-tools, revision 19.0.1
+----------
+id: 8 or "build-tools-19.0.0"
+     Type: BuildTool
+     Desc: Android SDK Build-tools, revision 19
+----------
+id: 9 or "build-tools-18.1.1"
+     Type: BuildTool
+     Desc: Android SDK Build-tools, revision 18.1.1
+----------
+id: 10 or "build-tools-18.1.0"
+     Type: BuildTool
+     Desc: Android SDK Build-tools, revision 18.1
+----------
+id: 11 or "build-tools-18.0.1"
+     Type: BuildTool
+     Desc: Android SDK Build-tools, revision 18.0.1
+----------
+id: 12 or "build-tools-17.0.0"
+     Type: BuildTool
+     Desc: Android SDK Build-tools, revision 17
+----------
+id: 13 or "doc-L"
+     Type: Doc
+     Desc: Documentation for Android 'L' Preview SDK, revision 1
+----------
+id: 14 or "android-20"
+     Type: Platform
+     Desc: Android SDK Platform 4.4W
+           Revision 1
+----------
+id: 15 or "android-L"
+     Type: Platform
+     Desc: Android SDK Platform L
+           Revision 3
+----------
+id: 16 or "android-19"
+     Type: Platform
+     Desc: Android SDK Platform 4.4.2
+           Revision 3
+----------
+id: 17 or "android-18"
+     Type: Platform
+     Desc: Android SDK Platform 4.3
+           Revision 2
+----------
+id: 18 or "android-17"
+     Type: Platform
+     Desc: Android SDK Platform 4.2.2
+           Revision 2
+----------
+id: 19 or "android-16"
+     Type: Platform
+     Desc: Android SDK Platform 4.1.2
+           Revision 4
+----------
+id: 20 or "android-15"
+     Type: Platform
+     Desc: Android SDK Platform 4.0.3
+           Revision 3
+----------
+id: 21 or "android-14"
+     Type: Platform
+     Desc: Android SDK Platform 4.0
+           Revision 3
+----------
+id: 22 or "android-13"
+     Type: Platform
+     Desc: Android SDK Platform 3.2, revision 1
+----------
+id: 23 or "android-12"
+     Type: Platform
+     Desc: Android SDK Platform 3.1, revision 3
+----------
+id: 24 or "android-11"
+     Type: Platform
+     Desc: Android SDK Platform 3.0, revision 2
+----------
+id: 25 or "android-10"
+     Type: Platform
+     Desc: Android SDK Platform 2.3.3._r2
+           Revision 2
+----------
+id: 26 or "android-9"
+     Type: Platform
+     Desc: Android SDK Platform 2.3.1_r2
+           Revision 2 (Obsolete)
+----------
+id: 27 or "android-8"
+     Type: Platform
+     Desc: Android SDK Platform 2.2_r3
+           Revision 3
+----------
+id: 28 or "android-7"
+     Type: Platform
+     Desc: Android SDK Platform 2.1_r3
+           Revision 3
+----------
+id: 29 or "android-6"
+     Type: Platform
+     Desc: Android SDK Platform 2.0.1_r1
+           Revision 1 (Obsolete)
+----------
+id: 30 or "android-5"
+     Type: Platform
+     Desc: Android SDK Platform 2.0, revision 1
+----------
+id: 31 or "android-4"
+     Type: Platform
+     Desc: Android SDK Platform 1.6_r2
+           Revision 3
+----------
+id: 32 or "android-3"
+     Type: Platform
+     Desc: Android SDK Platform 1.5_r3
+           Revision 4
+----------
+id: 33 or "android-2"
+     Type: Platform
+     Desc: Android SDK Platform 1.1_r1
+           Revision 1 (Obsolete)
+----------
+id: 34 or "sample-20"
+     Type: Sample
+     Desc: Samples for SDK API 20, revision 2
+----------
+id: 35 or "sample-L"
+     Type: Sample
+     Desc: Samples for SDK API L Preview, revision 2
+----------
+id: 36 or "sample-19"
+     Type: Sample
+     Desc: Samples for SDK API 19, revision 6
+----------
+id: 37 or "sample-18"
+     Type: Sample
+     Desc: Samples for SDK API 18, revision 1
+----------
+id: 38 or "sample-17"
+     Type: Sample
+     Desc: Samples for SDK API 17, revision 1
+----------
+id: 39 or "sample-16"
+     Type: Sample
+     Desc: Samples for SDK API 16, revision 1
+----------
+id: 40 or "sample-15"
+     Type: Sample
+     Desc: Samples for SDK API 15, revision 2
+----------
+id: 41 or "sample-14"
+     Type: Sample
+     Desc: Samples for SDK API 14, revision 2
+----------
+id: 42 or "sample-13"
+     Type: Sample
+     Desc: Android SDK Samples for Android API 13, revision 1
+----------
+id: 43 or "sample-12"
+     Type: Sample
+     Desc: Android SDK Samples for Android API 12, revision 1
+----------
+id: 44 or "sample-11"
+     Type: Sample
+     Desc: Android SDK Samples for Android API 11, revision 1
+----------
+id: 45 or "sample-10"
+     Type: Sample
+     Desc: Android SDK Samples for Android API 10, revision 1
+----------
+id: 46 or "sample-9"
+     Type: Sample
+     Desc: Android SDK Samples for Android API 9, revision 1
+----------
+id: 47 or "sample-8"
+     Type: Sample
+     Desc: Android SDK Samples for Android API 8, revision 1
+----------
+id: 48 or "sample-7"
+     Type: Sample
+     Desc: Android SDK Samples for Android API 7, revision 1
+----------
+id: 49 or "sys-img-armeabi-v7a-android-wear-20"
+     Type: SystemImage
+     Desc: Android SDK Platform 4.4W
+           Revision 1
+           Requires SDK Platform Android API 20
+----------
+id: 50 or "sys-img-x86-android-wear-20"
+     Type: SystemImage
+     Desc: Android SDK Platform 4.4W
+           Revision 1
+           Requires SDK Platform Android API 20
+----------
+id: 51 or "sys-img-armeabi-v7a-android-tv-l"
+     Type: SystemImage
+     Desc: Android SDK Platform L
+           Revision 1
+           Requires SDK Platform Android API L
+----------
+id: 52 or "sys-img-x86-android-tv-l"
+     Type: SystemImage
+     Desc: Android SDK Platform L
+           Revision 1
+           Requires SDK Platform Android API L
+----------
+id: 53 or "sys-img-armeabi-v7a-android-l"
+     Type: SystemImage
+     Desc: Android SDK Platform L
+           Revision 1
+           Requires SDK Platform Android API L
+----------
+id: 54 or "sys-img-x86-android-l"
+     Type: SystemImage
+     Desc: Android SDK Platform L
+           Revision 1
+           Requires SDK Platform Android API L
+----------
+id: 55 or "sys-img-armeabi-v7a-android-19"
+     Type: SystemImage
+     Desc: Android SDK Platform 4.4.2
+           Revision 2
+           Requires SDK Platform Android API 19
+----------
+id: 56 or "sys-img-x86-android-19"
+     Type: SystemImage
+     Desc: Android SDK Platform 4.4.2
+           Revision 2
+           Requires SDK Platform Android API 19
+----------
+id: 57 or "sys-img-armeabi-v7a-android-18"
+     Type: SystemImage
+     Desc: Android SDK Platform 4.3
+           Revision 2
+           Requires SDK Platform Android API 18
+----------
+id: 58 or "sys-img-x86-android-18"
+     Type: SystemImage
+     Desc: Android SDK Platform 4.3
+           Revision 1
+           Requires SDK Platform Android API 18
+----------
+id: 59 or "sys-img-armeabi-v7a-android-17"
+     Type: SystemImage
+     Desc: Android SDK Platform 4.2.2
+           Revision 2
+           Requires SDK Platform Android API 17
+----------
+id: 60 or "sys-img-x86-android-17"
+     Type: SystemImage
+     Desc: Android SDK Platform 4.2
+           Revision 1
+           Requires SDK Platform Android API 17
+----------
+id: 61 or "sys-img-mips-android-17"
+     Type: SystemImage
+     Desc: Android 4.2.1
+           Revision 1
+           Requires SDK Platform Android API 17
+----------
+id: 62 or "sys-img-armeabi-v7a-android-16"
+     Type: SystemImage
+     Desc: Android SDK Platform 4.1
+           Revision 3
+           Requires SDK Platform Android API 16
+----------
+id: 63 or "sys-img-x86-android-16"
+     Type: SystemImage
+     Desc: Android SDK Platform 4.1.1
+           Revision 1
+           Requires SDK Platform Android API 16
+----------
+id: 64 or "sys-img-mips-android-16"
+     Type: SystemImage
+     Desc: Android 4.1.2
+           Revision 4
+           Requires SDK Platform Android API 16
+----------
+id: 65 or "sys-img-armeabi-v7a-android-15"
+     Type: SystemImage
+     Desc: Android SDK Platform 4.0.3
+           Revision 2
+           Requires SDK Platform Android API 15
+----------
+id: 66 or "sys-img-x86-android-15"
+     Type: SystemImage
+     Desc: Android SDK Platform 4.0.4
+           Revision 1
+           Requires SDK Platform Android API 15
+----------
+id: 67 or "sys-img-mips-android-15"
+     Type: SystemImage
+     Desc: Android 4.0.4
+           Revision 1
+           Requires SDK Platform Android API 15
+----------
+id: 68 or "sys-img-armeabi-v7a-android-14"
+     Type: SystemImage
+     Desc: Android SDK Platform 4.0
+           Revision 2
+           Requires SDK Platform Android API 14
+----------
+id: 69 or "sys-img-x86-android-10"
+     Type: SystemImage
+     Desc: Android SDK Platform 2.3.7
+           Revision 2
+           Requires SDK Platform Android API 10
+----------
+id: 70 or "addon-google_apis_x86-google-19"
+     Type: Addon
+     Desc: Google APIs (x86 System Image), Android API 19, revision 7
+           By Google Inc.
+           Android x86 + Google APIs
+           Requires SDK Platform Android API 19
+----------
+id: 71 or "addon-google_apis-google-19"
+     Type: Addon
+     Desc: Google APIs (ARM System Image), Android API 19, revision 7
+           By Google Inc.
+           Android + Google APIs
+           Requires SDK Platform Android API 19
+----------
+id: 72 or "addon-google_gdk-google-19"
+     Type: Addon
+     Desc: Glass Development Kit Preview, Android API 19, revision 8
+           By Google Inc.
+           Preview of the Glass Development Kit
+           Requires SDK Platform Android API 19
+----------
+id: 73 or "addon-google_apis-google-18"
+     Type: Addon
+     Desc: Google APIs, Android API 18, revision 3
+           By Google Inc.
+           Android + Google APIs
+           Requires SDK Platform Android API 18
+----------
+id: 74 or "addon-google_apis-google-17"
+     Type: Addon
+     Desc: Google APIs, Android API 17, revision 3
+           By Google Inc.
+           Android + Google APIs
+           Requires SDK Platform Android API 17
+----------
+id: 75 or "addon-google_apis-google-16"
+     Type: Addon
+     Desc: Google APIs, Android API 16, revision 3
+           By Google Inc.
+           Android + Google APIs
+           Requires SDK Platform Android API 16
+----------
+id: 76 or "addon-google_apis-google-15"
+     Type: Addon
+     Desc: Google APIs, Android API 15, revision 2
+           By Google Inc.
+           Android + Google APIs
+           Requires SDK Platform Android API 15
+----------
+id: 77 or "addon-google_apis-google-14"
+     Type: Addon
+     Desc: Google APIs, Android API 14, revision 2
+           By Google Inc.
+           Android + Google APIs
+           Requires SDK Platform Android API 14
+----------
+id: 78 or "addon-google_apis-google-13"
+     Type: Addon
+     Desc: Google APIs, Android API 13, revision 1
+           By Google Inc.
+           Android + Google APIs, API 13, revision 1
+           Requires SDK Platform Android API 13
+----------
+id: 79 or "addon-google_tv_addon-google-13"
+     Type: Addon
+     Desc: Google TV Addon, Android API 13, revision 1
+           By Google Inc.
+           Android + Google TV, API 13
+           Requires SDK Platform Android API 13
+----------
+id: 80 or "addon-google_apis-google-12"
+     Type: Addon
+     Desc: Google APIs, Android API 12, revision 1
+           By Google Inc.
+           Android + Google APIs, API 12, revision 1
+           Requires SDK Platform Android API 12
+----------
+id: 81 or "addon-google_tv_addon-google-12"
+     Type: Addon
+     Desc: Google TV Addon, Android API 12, revision 2
+           By Google Inc.
+           Android + Google TV, API 12, preview release
+           Requires SDK Platform Android API 12
+----------
+id: 82 or "addon-google_apis-google-11"
+     Type: Addon
+     Desc: Google APIs, Android API 11, revision 1
+           By Google Inc.
+           Android + Google APIs, API 11, revision 1
+           Requires SDK Platform Android API 11
+----------
+id: 83 or "addon-google_apis-google-10"
+     Type: Addon
+     Desc: Google APIs, Android API 10, revision 2
+           By Google Inc.
+           Android + Google APIs, API 10, revision 2
+           Requires SDK Platform Android API 10
+----------
+id: 84 or "addon-google_apis-google-9"
+     Type: Addon
+     Desc: Google APIs, Android API 9, revision 2 (Obsolete)
+           By Google Inc.
+           Android + Google APIs, API 9, revision 2
+           Requires SDK Platform Android API 9
+----------
+id: 85 or "addon-google_apis-google-8"
+     Type: Addon
+     Desc: Google APIs, Android API 8, revision 2
+           By Google Inc.
+           Android + Google APIs, API 8, revision 2
+           Requires SDK Platform Android API 8
+----------
+id: 86 or "addon-google_apis-google-7"
+     Type: Addon
+     Desc: Google APIs, Android API 7, revision 1
+           By Google Inc.
+           Android + Google APIs, revision 1
+           Requires SDK Platform Android API 7
+----------
+id: 87 or "addon-google_apis-google-6"
+     Type: Addon
+     Desc: Google APIs, Android API 6, revision 1 (Obsolete)
+           By Google Inc.
+           Android + Google APIs, revision 1
+           Requires SDK Platform Android API 6
+----------
+id: 88 or "addon-google_apis-google-5"
+     Type: Addon
+     Desc: Google APIs, Android API 5, revision 1 (Obsolete)
+           By Google Inc.
+           Android + Google APIs, revision 1
+           Requires SDK Platform Android API 5
+----------
+id: 89 or "addon-google_apis-google-4"
+     Type: Addon
+     Desc: Google APIs, Android API 4, revision 2
+           By Google Inc.
+           Android + Google APIs, revision 2
+           Requires SDK Platform Android API 4
+----------
+id: 90 or "addon-google_apis-google-3"
+     Type: Addon
+     Desc: Google APIs, Android API 3, revision 3
+           By Google Inc.
+           Android + Google APIs
+           Requires SDK Platform Android API 3
+----------
+id: 91 or "source-20"
+     Type: Source
+     Desc: Sources for Android SDK, API 20, revision 1
+----------
+id: 92 or "source-19"
+     Type: Source
+     Desc: Sources for Android SDK, API 19, revision 2
+----------
+id: 93 or "source-18"
+     Type: Source
+     Desc: Sources for Android SDK, API 18, revision 1
+----------
+id: 94 or "source-17"
+     Type: Source
+     Desc: Sources for Android SDK, API 17, revision 1
+----------
+id: 95 or "source-16"
+     Type: Source
+     Desc: Sources for Android SDK, API 16, revision 2
+----------
+id: 96 or "source-15"
+     Type: Source
+     Desc: Sources for Android SDK, API 15, revision 2
+----------
+id: 97 or "source-14"
+     Type: Source
+     Desc: Sources for Android SDK, API 14, revision 1
+----------
+id: 98 or "extra-android-m2repository"
+     Type: Extra
+     Desc: Android Support Repository, revision 6
+           By Android
+           Local Maven repository for Support Libraries
+           Install path: extras/android/m2repository
+----------
+id: 99 or "extra-android-support"
+     Type: Extra
+     Desc: Android Support Library, revision 20
+           By Android
+           Install path: extras/android/support
+----------
+id: 100 or "extra-google-admob_ads_sdk"
+     Type: Extra
+     Desc: Google AdMob Ads SDK, revision 11 (Obsolete)
+           By Google Inc.
+           AdMob Ads SDK
+           Install path: extras/google/admob_ads_sdk
+----------
+id: 101 or "extra-google-analytics_sdk_v2"
+     Type: Extra
+     Desc: Google Analytics App Tracking SDK, revision 3 (Obsolete)
+           By Google Inc.
+           Analytics App Tracking SDK
+           Install path: extras/google/analytics_sdk_v2
+----------
+id: 102 or "extra-google-gcm"
+     Type: Extra
+     Desc: Google Cloud Messaging for Android Library, revision 3 (Obsolete)
+           By Google Inc.
+           GCM library has been moved to Google Play Services
+           (com.google.android.gms.gcm) and this standalone version is no
+           longer supported
+           Install path: extras/google/gcm
+----------
+id: 103 or "extra-google-google_play_services_fit_preview"
+     Type: Extra
+     Desc: Google Play services for Fit Preview, revision 1
+           By Google Inc.
+           Google Play services client library and sample code
+           Install path: extras/google/google_play_services_fit_preview
+----------
+id: 104 or "extra-google-google_play_services_froyo"
+     Type: Extra
+     Desc: Google Play services for Froyo, revision 12
+           By Google Inc.
+           Google Play services client library and sample code
+           Install path: extras/google/google_play_services_froyo
+----------
+id: 105 or "extra-google-google_play_services"
+     Type: Extra
+     Desc: Google Play services, revision 19
+           By Google Inc.
+           Google Play services client library and sample code
+           Install path: extras/google/google_play_services
+----------
+id: 106 or "extra-google-m2repository"
+     Type: Extra
+     Desc: Google Repository, revision 11
+           By Google Inc.
+           Local Maven repository for Google Libraries
+           Install path: extras/google/m2repository
+----------
+id: 107 or "extra-google-play_apk_expansion"
+     Type: Extra
+     Desc: Google Play APK Expansion Library, revision 3
+           By Google Inc.
+           Google Play APK Expansion library
+           Install path: extras/google/play_apk_expansion
+----------
+id: 108 or "extra-google-play_billing"
+     Type: Extra
+     Desc: Google Play Billing Library, revision 5
+           By Google Inc.
+           Google Play Billing files and sample code
+           Install path: extras/google/play_billing
+----------
+id: 109 or "extra-google-play_licensing"
+     Type: Extra
+     Desc: Google Play Licensing Library, revision 2
+           By Google Inc.
+           Google Play Licensing client library
+           Install path: extras/google/play_licensing
+----------
+id: 110 or "extra-google-webdriver"
+     Type: Extra
+     Desc: Google Web Driver, revision 2
+           By Google Inc.
+           WebDriver
+           Install path: extras/google/webdriver
