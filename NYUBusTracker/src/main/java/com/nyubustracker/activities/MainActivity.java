@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -237,9 +238,11 @@ public class MainActivity extends Activity {
                 @Override
                 public void run() {
                         Stop broadway = BusManager.getBusManager().getStopByName("715 Broadway @ Washington Square");
-                        context.getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).apply();
-                        broadway.setFavorite(true);
-                        progressDialog.dismiss();
+                        if (broadway != null) {
+                            context.getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).apply();
+                            broadway.setFavorite(true);
+                            progressDialog.dismiss();
+                        }
                     }
                 });
             }
@@ -929,5 +932,24 @@ public class MainActivity extends Activity {
                 else if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Could not delete " + f.toString());
             }
         }
+    }
+
+    private void showErrorAndFinish() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Error downloading")
+                .setCancelable(false)
+                .setPositiveButton("Refresh", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        finish();
+                    }
+                })
+                .setNegativeButton("Try again later", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        downloadEverything(true);
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 }
