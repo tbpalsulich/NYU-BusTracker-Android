@@ -24,6 +24,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.CompoundButton;
@@ -86,7 +87,7 @@ import java.util.TimerTask;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 public class MainActivity extends Activity {
-    public static final boolean LOCAL_LOGV = true;
+    public static final boolean LOCAL_LOGV = false;
     private static final String RUN_ONCE_PREF = "runOnce";
     private static final String STOP_PREF = "stops";
     private static final String START_STOP_PREF = "startStop";
@@ -172,7 +173,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    String readSavedData(String fileName) {
+    String readSavedData(String fileName) throws JSONException {
         if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Reading saved data from " + fileName);
         StringBuilder buffer = new StringBuilder("");
         try {
@@ -192,7 +193,7 @@ public class MainActivity extends Activity {
             inputStream.close();
         } catch (IOException e) {
             if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Failed to read " + fileName + "...");
-            e.printStackTrace();
+            throw new JSONException("Failed to read " + fileName);
         }
         return buffer.toString();
     }
@@ -885,20 +886,15 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void displayNotConnectedError() {
-        Context context = getApplicationContext();
-        CharSequence text = getString(R.string.not_connected);
-        int duration = Toast.LENGTH_SHORT;
-
-        if (context != null) {
-            Toast.makeText(context, text, duration).show();
-        }
-    }
-
     @SuppressWarnings("UnusedParameters")
     public void createInfoDialog(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        LinearLayout linearLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.information_layout, null);
+        LinearLayout linearLayout = (LinearLayout) getLayoutInflater()
+                .inflate(
+                        R.layout.information_layout,
+                        (ViewGroup) ((ViewGroup) this.findViewById(android.R.id.content)).getChildAt(0),
+                        false
+                );
         builder.setView(linearLayout);
         Dialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(true);

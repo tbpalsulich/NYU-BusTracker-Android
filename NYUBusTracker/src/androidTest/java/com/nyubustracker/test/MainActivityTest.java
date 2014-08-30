@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.ViewAsserts;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 

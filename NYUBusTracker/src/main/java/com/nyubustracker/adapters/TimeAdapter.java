@@ -53,7 +53,7 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.time_list_item, null);
+            convertView = inflater.inflate(R.layout.time_list_item, parent, false);
             if (convertView != null) {
                 viewHolder = new ViewHolder();
                 viewHolder.timeText = (TextView) convertView.findViewById(R.id.time_text);
