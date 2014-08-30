@@ -58,6 +58,10 @@ android {
             versionNameSuffix "-debug"
         }
     }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 robolectric {
