@@ -3,10 +3,12 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.12.+'
+        classpath 'com.android.tools.build:gradle:0.12.2'
+        classpath 'org.robolectric:robolectric-gradle-plugin:0.11.0'
     }
 }
 apply plugin: 'com.android.application'
+apply plugin: 'robolectric'
 
 repositories {
     mavenCentral()
@@ -58,10 +60,9 @@ android {
     }
 }
 
-sourceSets {
-    instrumentTest {
-        java.srcDirs = ['instrumentTest/java']
-    }
+robolectric {
+    include '**/*Test.class'
+    exclude '**/espresso/**/*.class'
 }
 
 dependencies {

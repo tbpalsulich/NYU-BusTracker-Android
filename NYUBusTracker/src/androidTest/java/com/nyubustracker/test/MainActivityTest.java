@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.nyubustracker.R;
 import com.nyubustracker.activities.MainActivity;
 import com.nyubustracker.helpers.BusManager;
+import com.nyubustracker.helpers.MultipleOrientationSlidingDrawer;
 
 public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActivity> {
     Activity mActivity;
@@ -21,18 +22,20 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     TextView endText;
     String endTextCorrect;
 
-    Button callSafeRideButton;
+    TextView callSafeRideButton;
     String safeRideTextCorrect;
 
-    Button startButton;
-    Button endButton;
+    TextView startButton;
+    TextView endButton;
 
-    Button timeButton;
+    MultipleOrientationSlidingDrawer drawer;
     TextSwitcher nextTime;
     TextView nextRoute;
     TextView nextBus;
 
     BusManager busManager;
+
+    View decorView;
 
     public MainActivityTest() {
         super(MainActivity.class);
@@ -51,10 +54,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         nextRoute = (TextView) mActivity.findViewById(R.id.next_route);
         nextBus = (TextView) mActivity.findViewById(R.id.next_bus);
 
-        callSafeRideButton = (Button) mActivity.findViewById(R.id.safe_ride_button);
+        callSafeRideButton = (TextView) mActivity.findViewById(R.id.safe_ride_button);
 
-        startButton = (Button) mActivity.findViewById(R.id.start_stop);
-        endButton = (Button) mActivity.findViewById(R.id.end_stop);
+        startButton = (TextView) mActivity.findViewById(R.id.start_stop);
+        endButton = (TextView) mActivity.findViewById(R.id.end_stop);
+        drawer = (MultipleOrientationSlidingDrawer) mActivity.findViewById(R.id.sliding_drawer);
 
         startTextCorrect = mActivity.getString(R.string.start);
         safeRideTextCorrect = mActivity.getString(R.string.call_safe_ride);
@@ -62,6 +66,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         busManager = BusManager.getBusManager();
 
+        decorView = mActivity.getWindow().getDecorView();
     }
 
     public void testPreconditions() {
@@ -72,7 +77,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertNotNull(nextTime);
         assertNotNull(nextBus);
         assertNotNull(nextRoute);
-        assertNotNull(timeButton);
+        assertNotNull(drawer);
+        assertNotNull(decorView);
     }
 
     public void testStartText() {
@@ -80,7 +86,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     public void testStartText_layout() {
-        final View decorView = mActivity.getWindow().getDecorView();
         ViewAsserts.assertOnScreen(decorView, startText);
         assertTrue(View.VISIBLE == startText.getVisibility());
     }
@@ -90,15 +95,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     public void testEndText_layout() {
-        final View decorView = mActivity.getWindow().getDecorView();
         ViewAsserts.assertOnScreen(decorView, endText);
         assertTrue(View.VISIBLE == endText.getVisibility());
-    }
-
-    public void testSafeRideButton_layout() {
-        final View decorView = mActivity.getWindow().getDecorView();
-        ViewAsserts.assertOnScreen(decorView, callSafeRideButton);
-        assertTrue(View.GONE == callSafeRideButton.getVisibility());
     }
 
     public void testSafeRideButton_text() {
