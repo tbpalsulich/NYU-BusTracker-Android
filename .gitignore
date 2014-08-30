@@ -1,6 +1,5 @@
 .gradle
 /local.properties
-/.idea/workspace.xml
 .DS_Store
 *.iml
 *.ipr
@@ -10,4 +9,4 @@ NYUBusTracker/src/main/AndroidManifest.xml
 NYUBusTracker/src/main/res/values/analytics.xml
 NYUBusTracker/src/debug/res/values/analytics.xml
 build
-**/api-keys.xml
+NYUBusTracker/src/main/res/values/api-keys.xml
