@@ -39,6 +39,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     public MainActivityTest() {
         super(MainActivity.class);
     }
+    public void testExample() {
+        
+    }
 /*
     @Override
     protected void setUp() throws Exception {
