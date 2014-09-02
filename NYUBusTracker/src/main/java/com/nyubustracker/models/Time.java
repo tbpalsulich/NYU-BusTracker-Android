@@ -49,9 +49,10 @@ public class Time {
     private String route;       // What route this time corresponds to.
 
     public Time(String time, TimeOfWeek mTimeOfWeek, String mRoute) {           // Input a string like "8:04 PM".
-        AM = time.contains("AM");       // Automatically accounts for AM/PM with military time.
+        AM = time.toLowerCase(Locale.ROOT).contains("am");       // Automatically accounts for AM/PM with military time.
+        String amOrPm = AM ? "am" : "pm";
         hour = Integer.parseInt(time.substring(0, time.indexOf(":")).trim());
-        min = Integer.parseInt(time.substring(time.indexOf(":") + 1, time.indexOf(" ")).trim());
+        min = Integer.parseInt(time.substring(time.indexOf(":") + 1, time.toLowerCase().indexOf(amOrPm)).trim());
         if (AM && hour == 12) {      // It's 12:xx AM
             hour = 0;
         }
@@ -207,6 +208,14 @@ public class Time {
 
     public int getHour() {
         return hour;
+    }
+
+    public int getMinute() {
+        return min;
+    }
+
+    public boolean isAM() {
+        return AM;
     }
 
     // Ensure the minute string is 2 digits long.
