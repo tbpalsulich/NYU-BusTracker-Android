@@ -229,7 +229,7 @@ public class Time {
     }
 
     // isStrictlyBefore(t) returns false if the times are equal or this is after t.
-    public boolean isStrictlyBefore(Time t) {
+    private boolean isStrictlyBefore(Time t) {
         //if (MainActivity.LOCAL_LOGV) Log.v("Time Debugging", this.toString() + " is strictly before " + t.toString() + ": " + ((this.hour < t.hour) || (this.hour == t.hour && this.min < t.min)));
         return (this.hour < t.hour) || (this.hour == t.hour && this.min < t.min);
     }

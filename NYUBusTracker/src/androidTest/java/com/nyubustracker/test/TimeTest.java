@@ -104,4 +104,13 @@ public class TimeTest extends TestCase{
         assertTrue(Time.compare.compare(t0, t1) == 0);
         assertEquals(t0, t1);
     }
+
+    public void testGetTimeOfWeekAsString() {
+        Time t1 = new Time("12:01 AM", Time.TimeOfWeek.Weekday, "Route T");
+        Time t2 = new Time( "1:00 AM", Time.TimeOfWeek.Friday, "Route T");
+        Time t3 = new Time( "1:00 PM", Time.TimeOfWeek.Weekend, "Route T");
+        assertEquals("Should return the time of week", "Weekday", t1.getTimeOfWeekAsString());
+        assertEquals("Should return the time of week", "Friday", t2.getTimeOfWeekAsString());
+        assertEquals("Should return the time of week", "Weekend", t3.getTimeOfWeekAsString());
+    }
 }

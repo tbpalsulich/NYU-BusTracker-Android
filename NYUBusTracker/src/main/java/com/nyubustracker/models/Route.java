@@ -110,7 +110,7 @@ public class Route {
     public boolean isActive(Stop s) {
         Time currentTime = Time.getCurrentTime();
         for (Time t : s.getTimesOfRoute(this.getLongName())) {
-            if (!t.isStrictlyBefore(currentTime)) return true;
+            if (Time.compare.compare(t, currentTime) >= 0) return true;
         }
         return false;
     }
