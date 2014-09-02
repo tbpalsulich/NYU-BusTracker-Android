@@ -67,7 +67,10 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
         }
         if (viewHolder.timeText != null) {
             Time thisTime = times.get(position);
-            viewHolder.timeText.setText(thisTime.toString() + ((currentTime.getTimeAsTimeUntil(thisTime).isBefore(new Time(1, 0)) && currentTime.getTimeOfWeek() == thisTime.getTimeOfWeek()) ? " (" + currentTime.getTimeAsStringUntil(thisTime, context.getResources()) + ")" : ""));
+            viewHolder.timeText.setText(thisTime.toString() +
+                    ((Time.compare.compare(currentTime.getTimeAsTimeUntil(thisTime), new Time(1, 0)) <= 0 && currentTime.getTimeOfWeek() == thisTime.getTimeOfWeek())
+                            ? " (" + currentTime.getTimeAsStringUntil(thisTime, context.getResources()) + ")"
+                            : ""));
         }
         if (viewHolder.viaRouteText != null) {
             String[] routeArray = times.get(position).getRoute().split("\\s");

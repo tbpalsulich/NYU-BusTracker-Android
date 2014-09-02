@@ -1,11 +1,15 @@
-package com.nyubustracker.test;
+package com.nyubustracker.models.test;
 
 import com.nyubustracker.models.Time;
 
 import junit.framework.TestCase;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 public class TimeTest extends TestCase{
@@ -88,7 +92,7 @@ public class TimeTest extends TestCase{
     public void testComparatorDifferentDay() {
         Time t0 = new Time("12:00 AM", Time.TimeOfWeek.Weekday, "Route T");
         Time t1 = new Time("12:01 AM", Time.TimeOfWeek.Weekday, "Route T");
-        Time t2 = new Time( "1:00 AM", Time.TimeOfWeek.Friday, "Route T");
+        Time t2 = new Time( "1:00 PM", Time.TimeOfWeek.Friday, "Route T");
         Time t3 = new Time( "1:00 PM", Time.TimeOfWeek.Weekend, "Route T");
         assertTrue(Time.compare.compare(t0, t1) < 0);
         assertTrue(Time.compare.compare(t0, t2) < 0);
@@ -112,5 +116,14 @@ public class TimeTest extends TestCase{
         assertEquals("Should return the time of week", "Weekday", t1.getTimeOfWeekAsString());
         assertEquals("Should return the time of week", "Friday", t2.getTimeOfWeekAsString());
         assertEquals("Should return the time of week", "Weekend", t3.getTimeOfWeekAsString());
+    }
+
+    public void testGetCurrentTime() throws ParseException {
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("h:m a");
+        calendar.setTime(sdf.parse("1:12 PM"));
+        Time t = Time.getCurrentTime(calendar);
+        assertEquals("Hour should be set by current time", 13, t.getHour());
+        assertEquals("Minute should be set by current time", 12, t.getMinute());
     }
 }

@@ -1,4 +1,4 @@
-package com.nyubustracker.test;
+package com.nyubustracker.activities.test;
 
 import android.app.Activity;
 import android.test.ActivityInstrumentationTestCase2;

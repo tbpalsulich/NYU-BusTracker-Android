@@ -34,12 +34,7 @@ public class Time {
                 // Times are the same, but we aren't comparing the current time.
                 return 0;
             }
-            else if (time1.getTimeOfWeek().ordinal() < time2.getTimeOfWeek().ordinal()) {    // Time1 is an earlier day.
-                return -1;
-            }
-            else {       // Time2 is an earlier day.
-                return 1;
-            }
+            return time1.getTimeOfWeek().ordinal() - time2.getTimeOfWeek().ordinal();
         }
     };
     private final TimeOfWeek timeOfWeek;  // Either Weekday, Friday, Weekend.
@@ -82,10 +77,14 @@ public class Time {
         return timeOfWeek;
     }
 
+    public static Time getCurrentTime(Calendar calendar) {
+        calendar.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+        return new Time(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+    }
+
     public static Time getCurrentTime() {
-        Calendar rightNow = Calendar.getInstance();
-        rightNow.setTimeZone(TimeZone.getTimeZone("America/New_York"));
-        return new Time(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE));
+        return getCurrentTime(Calendar.getInstance());
+
     }
 
     // Returns a String representation of the time of week this Time is in.
@@ -162,7 +161,7 @@ public class Time {
 
     // Return a Time object who represents the difference in time between the two Times.
     public Time getTimeAsTimeUntil(Time t) {
-        if (this.isBefore(t)) {
+        if (compare.compare(this, t) <= 0) {
             //if (MainActivity.LOCAL_LOGV) Log.v("Time Debugging", this + " is strictly before " + t);
             int hourDifference = t.hour - this.hour;
             int minDifference = t.min - this.min;
@@ -179,10 +178,6 @@ public class Time {
 
     public TimeOfWeek getTimeOfWeek() {
         return timeOfWeek;
-    }
-
-    public boolean isBefore(Time t) {
-        return (this.hour < t.hour) || (this.hour == t.hour && this.min <= t.min);
     }
 
     public boolean equals(Object t) {
