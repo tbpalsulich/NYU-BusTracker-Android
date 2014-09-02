@@ -62,6 +62,18 @@ public class TimeTest extends TestCase{
         assertFalse("Bad format: AM/PM should be set", t.isAM());
     }
 
+    public void testAltConstructor() {
+        Time t = new Time(0, 0);
+        assertEquals("Hour should be set", 0, t.getHour());
+        assertEquals("Minute should be set", 0, t.getMinute());
+        assertTrue("AM/PM should be set", t.isAM());
+
+        t = new Time(12, 0);
+        assertEquals("Hour should be set", 12, t.getHour());
+        assertEquals("Minute should be set", 0, t.getMinute());
+        assertFalse("AM/PM should be set", t.isAM());
+    }
+
     public void testComparatorSameDay() {
         Time t0 = new Time("12:00 AM", Time.TimeOfWeek.Weekday, "Route T");
         Time t1 = new Time("12:01 AM", Time.TimeOfWeek.Weekday, "Route T");
