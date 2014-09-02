@@ -1,8 +1,10 @@
 package com.nyubustracker.models;
 
 import android.content.res.Resources;
+import android.util.Log;
 
 import com.nyubustracker.R;
+import com.nyubustracker.activities.MainActivity;
 import com.nyubustracker.helpers.BusManager;
 
 import java.util.Calendar;
@@ -44,18 +46,24 @@ public class Time {
     private String route;       // What route this time corresponds to.
 
     public Time(String time, TimeOfWeek mTimeOfWeek, String mRoute) {           // Input a string like "8:04 PM".
+        timeOfWeek = mTimeOfWeek;
+        route = mRoute;
         AM = time.toLowerCase(Locale.ROOT).contains("am");       // Automatically accounts for AM/PM with military time.
         String amOrPm = AM ? "am" : "pm";
-        hour = Integer.parseInt(time.substring(0, time.indexOf(":")).trim());
-        min = Integer.parseInt(time.substring(time.indexOf(":") + 1, time.toLowerCase().indexOf(amOrPm)).trim());
+        try {
+            hour = Integer.parseInt(time.substring(0, time.indexOf(":")).trim());
+            min = Integer.parseInt(time.substring(time.indexOf(":") + 1, time.toLowerCase().indexOf(amOrPm)).trim());
+        } catch (Exception e) {
+            hour = 0;
+            min = 0;
+            AM = true;
+        }
         if (AM && hour == 12) {      // It's 12:xx AM
             hour = 0;
         }
         if (!AM && hour != 12) {     // Its x:xx PM, but not 12:xx PM.
             hour += 12;
         }
-        timeOfWeek = mTimeOfWeek;
-        route = mRoute;
     }
 
     // Create a new Time given a military hour and minute.
