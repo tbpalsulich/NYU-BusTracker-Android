@@ -4,11 +4,9 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:0.12.2'
-        classpath 'org.robolectric:robolectric-gradle-plugin:0.11.0'
     }
 }
 apply plugin: 'com.android.application'
-apply plugin: 'robolectric'
 
 repositories {
     mavenCentral()
@@ -21,8 +19,8 @@ android {
 
     buildTypes {
         defaultConfig {
-            versionCode 16
-            versionName "1.65"
+            versionCode 17
+            versionName "1.66"
             minSdkVersion 14
             targetSdkVersion 20
         }
@@ -64,14 +62,9 @@ android {
     }
 }
 
-robolectric {
-    include '**/*Test.class'
-    exclude '**/espresso/**/*.class'
-}
-
 dependencies {
-    compile 'com.google.android.gms:play-services:5.0.89'
+    compile 'com.google.android.gms:play-services:5.2.08'
     compile 'com.google.maps.android:android-maps-utils:0.3.1'
-    compile 'se.emilsjolander:stickylistheaders:2.4.1'
+    compile 'se.emilsjolander:stickylistheaders:2.5.1'
     compile fileTree(dir: 'libs', include: '*.jar')
 }
