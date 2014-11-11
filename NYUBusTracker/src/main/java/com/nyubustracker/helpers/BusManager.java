@@ -315,6 +315,7 @@ public final class BusManager {
     some route between it and the given stop.
      */
     public ArrayList<Stop> getConnectedStops(Stop stop) {
+        stop = stop.getUltimateParent();
         ArrayList<Stop> result = new ArrayList<Stop>();
         if (stop != null) {
             ArrayList<Route> stopRoutes = stop.getRoutes();

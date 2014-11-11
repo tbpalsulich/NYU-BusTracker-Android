@@ -88,7 +88,7 @@ import java.util.TimerTask;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 public class MainActivity extends Activity {
-    public static final boolean LOCAL_LOGV = false;
+    public static final boolean LOCAL_LOGV = true;
     private static final String RUN_ONCE_PREF = "runOnce";
     private static final String STOP_PREF = "stops";
     private static final String START_STOP_PREF = "startStop";
@@ -230,7 +230,7 @@ public class MainActivity extends Activity {
     public static void pieceDownloadsTogether(final Context context) {
         downloadsOnTheWire--;
         if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Downloads on the wire: " + downloadsOnTheWire);
-        if (downloadsOnTheWire == 0) {
+        if (downloadsOnTheWire <= 0) {
             if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Downloading finished!");
             oncePreferences.edit().putBoolean(FIRST_TIME, false).apply();
             if (progressDialog != null) {
@@ -241,9 +241,9 @@ public class MainActivity extends Activity {
                         if (broadway != null) {
                             context.getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).apply();
                             broadway.setFavorite(true);
-                            progressDialog.dismiss();
                         }
-                    }
+                    progressDialog.dismiss();
+                }
                 });
             }
         }

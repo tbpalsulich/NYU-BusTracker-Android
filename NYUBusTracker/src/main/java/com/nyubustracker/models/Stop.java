@@ -328,8 +328,8 @@ public class Stop {
         for (Route r : routes) {
             if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.LOG_TAG, "  " + r + " is available");
             // Get the Times at this stop for this route.
-            ArrayList<Time> times = this.getTimesOfRoute(r.getLongName());
-            ArrayList<Time> otherTimes = this.getTimesOfRoute(r.getOtherLongName());
+            ArrayList<Time> times = this.getUltimateParent().getTimesOfRoute(r.getLongName());
+            ArrayList<Time> otherTimes = this.getUltimateParent().getTimesOfRoute(r.getOtherLongName());
             if (MainActivity.LOCAL_LOGV) {
                 Log.d(MainActivity.LOG_TAG, "  has " + times.size() + " times ");
                 Log.d(MainActivity.LOG_TAG, "  has " + otherTimes.size() + " other times.");

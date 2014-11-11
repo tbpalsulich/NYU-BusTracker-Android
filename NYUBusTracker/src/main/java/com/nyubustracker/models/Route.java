@@ -108,6 +108,7 @@ public class Route {
     }
 
     public boolean isActive(Stop s) {
+        s = s.getUltimateParent();
         Time currentTime = Time.getCurrentTime();
         for (Time t : s.getTimesOfRoute(this.getLongName())) {
             if (Time.compare.compare(t, currentTime) >= 0) return true;
