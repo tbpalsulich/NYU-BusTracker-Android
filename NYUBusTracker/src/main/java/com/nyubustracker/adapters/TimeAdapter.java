@@ -42,15 +42,18 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
     }
 
     public Object getItem(int position) {
+        position = Math.min(position, times.size() - 1);
         return times.get(position);
     }
 
     public long getItemId(int position) {
+        position = Math.min(position, times.size() - 1);
         return position;
     }
 
     @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, ViewGroup parent) {
+        position = Math.min(position, times.size() - 1);
         ViewHolder viewHolder;
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.time_list_item, parent, false);
@@ -87,6 +90,7 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
 
     @Override
     public View getHeaderView(int position, View convertView, ViewGroup parent) {
+        position = Math.min(position, times.size() - 1);
         HeaderViewHolder holder;
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.time_list_header, parent, false);
@@ -108,7 +112,7 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
 
     @Override
     public long getHeaderId(int position) {
-        //return the first character of the country as ID because this is what headers are based upon
+        position = Math.min(position, times.size() - 1);
         return times.get(position).getTimeOfWeek().ordinal();
     }
 
