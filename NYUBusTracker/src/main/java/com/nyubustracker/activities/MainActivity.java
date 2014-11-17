@@ -237,7 +237,7 @@ public class MainActivity extends Activity {
                 runOnUI(new Runnable() {
                 @Override
                 public void run() {
-                        Stop broadway = BusManager.getBusManager().getStopByName("715 Broadway @ Washington Square");
+                        Stop broadway = BusManager.getBusManager().getStopByName("715 Broadway");
                         if (broadway != null) {
                             context.getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).apply();
                             broadway.setFavorite(true);
@@ -497,8 +497,8 @@ public class MainActivity extends Activity {
     }
 
     void setStartAndEndStops() {
-        String end = getSharedPreferences(STOP_PREF, MODE_PRIVATE).getString(END_STOP_PREF, "80 Lafayette St");         // Creates or updates cache file.
-        String start = getSharedPreferences(STOP_PREF, MODE_PRIVATE).getString(START_STOP_PREF, "715 Broadway @ Washington Square");
+        String end = getSharedPreferences(STOP_PREF, MODE_PRIVATE).getString(END_STOP_PREF, "3rd Ave & 14th St");         // Creates or updates cache file.
+        String start = getSharedPreferences(STOP_PREF, MODE_PRIVATE).getString(START_STOP_PREF, "715 Broadway");
         if (startStop == null) setStartStop(BusManager.getBusManager().getStopByName(start));
         if (endStop == null) setEndStop(BusManager.getBusManager().getStopByName(end));
         Location l = getLocation();
