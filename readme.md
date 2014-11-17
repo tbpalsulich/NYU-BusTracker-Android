@@ -1,9 +1,6 @@
 NYU Bus Tracker
 ===============
 
-[![Build Status](https://travis-ci.org/tpalsulich/NYU-BusTracker-Android.svg?branch=master)]
-(https://travis-ci.org/tpalsulich/NYU-BusTracker-Android)
-
 [NYU Bus Tracker](http://www.nyubustracker.com/) is designed to combine the functionality of the NYU
 Mobile and Transloc apps (maps with real time bus locations) with the [massive schedules]
 (http://www.nyu.edu/life/travel-and-transportation/university-transportation.html) of the NYU bus
