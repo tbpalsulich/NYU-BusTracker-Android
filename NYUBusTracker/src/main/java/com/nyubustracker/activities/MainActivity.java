@@ -704,24 +704,13 @@ public class MainActivity extends Activity {
         if (timeUntilTimer != null) timeUntilTimer.cancel();
         if (busRefreshTimer != null) busRefreshTimer.cancel();
 
-        // Find the best pair of start and end related to this pair, since Stops can "combine"
-        // and have child stops, like at 14th Street and 3rd Ave.
-        Stop[] newStartAndEnd = Stop.getBestRelatedStartAndEnd(startStop, endStop);
-        startStop = newStartAndEnd[0];
-        endStop = newStartAndEnd[1];
-        routesBetweenStartAndEnd = startStop.getRoutesTo(endStop);
-        timesBetweenStartAndEnd = startStop.getTimesToOn(endStop, routesBetweenStartAndEnd);
+        timesBetweenStartAndEnd = startStop.getTimesToOn(endStop);
         timesAdapter.setDataSet(timesBetweenStartAndEnd);
         timesAdapter.notifyDataSetChanged();
-        if (routesBetweenStartAndEnd == null || // No routes between the two. Should not happen.
-            timesBetweenStartAndEnd == null  || // Should definitely not be here. But, just in case.
-            timesBetweenStartAndEnd.size() == 0){   // Have a route, but no time.
-            if (LOCAL_LOGV) {
-                Log.v(LOG_TAG, "Returning early!!!!");
-                Log.v(LOG_TAG, "Routes Null: " + (routesBetweenStartAndEnd == null));
-                Log.v(LOG_TAG, "Times Null: " + (timesBetweenStartAndEnd == null));
-                Log.v(LOG_TAG, "No times: " + timesBetweenStartAndEnd.size());
-            }
+        if (startStop.getRoutesTo(endStop).isEmpty() || // No routes between the two. Should not happen.
+            timesBetweenStartAndEnd == null  ||         // Should definitely not be here. But, just in case.
+            timesBetweenStartAndEnd.size() == 0){       // Have a route, but no time.
+
             if (drawer.isOpened()) drawer.animateClose();
             drawer.setAllowSingleTap(false);
             drawer.lock();

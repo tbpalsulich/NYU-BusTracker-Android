@@ -318,11 +318,11 @@ public class Stop {
                 availableRoutes.add(r);
             }
         }
-        if (foundAValidRoute) return availableRoutes;
-        else return null;
+        return availableRoutes;
     }
 
-    public List<Time> getTimesToOn(Stop endStop, List<Route> routes){
+    public List<Time> getTimesToOn(Stop endStop){
+        List<Route> routes = this.getRoutesTo(endStop);
         if (routes == null) return new ArrayList<Time>();
         ArrayList<Time> timesBetweenStartAndEnd = new ArrayList<Time>();
         for (Route r : routes) {
@@ -351,27 +351,4 @@ public class Stop {
         }
         return timesBetweenStartAndEnd;
     }
-
-    public static Stop[] getBestRelatedStartAndEnd(Stop startStop, Stop endStop) {
-        BusManager sharedManager = BusManager.getBusManager();
-        int bestDistance = sharedManager.distanceBetween(startStop, endStop);
-
-        int testDistance = sharedManager.distanceBetween(startStop.getOppositeStop(), endStop.getOppositeStop());
-        if (testDistance < bestDistance) {
-            startStop = startStop.getOppositeStop();
-            endStop = endStop.getOppositeStop();
-        }
-
-        testDistance = sharedManager.distanceBetween(startStop, endStop.getOppositeStop());
-        if (testDistance < bestDistance) {
-            endStop = endStop.getOppositeStop();
-        }
-
-        testDistance = sharedManager.distanceBetween(startStop.getOppositeStop(), endStop);
-        if (testDistance < bestDistance) {
-            startStop = startStop.getOppositeStop();
-        }
-        return new Stop[] {startStop, endStop};
-    }
-
 }
