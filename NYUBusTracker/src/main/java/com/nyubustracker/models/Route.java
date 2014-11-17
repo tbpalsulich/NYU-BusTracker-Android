@@ -111,7 +111,7 @@ public class Route {
         s = s.getUltimateParent();
         Time currentTime = Time.getCurrentTime();
         for (Time t : s.getTimesOfRoute(this.getLongName())) {
-            if (Time.compare.compare(t, currentTime) >= 0) return true;
+            if (t.compareTo(currentTime) >= 0) return true;
         }
         return false;
     }

@@ -734,8 +734,8 @@ public class MainActivity extends Activity {
         final Time currentTime = Time.getCurrentTime();
         ArrayList<Time> tempTimesBetweenStartAndEnd = new ArrayList<Time>(timesBetweenStartAndEnd);
         tempTimesBetweenStartAndEnd.add(currentTime);
-        Collections.sort(tempTimesBetweenStartAndEnd, Time.compare);
-        Collections.sort(timesBetweenStartAndEnd, Time.compare);
+        Collections.sort(tempTimesBetweenStartAndEnd);
+        Collections.sort(timesBetweenStartAndEnd);
 
         int index = tempTimesBetweenStartAndEnd.indexOf(currentTime);
         if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Index: " + index + " | size: " + tempTimesBetweenStartAndEnd.size());

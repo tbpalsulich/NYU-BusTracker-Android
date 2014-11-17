@@ -12,33 +12,31 @@ import java.util.Comparator;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class Time {
+public class Time implements Comparable<Time> {
     // compare is used to sort the list of times being checked for the "nextBusTime" in MainActivity.
-    public static final Comparator<Time> compare = new Comparator<Time>() {
-        // Return a negative number if Time1 is before, positive number if time2 is before, and 0 otherwise.
-        @Override
-        public int compare(Time time1, Time time2) {
-            // timeOfWeek is an enum. ordinal() returns the rank of the given TimeOfWeek.
-            if (time1.getTimeOfWeek().ordinal() == time2.getTimeOfWeek().ordinal()) {    // Times at the same time in the week.
-                if (time1.isStrictlyBefore(time2)) {     // Checks hour and minute. Returns false if they're equal or time2 is before.
-                    return -1;
-                }
-                if (time2.isStrictlyBefore(time1)) {
-                    return 1;
-                }
-                // Same exact time (hour, minute, and timeOfWeek). So, check if we're looking at the current time.
-                if (time1.getRoute() == null) {
-                    return -1;
-                }
-                if (time2.getRoute() == null) {
-                    return 1;
-                }
-                // Times are the same, but we aren't comparing the current time.
-                return 0;
+    // Return a negative number if Time1 is before, positive number if time2 is before, and 0 otherwise.
+    @Override
+    public int compareTo(Time time2) {
+        // timeOfWeek is an enum. ordinal() returns the rank of the given TimeOfWeek.
+        if (this.getTimeOfWeek().ordinal() == time2.getTimeOfWeek().ordinal()) {    // Times at the same time in the week.
+            if (this.isStrictlyBefore(time2)) {     // Checks hour and minute. Returns false if they're equal or time2 is before.
+                return -1;
             }
-            return time1.getTimeOfWeek().ordinal() - time2.getTimeOfWeek().ordinal();
+            if (time2.isStrictlyBefore(this)) {
+                return 1;
+            }
+            // Same exact time (hour, minute, and timeOfWeek). So, check if we're looking at the current time.
+            if (this.getRoute() == null) {
+                return -1;
+            }
+            if (time2.getRoute() == null) {
+                return 1;
+            }
+            // Times are the same, but we aren't comparing the current time.
+            return 0;
         }
-    };
+        return this.getTimeOfWeek().ordinal() - time2.getTimeOfWeek().ordinal();
+    }
     private final TimeOfWeek timeOfWeek;  // Either Weekday, Friday, Weekend.
     private int hour;           // In 24 hour (military) format.
     private int min;
@@ -169,7 +167,7 @@ public class Time {
 
     // Return a Time object who represents the difference in time between the two Times.
     public Time getTimeAsTimeUntil(Time t) {
-        if (compare.compare(this, t) <= 0) {
+        if (this.compareTo(t) <= 0) {
             //if (MainActivity.LOCAL_LOGV) Log.v("Time Debugging", this + " is strictly before " + t);
             int hourDifference = t.hour - this.hour;
             int minDifference = t.min - this.min;
