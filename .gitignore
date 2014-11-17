@@ -8,4 +8,5 @@
 NYUBusTracker/src/main/AndroidManifest.xml
 NYUBusTracker/src/main/res/values/analytics.xml
 NYUBusTracker/src/debug/res/values/analytics.xml
+NYUBusTracker/src/main/res/values/api-keys.xml
 build
