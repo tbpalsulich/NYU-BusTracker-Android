@@ -722,6 +722,7 @@ public class MainActivity extends Activity {
                 Log.v(LOG_TAG, "Times Null: " + (timesBetweenStartAndEnd == null));
                 Log.v(LOG_TAG, "No times: " + timesBetweenStartAndEnd.size());
             }
+            if (drawer.isOpened()) drawer.animateClose();
             drawer.setAllowSingleTap(false);
             drawer.lock();
             sayBusIsOffline();
