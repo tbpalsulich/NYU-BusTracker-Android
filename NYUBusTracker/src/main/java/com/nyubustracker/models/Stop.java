@@ -298,11 +298,7 @@ public class Stop implements Comparable<Stop> {
     }
 
     public String getUltimateName() {
-        Stop s = this;
-        while (s.getParent() != null) {
-            s = s.getParent();
-        }
-        return s.getName();
+        return getUltimateParent().getName();
     }
 
     public String getName() {
