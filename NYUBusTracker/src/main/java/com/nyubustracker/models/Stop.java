@@ -11,24 +11,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class Stop {
+public class Stop implements Comparable<Stop> {
     public static final String FAVORITES_PREF = "favorites";
-    public static final Comparator<Stop> compare = new Comparator<Stop>() {
-        @Override
-        public int compare(Stop stop, Stop stop2) {
-            if (stop.getFavorite()) {
-                if (stop2.getFavorite()) {
-                    return compareStartingNumbers(stop.getName(), stop2.getName());
-                }
-                else return -1;
-            }
-            else if (stop2.getFavorite()) return 1;
-            else return compareStartingNumbers(stop.getName(), stop2.getName());
-        }
-    };
     final ArrayList<Stop> childStops;
     String name, id;
     LatLng loc;
@@ -85,6 +74,18 @@ public class Stop {
         else return -1;
     }
 
+    @Override
+    public int compareTo(Stop stop2) {
+        if (this.getFavorite()) {
+            if (stop2.getFavorite()) {
+                return compareStartingNumbers(this.getName(), stop2.getName());
+            }
+            else return -1;
+        }
+        else if (stop2.getFavorite()) return 1;
+        else return compareStartingNumbers(this.getName(), stop2.getName());
+    }
+
     public static void parseJSON(JSONObject stopsJson) throws JSONException {
         JSONArray jStops = new JSONArray();
         BusManager sharedManager = BusManager.getBusManager();
@@ -115,6 +116,7 @@ public class Stop {
     }
 
     public void setOppositeStop(Stop stop) {
+        Log.v("routes", "Setting opposite of " + this.getID() + " to " + stop.getID());
         oppositeStop = stop;
     }
 
@@ -134,10 +136,6 @@ public class Stop {
         return false;
     }
 
-    public String getOtherRoute() {
-        return otherRoute;
-    }
-
     public void setOtherRoute(String r) {
         otherRoute = r;
     }
@@ -154,7 +152,7 @@ public class Stop {
         return result;
     }
 
-    public Stop getParent() {
+    private Stop getParent() {
         return parent;
     }
 
@@ -200,7 +198,7 @@ public class Stop {
     }
 
     public String toString() {
-        return name;
+        return name + " " + getID();
     }
 
     public boolean getFavorite() {
@@ -214,6 +212,13 @@ public class Stop {
     public boolean hasRouteByString(String routeID) {
         for (String route : routesString) {
             if (route.equals(routeID)) return true;
+        }
+        return false;
+    }
+    public boolean hasRouteByName(String name) {
+        if (name.trim().isEmpty()) return false;
+        for (Route r : routes) {
+            if (r.getLongName().equals(name)) return true;
         }
         return false;
     }
@@ -269,6 +274,10 @@ public class Stop {
         times.add(t);
     }
 
+    public List<Time> getTimes() {
+        return times;
+    }
+
     public ArrayList<Time> getTimesOfRoute(String route) {
         ArrayList<Time> result = new ArrayList<Time>();
         if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.LOG_TAG, "Times for route: " + route + " (" + times.size() + " possible for " + this.getName() + ")");
@@ -308,47 +317,48 @@ public class Stop {
         Stop startStop = this;
         ArrayList<Route> startRoutes = startStop.getUltimateParent().getRoutes();        // All the routes leaving the start stop.
         ArrayList<Route> endRoutes = endStop.getUltimateParent().getRoutes();
-        boolean foundAValidRoute = false;
         ArrayList<Route> availableRoutes = new ArrayList<Route>();               // All the routes connecting the two.
         for (Route r : startRoutes) {
-            if (MainActivity.LOCAL_LOGV) Log.v("Routes", "Start Route: " + r);
+            //if (MainActivity.LOCAL_LOGV) Log.v("Routes", "Start Route: " + r);
             if (endRoutes.contains(r) && !availableRoutes.contains(r)) {
-                if (MainActivity.LOCAL_LOGV) Log.v("Greenwich", "*  " + r + " is available.");
-                foundAValidRoute = true;
                 availableRoutes.add(r);
             }
         }
         return availableRoutes;
     }
 
-    public List<Time> getTimesToOn(Stop endStop){
-        List<Route> routes = this.getRoutesTo(endStop);
-        if (routes == null) return new ArrayList<Time>();
-        ArrayList<Time> timesBetweenStartAndEnd = new ArrayList<Time>();
-        for (Route r : routes) {
-            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.LOG_TAG, "  " + r + " is available");
-            // Get the Times at this stop for this route.
-            ArrayList<Time> times = this.getUltimateParent().getTimesOfRoute(r.getLongName());
-            ArrayList<Time> otherTimes = this.getUltimateParent().getTimesOfRoute(r.getOtherLongName());
-            if (MainActivity.LOCAL_LOGV) {
-                Log.d(MainActivity.LOG_TAG, "  has " + times.size() + " times ");
-                Log.d(MainActivity.LOG_TAG, "  has " + otherTimes.size() + " other times.");
+    public List<Time> getTimesTo(Stop endStop){
+        List<Time> result = new ArrayList<Time>();
+        for (Time t : times) {
+            if (endStop.hasRouteByName(t.getRoute())) {
+                result.add(t);
             }
-            if (!otherTimes.isEmpty() && !endStop.getTimesOfRoute(r.getOtherLongName()).isEmpty()) {
-                for (Time t : otherTimes) {
-                    if (!timesBetweenStartAndEnd.contains(t)) {
-                        timesBetweenStartAndEnd.add(t);
-                    }
-                }
-            }
-            else {
-                for (Time t : times) {
-                    if (!timesBetweenStartAndEnd.contains(t)) {
-                        timesBetweenStartAndEnd.add(t);
+        }
+        Collections.sort(result);
+        return result;
+    }
+
+    public boolean isConnectedTo(Stop stop) {
+        return stop == null || !this.getRoutesTo(stop).isEmpty();
+    }
+
+    public int distanceTo(Stop stop) {
+        if (stop == null) return Integer.MAX_VALUE;
+        List<Route> routes = getRoutesTo(stop);
+        if (routes.isEmpty()) return Integer.MAX_VALUE;
+        else {
+            Route r = routes.get(0);
+            List<Stop> stops = r.getStops();
+            for (int i = 0; i < stops.size(); i++) {
+                if (stops.get(i).getID().equals(getID())) {
+                    for (int j = 1; ((i + j) % stops.size()) != i; j++) {
+                        if (stops.get((i + j) % stops.size()).getID().equals(stop.getID())) {
+                            return j;
+                        }
                     }
                 }
             }
         }
-        return timesBetweenStartAndEnd;
+        return Integer.MAX_VALUE;
     }
 }

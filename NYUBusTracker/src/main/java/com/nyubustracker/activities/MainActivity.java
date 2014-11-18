@@ -112,7 +112,6 @@ public class MainActivity extends Activity {
     double onStartTime;
     private Stop startStop;     // Stop object to keep track of the start location of the desired route.
     private Stop endStop;       // Keep track of the desired end location.
-    private static List<Route> routesBetweenStartAndEnd;        // List of all routes between start and end.
     private HashMap<String, Boolean> clickableMapMarkers;   // Hash of all markers which are clickable (so we don't zoom in on buses).
     private ArrayList<Marker> busesOnMap = new ArrayList<Marker>();
     private TextSwitcher mSwitcher;
@@ -516,76 +515,65 @@ public class MainActivity extends Activity {
 
     // Clear the map of all buses and put them all back on in their new locations.
     private void updateMapWithNewBusLocations() {
-        if (routesBetweenStartAndEnd != null) {
-            BusManager sharedManager = BusManager.getBusManager();
-            for (Marker m : busesOnMap) {
-                m.remove();
-            }
-            busesOnMap = new ArrayList<Marker>();
-            if (clickableMapMarkers == null)
-                clickableMapMarkers = new HashMap<String, Boolean>();  // New set of buses means new set of clickable markers!
-            boolean somethingActive = false;    // Used to make sure we put at least one set of segments on the map.
-            for (Route r : routesBetweenStartAndEnd) {
-                somethingActive = somethingActive || r.isActive(startStop);
-            }
-            for (Route r : routesBetweenStartAndEnd) {
-                if (r.isActive(startStop) || !somethingActive) {
-                    somethingActive = true;
-                    for (Bus b : sharedManager.getBuses()) {
-                        //if (LOCAL_LOGV) Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
-                        if (b.getRoute().equals(r.getID())) {
-                            Marker mMarker = mMap.addMarker(new MarkerOptions().position(b.getLocation()).icon(BitmapDescriptorFactory.fromBitmap(rotateBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_bus_arrow), b.getHeading()))).anchor(0.5f, 0.5f));
-                            clickableMapMarkers.put(mMarker.getId(), false);    // Unable to click on buses.
-                            busesOnMap.add(mMarker);
-                        }
+
+        List<Route> routesBetweenStartAndEnd = startStop.getRoutesTo(endStop);
+        BusManager sharedManager = BusManager.getBusManager();
+        for (Marker m : busesOnMap) {
+            m.remove();
+        }
+        busesOnMap = new ArrayList<Marker>();
+        if (clickableMapMarkers == null)
+            clickableMapMarkers = new HashMap<String, Boolean>();  // New set of buses means new set of clickable markers!
+        boolean somethingActive = false;    // Used to make sure we put at least one set of segments on the map.
+        for (Route r : routesBetweenStartAndEnd) {
+            somethingActive = somethingActive || r.isActive(startStop);
+        }
+        for (Route r : routesBetweenStartAndEnd) {
+            if (r.isActive(startStop) || !somethingActive) {
+                somethingActive = true;
+                for (Bus b : sharedManager.getBuses()) {
+                    //if (LOCAL_LOGV) Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
+                    if (b.getRoute().equals(r.getID())) {
+                        Marker mMarker = mMap.addMarker(new MarkerOptions().position(b.getLocation()).icon(BitmapDescriptorFactory.fromBitmap(rotateBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_bus_arrow), b.getHeading()))).anchor(0.5f, 0.5f));
+                        clickableMapMarkers.put(mMarker.getId(), false);    // Unable to click on buses.
+                        busesOnMap.add(mMarker);
                     }
                 }
             }
-        }
-        else {
-            mMap.clear();
         }
     }
 
     // Clear the map, because we may have just changed what route we wish to display. Then, add everything back onto the map.
     private void updateMapWithNewStartOrEnd() {
-        // Can't update without any routes...
-        if (LOCAL_LOGV) Log.v(LOG_TAG, "routesBetween is " + ((routesBetweenStartAndEnd == null) ? "" : "not ") + "null");
-        if (routesBetweenStartAndEnd == null) {
-            mMap.clear();
-            return;
-        }
-        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Have " + routesBetweenStartAndEnd.size() + " routes to show.");
         setUpMapIfNeeded();
         mMap.clear();
+        if (startStop == null || endStop == null) return;
+
+        List<Route> routesBetweenStartAndEnd = startStop.getRoutesTo(endStop);
         clickableMapMarkers = new HashMap<String, Boolean>();
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         boolean validBuilder = false;
-        boolean somethingActive = false;    // Used to make sure we put at least one set of segments on the map.
         for (Route r : routesBetweenStartAndEnd) {
-            somethingActive = somethingActive || r.isActive(startStop);
-        }
-        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Something active: " + somethingActive);
-        for (Route r : routesBetweenStartAndEnd) {
-            if ((r.isActive(startStop) || !somethingActive) && !r.getSegments().isEmpty()) {
-                somethingActive = true;
+            if (r.isActive(startStop) && !r.getSegments().isEmpty()) {
                 if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Updating map with route: " + r.getLongName());
                 for (Stop s : r.getStops()) {
                     for (Stop f : s.getFamily()) {
                         if ((!f.isHidden() && !f.isRelatedTo(startStop) && !f.isRelatedTo(endStop)) || (f == startStop || f == endStop)) {
                             // Only put one representative from a family of stops on the p
                             //if (LOCAL_LOGV) Log.v("MapDebugging", "Not hiding " + f);
-                            Marker mMarker = mMap.addMarker(new MarkerOptions()      // Adds a balloon for every stop to the map.
-                                                                .position(f.getLocation()).title(f.getName()).anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_map_stop))));
+                            Marker mMarker = mMap.addMarker(
+                                    new MarkerOptions()      // Adds a balloon for every stop to the map.
+                                        .position(f.getLocation())
+                                        .title(f.getName())
+                                            .anchor(0.5f, 0.5f)
+                                            .icon(BitmapDescriptorFactory.fromBitmap(
+                                                    BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_map_stop))));
                             clickableMapMarkers.put(mMarker.getId(), true);
                         }
                     }
                 }
-                updateMapWithNewBusLocations();
                 // Adds the segments of every Route to the map.
-                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, r + " has " + r.getSegments().size() + " segments.");
                 for (PolylineOptions p : r.getSegments()) {
-                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Trying to add a segment to the map");
                     if (p != null) {
                         for (LatLng loc : p.getPoints()) {
                             validBuilder = true;
@@ -593,9 +581,7 @@ public class MainActivity extends Activity {
                         }
                         p.color(getResources().getColor(R.color.main_buttons));
                         mMap.addPolyline(p);
-                        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Success!");
                     }
-                    else if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Segment was null for " + r.getID());
                 }
             }
         }
@@ -611,64 +597,41 @@ public class MainActivity extends Activity {
     }
 
     private void setEndStop(Stop stop) {
-        if (stop == null) {
+        if (stop == null || !startStop.isConnectedTo(stop)) {
             ((TextView) findViewById(R.id.end_stop)).setText(getString(R.string.default_end));
             if (drawer.isOpened()) drawer.animateClose();
             endStop = null;
-            routesBetweenStartAndEnd = null;
             timesBetweenStartAndEnd = null;
             updateMapWithNewStartOrEnd();
             drawer.lock();
             drawer.setAllowSingleTap(false);
-            return;
-        }
-        // Check there is a route between these stops.
-        List<Route> routes = startStop.getRoutesTo(stop);
-        if (routes != null && routes.size() > 0 && stop != startStop) {
-            endStop = stop;
-            ((TextView) findViewById(R.id.end_stop)).setText(stop.getUltimateName());
-            if (startStop != null) {
-                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Start stop: " + startStop);
-                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "End stop: " + endStop);
-                setNextBusTime();    // Don't set the next bus if we don't have a valid route.
-                updateMapWithNewStartOrEnd();
-            }
         }
         else {
-            ArrayList<Stop> connected = BusManager.getBusManager().getConnectedStops(startStop);
-            if (connected.size() == 1) {
-                displayStopError();
+            Log.v("routes", "start stop is " + startStop.getID());
+            if (startStop.getOppositeStop() != null &&
+                    startStop.distanceTo(endStop) > startStop.getOppositeStop().distanceTo(endStop)){
+                startStop = startStop.getOppositeStop();
             }
-            else {
-                int stopIndex = 0;
-                while (connected.size() > stopIndex && !checkStop(connected.get(stopIndex))) {
-                    stopIndex++;
-                }
-                if (stopIndex < connected.size()) setEndStop(connected.get(stopIndex));
-                else downloadEverything(true);
-            }
+            Log.v("routes", "start is now " + startStop.getID());
+            Log.v("routes", "times: " + startStop.getTimes());
+            ((TextView) findViewById(R.id.end_stop)).setText(stop.getUltimateName());
+            endStop = stop;
         }
-    }
-
-    private boolean checkStop(Stop stop) {
-        if (stop != null) {     // Make sure we actually have a stop!
-            // Check there is a route between these stops.
-            ArrayList<Route> routes = new ArrayList<Route>();               // All the routes connecting the two.
-            for (Route r : startStop.getRoutes()) {
-                if (r.hasStop(stop)) {
-                    routes.add(r);
-                }
-            }
-            if (routes.size() > 0 && stop != startStop) {
-                return true;
-            }
-        }
-        return false;
+        setNextBusTime();
     }
 
     private void setStartStop(Stop stop) {
-        if (stop == null) return;
-        if (endStop == stop) {    // Selected the end as the new start.
+        if (stop == null) {
+            startStop = null;
+            ((TextView) findViewById(R.id.start_stop)).setText(getString(R.string.default_start));
+            setEndStop(null);
+            displayStopError();
+        }
+        else {
+            stop = stop.getUltimateParent();
+        }
+
+        if (endStop == stop) {
             // Swap the start and end stops.
             Stop temp = startStop;
             startStop = endStop;
@@ -678,56 +641,33 @@ public class MainActivity extends Activity {
         else { // We have a new start. So, we must ensure the end is actually connected. If not, pick the first connected stop.
             startStop = stop;
             ((TextView) findViewById(R.id.start_stop)).setText(stop.getUltimateName());
-            if (endStop != null) {
-                List<Route> routes = startStop.getRoutesTo(endStop);
-                if (routes == null) {   // Stops aren't connected.
-                    routes = startStop.getRoutes();     // Routes the stop actually has.
-                    if (routes != null && !routes.isEmpty()){
-                        List<Stop> stops = routes.get(0).getStops();
-                        if (!stops.isEmpty() && stops.get(0) != endStop){
-                            setEndStop(stops.get(0));
-                            return;
-                        }
-                    }
-                }
-                else {
-                    setNextBusTime();
-                    updateMapWithNewStartOrEnd();
-                    return;
-                }
+            if (!startStop.isConnectedTo(endStop)) {
+                setEndStop(null);
             }
-            setEndStop(null);
         }
+        setNextBusTime();
     }
 
     private void setNextBusTime() {
         if (timeUntilTimer != null) timeUntilTimer.cancel();
         if (busRefreshTimer != null) busRefreshTimer.cancel();
+        if (startStop == null || endStop == null) return;
 
-        timesBetweenStartAndEnd = startStop.getTimesToOn(endStop);
+        timesBetweenStartAndEnd = startStop.getTimesTo(endStop);
+
         timesAdapter.setDataSet(timesBetweenStartAndEnd);
         timesAdapter.notifyDataSetChanged();
-        if (startStop.getRoutesTo(endStop).isEmpty() || // No routes between the two. Should not happen.
-            timesBetweenStartAndEnd == null  ||         // Should definitely not be here. But, just in case.
-            timesBetweenStartAndEnd.size() == 0){       // Have a route, but no time.
 
-            if (drawer.isOpened()) drawer.animateClose();
-            drawer.setAllowSingleTap(false);
-            drawer.lock();
-            sayBusIsOffline();
-            showSafeRideInfoIfNeeded(Time.getCurrentTime());
-            return;
-        }
         drawer.setAllowSingleTap(true);
         drawer.unlock();
+
         final Time currentTime = Time.getCurrentTime();
+
         ArrayList<Time> tempTimesBetweenStartAndEnd = new ArrayList<Time>(timesBetweenStartAndEnd);
         tempTimesBetweenStartAndEnd.add(currentTime);
         Collections.sort(tempTimesBetweenStartAndEnd);
-        Collections.sort(timesBetweenStartAndEnd);
-
         int index = tempTimesBetweenStartAndEnd.indexOf(currentTime);
-        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Index: " + index + " | size: " + tempTimesBetweenStartAndEnd.size());
+
         int nextTimeTempIndex = (index + 1) % tempTimesBetweenStartAndEnd.size();
         nextBusTime = tempTimesBetweenStartAndEnd.get(nextTimeTempIndex);
         final int nextTimeIndex = timesBetweenStartAndEnd.indexOf(nextBusTime);
@@ -760,6 +700,7 @@ public class MainActivity extends Activity {
         else showSafeRideInfoIfNeeded(currentTime);
         renewBusRefreshTimer();
         renewTimeUntilTimer();
+        updateMapWithNewStartOrEnd();
     }
 
     private void showSafeRideInfoIfNeeded(Time currentTime) {

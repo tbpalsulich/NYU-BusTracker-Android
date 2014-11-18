@@ -151,7 +151,7 @@ public final class BusManager {
                 result.remove(stop);
             }
         }
-        Collections.sort(result, Stop.compare);
+        Collections.sort(result);
         return result;
     }
 
@@ -165,12 +165,12 @@ public final class BusManager {
             public void run() {
                 Stop s = sharedBusManager.getStopByID(stopID);
                 if (s != null) {
-                    t.cancel();
                     for (int i = 0; i < s.getRoutes().size(); i++) {
                         if (routes.has(s.getRoutes().get(i).getID())) {
                             try {
                                 JSONObject routeTimes = routes.getJSONObject(s.getRoutes().get(i).getID());
                                 getAllTimes(s, s.getRoutes().get(i), routeTimes);
+                                t.cancel();
                             } catch (JSONException e) {
                                 if (MainActivity.LOCAL_LOGV)
                                     Log.e("Greenwich", "Error parsing JSON...");
@@ -322,14 +322,12 @@ public final class BusManager {
             ArrayList<Route> stopRoutes = stop.getRoutes();
             for (Route route : stopRoutes) {       // For every route servicing this stop:
                 if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, route.toString() + " services this stop.");
-                if (stop.getTimesOfRoute(route.getLongName()).size() > -1) {    // TODO: make this > 0.
+                if (!stop.getTimesOfRoute(route.getLongName()).isEmpty()) {    // TODO: make this > 0.
                     for (Stop connectedStop : route.getStops()) {    // add all of that route's stops.
                         if (connectedStop != null && !connectedStop.getUltimateName().equals(stop.getName()) &&
                             !result.contains(connectedStop) &&
                             (!connectedStop.isHidden() || !connectedStop.isRelatedTo(stop))) {
-                            while (connectedStop.getParent() != null) {
-                                connectedStop = connectedStop.getParent();
-                            }
+                            connectedStop = connectedStop.getUltimateParent();
                             boolean repeatStop = false;
                             for (Stop resultStop : result) {
                                 if (resultStop.getName().equals(connectedStop.getName())) {
@@ -344,21 +342,11 @@ public final class BusManager {
                     }
                 }
             }
-            Collections.sort(result, Stop.compare);
+            Collections.sort(result);
             result.remove(stop);
         }
         if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Found " + result.size() + " connected stops.");
         return result;
-    }
-
-    /*
-    addStop will add a Stop to our ArrayList of Stops, unless we're supposed to hide it.
-     */
-    public void addStop(Stop stop) {
-        if (!stop.isHidden()) {
-            stops.add(stop);
-            //if (MainActivity.LOCAL_LOGV) Log.v("Debugging", "Added " + stop.toString() + " to list of stops (" + stops.size() + ")");
-        }
     }
 
     public Stop getStop(String stopName, String stopLat, String stopLng, String stopID, String[] routes) {
@@ -373,10 +361,6 @@ public final class BusManager {
             if (!stops.contains(s)) stops.add(s);
         }
         return s;
-    }
-
-    public int numStops() {
-        return stops.size();
     }
 
     /*
@@ -419,35 +403,5 @@ public final class BusManager {
             }
         }
         return null;
-    }
-
-    public int distanceBetween(Stop stop1, Stop stop2) {
-        // Check these stops and their children.
-        int result = 100;
-        if (stop1 != null && stop2 != null) {
-            for (Route r : routes) {
-                if (r.hasStop(stop1) && r.hasStop(stop2)) {
-                    int index1 = r.getStops().indexOf(stop1);
-                    int index2 = r.getStops().indexOf(stop2);
-                    result = index2 - index1;
-                    if (result < 0) result += r.getStops().size();
-                }
-            }
-            int children = 100;
-            for (Stop s : stop1.getChildStops()) {
-                int test = distanceBetween(s, stop2);
-                if (test < children) children = test;
-            }
-            if (children < result) result = children;
-
-            children = 100;
-            for (Stop s : stop2.getChildStops()) {
-                int test = distanceBetween(stop1, s);
-                if (test < children) children = test;
-            }
-            if (children < result) result = children;
-        }
-
-        return result;
     }
 }
