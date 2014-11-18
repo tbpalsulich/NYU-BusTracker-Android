@@ -662,7 +662,7 @@ public class MainActivity extends Activity {
         updateNextTimeSwitcher(currentTime.getTimeAsStringUntil(nextBusTime, getResources()));
 
         timesList.clearFocus();
-        timesList.post(new Runnable() {
+        if (!drawer.isOpened()) timesList.post(new Runnable() {
             @Override
             public void run() {
                 timesList.setSelection(nextTimeIndex);
