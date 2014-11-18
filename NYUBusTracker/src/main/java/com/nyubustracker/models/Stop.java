@@ -280,9 +280,7 @@ public class Stop implements Comparable<Stop> {
 
     public ArrayList<Time> getTimesOfRoute(String route) {
         ArrayList<Time> result = new ArrayList<Time>();
-        if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.LOG_TAG, "Times for route: " + route + " (" + times.size() + " possible for " + this.getName() + ")");
         for (Time t : times) {
-            //if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.LOG_TAG, "Time route: " + t.getRoute());
             if (t.getRoute().equals(route)) {
                 result.add(t);
             }
