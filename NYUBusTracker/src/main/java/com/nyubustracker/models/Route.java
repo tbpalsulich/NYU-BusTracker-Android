@@ -107,15 +107,6 @@ public class Route {
         if (!stops.contains(stop)) stops.add(stop);
     }
 
-    public boolean isActive(Stop s) {
-        s = s.getUltimateParent();
-        Time currentTime = Time.getCurrentTime();
-        for (Time t : s.getTimesOfRoute(this.getLongName())) {
-            if (t.compareTo(currentTime) >= 0) return true;
-        }
-        return false;
-    }
-
     public String getLongName() {
         return longName;
     }

@@ -116,7 +116,6 @@ public class Stop implements Comparable<Stop> {
     }
 
     public void setOppositeStop(Stop stop) {
-        Log.v("routes", "Setting opposite of " + this.getID() + " to " + stop.getID());
         oppositeStop = stop;
     }
 
