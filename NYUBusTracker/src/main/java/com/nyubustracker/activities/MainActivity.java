@@ -623,7 +623,7 @@ public class MainActivity extends Activity {
             ((TextView) findViewById(R.id.start_stop)).setText(startStop.getUltimateName());
             setEndStop(temp);
         }
-        else { // We have a new start. So, we must ensure the end is actually connected. If not, pick the first connected stop.
+        else { // We have a new start that isn't the same as the end.
             startStop = stop;
             ((TextView) findViewById(R.id.start_stop)).setText(stop.getUltimateName());
             if (!startStop.isConnectedTo(endStop)) {

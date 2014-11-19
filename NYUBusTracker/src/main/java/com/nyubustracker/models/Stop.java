@@ -329,7 +329,7 @@ public class Stop implements Comparable<Stop> {
     }
 
     public boolean isConnectedTo(Stop stop) {
-        return stop == null || !this.getRoutesTo(stop).isEmpty();
+        return stop != null && !this.getRoutesTo(stop).isEmpty();
     }
 
     public int distanceTo(Stop stop) {
