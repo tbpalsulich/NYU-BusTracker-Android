@@ -11,10 +11,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Stop implements Comparable<Stop> {
     public static final String FAVORITES_PREF = "favorites";
@@ -24,7 +24,7 @@ public class Stop implements Comparable<Stop> {
     String[] routesString;
     ArrayList<Route> routes = null;
     String otherRoute = null;
-    ArrayList<Time> times = null;
+    Map<String, List<Time>> times = null;
     boolean favorite;
     Stop parent;
     Stop oppositeStop;
@@ -35,7 +35,7 @@ public class Stop implements Comparable<Stop> {
         loc = new LatLng(Double.parseDouble(mLat), Double.parseDouble(mLng));
         id = mID;
         routesString = mRoutes;
-        times = new ArrayList<Time>();
+        times = new HashMap<String, List<Time>>();
         routes = new ArrayList<Route>();
         otherRoute = "";
         childStops = new ArrayList<Stop>();
@@ -270,20 +270,16 @@ public class Stop implements Comparable<Stop> {
     }
 
     public void addTime(Time t) {
-        times.add(t);
+        if (times.get(t.getRoute()) == null) times.put(t.getRoute(), new ArrayList<Time>());
+        times.get(t.getRoute()).add(t);
     }
 
-    public List<Time> getTimes() {
+    public Map<String, List<Time>> getTimes() {
         return times;
     }
 
-    public ArrayList<Time> getTimesOfRoute(String route) {
-        ArrayList<Time> result = new ArrayList<Time>();
-        for (Time t : times) {
-            if (t.getRoute().equals(route)) {
-                result.add(t);
-            }
-        }
+    public List<Time> getTimesOfRoute(String route) {
+        List<Time> result = times.get(route);
         for (Stop childStop : childStops) {
             result.addAll(childStop.getTimesOfRoute(route));
         }
@@ -320,10 +316,12 @@ public class Stop implements Comparable<Stop> {
     }
 
     public List<Time> getTimesTo(Stop endStop){
+        List<Route> startRoutes = getRoutes();
+        List<Route> endRoutes = endStop.getRoutes();
         List<Time> result = new ArrayList<Time>();
-        for (Time t : times) {
-            if (endStop.hasRouteByName(t.getRoute())) {
-                result.add(t);
+        for (Route r : startRoutes) {
+            if (endRoutes.contains(r) && times.containsKey(r.getLongName())) {
+                result.addAll(times.get(r.getLongName()));
             }
         }
         Collections.sort(result);

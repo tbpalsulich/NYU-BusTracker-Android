@@ -322,7 +322,7 @@ public final class BusManager {
             ArrayList<Route> stopRoutes = stop.getRoutes();
             for (Route route : stopRoutes) {       // For every route servicing this stop:
                 if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, route.toString() + " services this stop.");
-                if (!stop.getTimesOfRoute(route.getLongName()).isEmpty()) {    // TODO: make this > 0.
+                if (stop.getTimesOfRoute(route.getLongName()) != null) {    // TODO: make this > 0.
                     for (Stop connectedStop : route.getStops()) {    // add all of that route's stops.
                         if (connectedStop != null && !connectedStop.getUltimateName().equals(stop.getName()) &&
                             !result.contains(connectedStop) &&
