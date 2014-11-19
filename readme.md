@@ -74,10 +74,12 @@ Here is the release process, for when you're ready to push a new version to the 
 1. Make sure `MainActivity.LOCAL_LOGV = false`. Run the app and make sure there is no logging.
 2. Make sure the `DownloaderHelper.AMAZON_URL` is correct.
 3. Make sure your API keys are correct.
-4. Bump the release version in build.gradle.
-5. Tag a release on GitHub.
-6. ./gradlew assembleRelease
-7. Run the app as a last minute check, to make sure everything is in working order.
-8. Upload.
+4. Upgrade any dependencies.
+5. Bump the release version in build.gradle.
+6. Commit.
+7. Tag a release on GitHub.
+8. ./gradlew assembleRelease
+9. Run the app as a last minute check, to make sure everything is in working order.
+10. Upload.
 
 Please see the LICENSE file for license information.
