@@ -19,8 +19,8 @@ android {
 
     buildTypes {
         defaultConfig {
-            versionCode 17
-            versionName "1.66"
+            versionCode 18
+            versionName "1.7"
             minSdkVersion 14
             targetSdkVersion 20
         }
@@ -65,6 +65,6 @@ android {
 dependencies {
     compile 'com.google.android.gms:play-services:5.2.08'
     compile 'com.google.maps.android:android-maps-utils:0.3.1'
-    compile 'se.emilsjolander:stickylistheaders:2.5.1'
+    compile 'se.emilsjolander:stickylistheaders:2.5.2'
     compile fileTree(dir: 'libs', include: '*.jar')
 }
