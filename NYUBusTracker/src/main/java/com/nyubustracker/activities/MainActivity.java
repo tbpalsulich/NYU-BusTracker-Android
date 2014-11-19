@@ -667,8 +667,9 @@ public class MainActivity extends Activity {
 
         if (BusManager.getBusManager().isNotDuringSafeRide()) {
             String routeText;
-            String[] routeArray = nextBusTime.getRoute().split("\\s");
             String route = nextBusTime.getRoute();
+            if (route == null) route = "Unknown";
+            String[] routeArray = route.split("\\s");
             if (routeArray[0].length() == 1) {      // We have the A, B, C, E, etc. So, prepend route.
                 routeText = getString(R.string.route) + route;
             }
