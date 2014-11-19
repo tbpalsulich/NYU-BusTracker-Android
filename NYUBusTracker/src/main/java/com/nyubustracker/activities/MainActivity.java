@@ -120,6 +120,7 @@ public class MainActivity extends Activity {
     private GoogleMap mMap;     // Map to display all stops, segments, and buses.
     private boolean offline = true;
     private MultipleOrientationSlidingDrawer drawer;
+    private boolean justChangedStops = true;
     public static int downloadsOnTheWire = 0;
     public static Handler UIHandler;
 
@@ -583,6 +584,7 @@ public class MainActivity extends Activity {
     }
 
     private void setEndStop(Stop stop) {
+        justChangedStops = true;
         if (stop == null || startStop == null || !startStop.isConnectedTo(stop)) {
             ((TextView) findViewById(R.id.end_stop)).setText(getString(R.string.default_end));
             if (drawer.isOpened()) drawer.animateClose();
@@ -602,6 +604,7 @@ public class MainActivity extends Activity {
     }
 
     private void setStartStop(Stop stop) {
+        justChangedStops = true;
         if (stop == null) {
             startStop = null;
             ((TextView) findViewById(R.id.start_stop)).setText(getString(R.string.default_start));
@@ -657,9 +660,10 @@ public class MainActivity extends Activity {
         updateNextTimeSwitcher(currentTime.getTimeAsStringUntil(nextBusTime, getResources()));
 
         timesList.clearFocus();
-        if (!drawer.isOpened()) timesList.post(new Runnable() {
+        if (justChangedStops || !drawer.isOpened()) timesList.post(new Runnable() {
             @Override
             public void run() {
+                justChangedStops = false;
                 timesList.setSelection(nextTimeIndex);
             }
         });
