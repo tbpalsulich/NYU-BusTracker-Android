@@ -607,15 +607,16 @@ public class MainActivity extends Activity {
             ((TextView) findViewById(R.id.start_stop)).setText(getString(R.string.default_start));
             setEndStop(null);
             displayStopError();
+            return;
         }
         else {
             stop = stop.getUltimateParent();
         }
 
-        if (endStop == stop) {
+        if (endStop != null && endStop.getUltimateName().equals(stop.getUltimateName())) {
             // Swap the start and end stops.
             Stop temp = startStop;
-            startStop = endStop;
+            startStop = endStop.getUltimateParent();
             ((TextView) findViewById(R.id.start_stop)).setText(startStop.getUltimateName());
             setEndStop(temp);
         }
