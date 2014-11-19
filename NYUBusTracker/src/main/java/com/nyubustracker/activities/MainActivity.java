@@ -595,8 +595,7 @@ public class MainActivity extends Activity {
         }
         else {
             Log.v("routes", "start stop is " + startStop.getID());
-            if (startStop.getOppositeStop() != null &&
-                    startStop.distanceTo(endStop) > startStop.getOppositeStop().distanceTo(endStop)){
+            if (startStop.getOppositeStop() != null && startStop.distanceTo(stop) > startStop.getOppositeStop().distanceTo(stop)){
                 startStop = startStop.getOppositeStop();
             }
             Log.v("routes", "start is now " + startStop.getID());
