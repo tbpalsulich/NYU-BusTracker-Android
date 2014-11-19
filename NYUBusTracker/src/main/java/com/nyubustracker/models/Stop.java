@@ -312,7 +312,6 @@ public class Stop implements Comparable<Stop> {
         ArrayList<Route> endRoutes = endStop.getUltimateParent().getRoutes();
         ArrayList<Route> availableRoutes = new ArrayList<Route>();               // All the routes connecting the two.
         for (Route r : startRoutes) {
-            //if (MainActivity.LOCAL_LOGV) Log.v("Routes", "Start Route: " + r);
             if (endRoutes.contains(r) && !availableRoutes.contains(r)) {
                 availableRoutes.add(r);
             }

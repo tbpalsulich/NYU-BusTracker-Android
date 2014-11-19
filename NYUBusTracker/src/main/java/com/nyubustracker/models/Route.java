@@ -31,7 +31,6 @@ public class Route {
         for (Stop s : stops) {
             s.addRoute(this);
         }
-        //if (MainActivity.LOCAL_LOGV) Log.v("Debugging", longName + "'s number of stops:" + stops.size());
     }
 
     public static void parseJSON(JSONObject routesJson) throws JSONException {

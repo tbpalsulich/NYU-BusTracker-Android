@@ -317,8 +317,7 @@ public class MainActivity extends Activity {
                         try {
                             BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
                         } catch (JSONException e) {
-                            if (LOCAL_LOGV)
-                                Log.v(REFACTOR_LOG_TAG, "Didn't find time file, so downloading it: " + timeURL);
+                            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Didn't find time file, so downloading it: " + timeURL);
                             new Downloader(new TimeDownloaderHelper(), context).execute(timeURL);
                         }
                     }
@@ -594,12 +593,8 @@ public class MainActivity extends Activity {
             sayBusIsOffline();
         }
         else {
-            Log.v("routes", "start stop is " + startStop.getID());
-            if (startStop.getOppositeStop() != null && startStop.distanceTo(stop) > startStop.getOppositeStop().distanceTo(stop)){
+            if (startStop.getOppositeStop() != null && startStop.distanceTo(stop) > startStop.getOppositeStop().distanceTo(stop))
                 startStop = startStop.getOppositeStop();
-            }
-            Log.v("routes", "start is now " + startStop.getID());
-            Log.v("routes", "times: " + startStop.getTimes());
             ((TextView) findViewById(R.id.end_stop)).setText(stop.getUltimateName());
             endStop = stop;
         }
