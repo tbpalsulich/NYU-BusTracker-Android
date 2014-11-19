@@ -17,7 +17,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -315,33 +317,24 @@ public final class BusManager {
     Given a Stop, getConnectedStops returns an array of Strings corresponding to every stop which has
     some route between it and the given stop.
      */
-    public ArrayList<Stop> getConnectedStops(Stop stop) {
+    public List<Stop> getConnectedStops(Stop stop) {
         stop = stop.getUltimateParent();
-        ArrayList<Stop> result = new ArrayList<Stop>();
+        Set<Stop> resultSet = new HashSet<Stop>();
+        List<Stop> result = new ArrayList<Stop>();
         if (stop != null) {
             ArrayList<Route> stopRoutes = stop.getRoutes();
             for (Route route : stopRoutes) {       // For every route servicing this stop:
-                if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, route.toString() + " services this stop.");
                 if (stop.getTimesOfRoute(route.getLongName()) != null) {    // TODO: make this > 0.
                     for (Stop connectedStop : route.getStops()) {    // add all of that route's stops.
-                        if (connectedStop != null && !connectedStop.getUltimateName().equals(stop.getName()) &&
-                            !result.contains(connectedStop) &&
-                            (!connectedStop.isHidden() || !connectedStop.isRelatedTo(stop))) {
-                            connectedStop = connectedStop.getUltimateParent();
-                            boolean repeatStop = false;
-                            for (Stop resultStop : result) {
-                                if (resultStop.getName().equals(connectedStop.getName())) {
-                                    repeatStop = true;
-                                }
-                            }
-                            if (!repeatStop) {
-                                result.add(connectedStop);
-                                //if (MainActivity.LOCAL_LOGV) Log.v("Route Debugging","'" + connectedStop.getName() + "' is connected to '" + stop.getName() + "'");
-                            }
+                        if (connectedStop != null
+                                && !connectedStop.getUltimateName().equals(stop.getName())
+                                && (!connectedStop.isHidden() || !connectedStop.isRelatedTo(stop))) {
+                            resultSet.add(connectedStop.getUltimateParent());
                         }
                     }
                 }
             }
+            result = new ArrayList<Stop>(resultSet);
             Collections.sort(result);
             result.remove(stop);
         }
