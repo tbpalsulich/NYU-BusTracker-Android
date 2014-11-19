@@ -13,16 +13,17 @@ import com.nyubustracker.R;
 import com.nyubustracker.models.Stop;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class StopAdapter extends BaseAdapter {
 
     private final LayoutInflater mInflater;
     private final View.OnClickListener textOnClickListener;
     private final CompoundButton.OnCheckedChangeListener checkBoxOnCLickListener;
-    private ArrayList<Stop> stops = new ArrayList<Stop>();
+    private List<Stop> stops = new ArrayList<Stop>();
 
     // Constructor. Just used to initialize variables.
-    public StopAdapter(Context context, ArrayList<Stop> mStops, View.OnClickListener listener, CompoundButton.OnCheckedChangeListener cbListener) {
+    public StopAdapter(Context context, List<Stop> mStops, View.OnClickListener listener, CompoundButton.OnCheckedChangeListener cbListener) {
         textOnClickListener = listener;
         checkBoxOnCLickListener = cbListener;
         // Cache the LayoutInflate to avoid asking for a new one each time.

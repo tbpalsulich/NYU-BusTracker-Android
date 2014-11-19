@@ -735,7 +735,7 @@ public class MainActivity extends Activity {
     public void createEndDialog(View view) {
         // Get all stops connected to the start stop.
         if (startStop == null) return;
-        final ArrayList<Stop> connectedStops = BusManager.getBusManager().getConnectedStops(startStop);
+        final List<Stop> connectedStops = BusManager.getBusManager().getConnectedStops(startStop);
         if (connectedStops.size() > 0) {
             ListView listView = new ListView(this);     // ListView to populate the dialog.
             listView.setId(R.id.end_stop_list);
