@@ -37,7 +37,6 @@ import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import com.flurry.android.FlurryAgent;
-import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdate;
@@ -50,7 +49,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.nyubustracker.NYUBusTrackerApplication;
 import com.nyubustracker.R;
 import com.nyubustracker.adapters.StopAdapter;
 import com.nyubustracker.adapters.TimeAdapter;
@@ -88,7 +86,7 @@ import java.util.TimerTask;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 public class MainActivity extends Activity {
-    public static final boolean LOCAL_LOGV = false;
+    public static final boolean LOCAL_LOGV = true;
     private static final String RUN_ONCE_PREF = "runOnce";
     private static final String STOP_PREF = "stops";
     private static final String START_STOP_PREF = "startStop";
@@ -252,14 +250,12 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "onCreate!");
+
         setContentView(R.layout.activity_main);
 
-        ((NYUBusTrackerApplication) getApplication()).getTracker();
 
         oncePreferences = getSharedPreferences(RUN_ONCE_PREF, MODE_PRIVATE);
-
         setUpMapIfNeeded(); // Instantiates mMap, if it needs to be.
-
         // Singleton BusManager to keep track of all stops, routes, etc.
         final BusManager sharedManager = BusManager.getBusManager();
 
@@ -354,9 +350,8 @@ public class MainActivity extends Activity {
     @Override
     public void onStart() {
         super.onStart();
-        //        if (LOCAL_LOGV) Log.v("General Debugging", "onStart!");
+        if (LOCAL_LOGV) Log.v("General Debugging", "onStart!");
         onStartTime = System.currentTimeMillis();
-        GoogleAnalytics.getInstance(this).reportActivityStart(this);
         FlurryAgent.onStartSession(this, getString(LOCAL_LOGV ? R.string.flurry_debug_api_key : R.string.flurry_api_key));
     }
 
@@ -385,7 +380,6 @@ public class MainActivity extends Activity {
     public void onStop() {
         super.onStop();
         //        if (LOCAL_LOGV) Log.v("General Debugging", "onStop!");
-        GoogleAnalytics.getInstance(this).reportActivityStop(this);
         FlurryAgent.onEndSession(this);
     }
 
