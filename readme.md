@@ -75,10 +75,10 @@ Here is the release process, for when you're ready to push a new version to the 
 2. Make sure the `DownloaderHelper.AMAZON_URL` is correct.
 3. Make sure your API keys are correct.
 4. Upgrade any dependencies.
-5. Bump the release version in build.gradle.
-6. Commit.
+5. Bump the release version in `build.gradle`.
+6. `git commit -am "Preparing release X.Y"`
 7. Tag a release on GitHub.
-8. ./gradlew assembleRelease
+8. `./gradlew assembleRelease`
 9. Run the app as a last minute check, to make sure everything is in working order.
 10. Upload.
 
