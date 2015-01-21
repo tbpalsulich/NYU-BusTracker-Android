@@ -1,64 +1,38 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:0.12.2'
-    }
-}
-apply plugin: 'com.android.application'
-
 repositories {
     mavenCentral()
-    maven { url 'https://github.com/Goddchen/mvn-repo/raw/master/' }
 }
 
+buildscript {
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.0.0'
+    }
+}
+
+apply plugin: 'com.android.application'
+
 android {
-    compileSdkVersion 20
-    buildToolsVersion '20'
+    compileSdkVersion 21
+    buildToolsVersion '21.1.2'
+
+    defaultConfig {
+        versionCode 18
+        versionName "1.7"
+        minSdkVersion 14
+        targetSdkVersion 21
+    }
 
     buildTypes {
-        defaultConfig {
-            versionCode 18
-            versionName "1.7"
-            minSdkVersion 14
-            targetSdkVersion 20
+        release {
+            debuggable false
         }
-        
-        if (project.hasProperty('RELEASE_STORE_FILE') &&
-            project.hasProperty('RELEASE_STORE_PASSWORD') &&
-            project.hasProperty('RELEASE_KEY_ALIAS') &&
-            project.hasProperty('RELEASE_KEY_PASSWORD')) {
-            signingConfigs {
-                release {
-                    storeFile file(RELEASE_STORE_FILE)
-                    storePassword RELEASE_STORE_PASSWORD
-                    keyAlias RELEASE_KEY_ALIAS
-                    keyPassword RELEASE_KEY_PASSWORD
-                }
-            }
-
-            release {
-                zipAlign true
-                debuggable false
-                jniDebugBuild false
-                signingConfig signingConfigs.release
-            }
-
-            beta {
-                signingConfig signingConfigs.release
-                versionNameSuffix "-beta"
-            }
+        beta {
+            versionNameSuffix "-beta"
         }
-
         debug {
             applicationIdSuffix ".debug"
             versionNameSuffix "-debug"
+            debuggable true
         }
-    }
-
-    lintOptions {
-        abortOnError false
     }
 }
 
