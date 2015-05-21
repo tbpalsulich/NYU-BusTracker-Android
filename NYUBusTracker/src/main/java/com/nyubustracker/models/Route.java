@@ -3,6 +3,7 @@ package com.nyubustracker.models;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.nyubustracker.BuildConfig;
 import com.nyubustracker.activities.MainActivity;
 import com.nyubustracker.helpers.BusManager;
 
@@ -48,14 +49,14 @@ public class Route {
                 r.addStop(i, sharedManager.getStopByID(stops.getString(i)));
             }
             JSONArray segments = routeObject.getJSONArray(BusManager.TAG_SEGMENTS);
-            if (MainActivity.LOCAL_LOGV)
+            if (BuildConfig.DEBUG)
                 Log.v(MainActivity.REFACTOR_LOG_TAG, "Found " + segments.length() + " segments for route " + routeID);
             for (int i = 0; i < segments.length(); i++) {
-                //if (MainActivity.LOCAL_LOGV) Log.v("MapDebugging", "parseJSON of Route adding segment ID " + segments.getJSONArray(i).getString(0) + " for " + routeID + "(" + r.getSegmentIDs().size() + " total)");
+                //if (BuildConfig.DEBUG) Log.v("MapDebugging", "parseJSON of Route adding segment ID " + segments.getJSONArray(i).getString(0) + " for " + routeID + "(" + r.getSegmentIDs().size() + " total)");
                 r.getSegmentIDs().add(segments.getJSONArray(i).getString(0));
             }
             sharedManager.addRoute(r);
-            //if (MainActivity.LOCAL_LOGV) Log.v("JSONDebug", "Route name: " + routeLongName + " | ID:" + routeID + " | Number of stops: " + sharedManager.getRouteByID(routeID).getStops().size());
+            //if (BuildConfig.DEBUG) Log.v("JSONDebug", "Route name: " + routeLongName + " | ID:" + routeID + " | Number of stops: " + sharedManager.getRouteByID(routeID).getStops().size());
         }
     }
 

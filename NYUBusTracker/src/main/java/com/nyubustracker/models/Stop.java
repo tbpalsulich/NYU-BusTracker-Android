@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.nyubustracker.BuildConfig;
 import com.nyubustracker.activities.MainActivity;
 import com.nyubustracker.helpers.BusManager;
 
@@ -79,15 +80,15 @@ public class Stop implements Comparable<Stop> {
         JSONArray jStops = new JSONArray();
         BusManager sharedManager = BusManager.getBusManager();
         if (stopsJson != null) jStops = stopsJson.getJSONArray(BusManager.TAG_DATA);
-        if (MainActivity.LOCAL_LOGV)
+        if (BuildConfig.DEBUG)
             Log.v(MainActivity.REFACTOR_LOG_TAG, "BusManager current # stops: " + sharedManager.getStops());
-        if (MainActivity.LOCAL_LOGV)
+        if (BuildConfig.DEBUG)
             Log.v(MainActivity.REFACTOR_LOG_TAG, "Parsing # stops: " + jStops.length());
         for (int i = 0; i < jStops.length(); i++) {
             JSONObject stopObject = jStops.getJSONObject(i);
             String stopID = stopObject.getString(BusManager.TAG_STOP_ID);
             String stopName = stopObject.getString(BusManager.TAG_STOP_NAME);
-            if (MainActivity.LOCAL_LOGV)
+            if (BuildConfig.DEBUG)
                 Log.v(MainActivity.REFACTOR_LOG_TAG, "*   Stop: " + stopID + " | " + stopName);
             JSONObject location = stopObject.getJSONObject(BusManager.TAG_LOCATION);
             String stopLat = location.getString(BusManager.TAG_LAT);
@@ -98,8 +99,8 @@ public class Stop implements Comparable<Stop> {
                 routes[j] = stopRoutes.getString(j);
             }
             Stop s = sharedManager.getStop(stopName, stopLat, stopLng, stopID, routes); // Creates the stop.
-            //if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Number of stops in manager: " + sharedManager.numStops());
-            //if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "___after adding " + s.name);
+            //if (BuildConfig.DEBUG) Log.v(MainActivity.REFACTOR_LOG_TAG, "Number of stops in manager: " + sharedManager.numStops());
+            //if (BuildConfig.DEBUG) Log.v(MainActivity.REFACTOR_LOG_TAG, "___after adding " + s.name);
         }
     }
 
