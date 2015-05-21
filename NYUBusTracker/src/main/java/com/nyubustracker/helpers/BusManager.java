@@ -147,17 +147,6 @@ public final class BusManager {
         }
     }
 
-    public ArrayList<Stop> getStops() {
-        ArrayList<Stop> result = new ArrayList<>(stops);
-        for (Stop stop : stops) {
-            if (stop.isHidden()) { // || !stop.hasTimes()) {    Show stops without times for now.
-                result.remove(stop);
-            }
-        }
-        Collections.sort(result);
-        return result;
-    }
-
     public static void parseTime(JSONObject timesJson) throws JSONException {
         if (timesJson == null) return;      // Couldn't get the JSON. So, give up.
         final JSONObject routes = timesJson.getJSONObject(BusManager.TAG_ROUTES);
@@ -203,13 +192,15 @@ public final class BusManager {
     private static void getTimes(JSONObject routeTimes, String tag, Stop s, Time.TimeOfWeek timeOfWeek) throws JSONException {
         if (routeTimes.has(tag)) {
             JSONArray timesJson = routeTimes.getJSONArray(tag);
-            if (BuildConfig.DEBUG) Log.v(MainActivity.LOG_TAG, "Found " + timesJson.length() + " " + timeOfWeek + " times.");
+            if (BuildConfig.DEBUG)
+                Log.v(MainActivity.LOG_TAG, "Found " + timesJson.length() + " " + timeOfWeek + " times.");
             String route = routeTimes.getString(BusManager.TAG_ROUTE);
 
             if (route.contains("Route ")) {
                 route = route.substring(route.indexOf("Route ") + "Route ".length());
             }
-            if (BuildConfig.DEBUG) Log.d(MainActivity.LOG_TAG, timesJson.length() + " times for " + s);
+            if (BuildConfig.DEBUG)
+                Log.d(MainActivity.LOG_TAG, timesJson.length() + " times for " + s);
             for (int k = 0; k < timesJson.length(); k++) {
                 s.addTime(new Time(timesJson.getString(k), timeOfWeek, route));
             }
@@ -221,7 +212,8 @@ public final class BusManager {
         if (segmentsJSON != null) jSegments = segmentsJSON.getJSONObject("data");
         if (jSegments != null) {
             for (Route r : routes) {
-                if (BuildConfig.DEBUG) Log.v(MainActivity.REFACTOR_LOG_TAG, "Parsing segments for " + r + " (" + r.getSegmentIDs() + ")");
+                if (BuildConfig.DEBUG)
+                    Log.v(MainActivity.REFACTOR_LOG_TAG, "Parsing segments for " + r + " (" + r.getSegmentIDs() + ")");
                 for (String seg : r.getSegmentIDs()) {
                     if (jSegments.has(seg)) {
                         r.getSegments().add(new PolylineOptions().addAll(PolyUtil.decode(jSegments.getString(seg))));
@@ -236,6 +228,17 @@ public final class BusManager {
             sharedBusManager = new BusManager();
         }
         return sharedBusManager;
+    }
+
+    public ArrayList<Stop> getStops() {
+        ArrayList<Stop> result = new ArrayList<>(stops);
+        for (Stop stop : stops) {
+            if (stop.isHidden()) { // || !stop.hasTimes()) {    Show stops without times for now.
+                result.remove(stop);
+            }
+        }
+        Collections.sort(result);
+        return result;
     }
 
     public boolean isNotDuringSafeRide() {
@@ -334,7 +337,8 @@ public final class BusManager {
             Collections.sort(result);
             result.remove(stop);
         }
-        if (BuildConfig.DEBUG) Log.v(MainActivity.REFACTOR_LOG_TAG, "Found " + result.size() + " connected stops.");
+        if (BuildConfig.DEBUG)
+            Log.v(MainActivity.REFACTOR_LOG_TAG, "Found " + result.size() + " connected stops.");
         return result;
     }
 
@@ -344,8 +348,7 @@ public final class BusManager {
             s = new Stop(stopName, stopLat, stopLng, stopID, routes);
             stops.add(s);
             //if (BuildConfig.DEBUG) Log.v(MainActivity.REFACTOR_LOG_TAG, "BusManager num stops: " + stops.size());
-        }
-        else {
+        } else {
             s.setValues(stopName, stopLat, stopLng, stopID, routes);
             if (!stops.contains(s)) stops.add(s);
         }
@@ -376,8 +379,7 @@ public final class BusManager {
         Route r;
         if ((r = getRouteByID(id)) == null) {
             return new Route(name, id);
-        }
-        else return r.setName(name);
+        } else return r.setName(name);
     }
 
     /*

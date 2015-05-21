@@ -20,8 +20,7 @@ public class TimeDownloaderHelper implements DownloaderHelper {
                 Log.v(MainActivity.LOG_TAG, "*   result: " + jsonObject.toString());
             }
             Downloader.cache(jsonObject.getString("stop_id"), jsonObject);
-        }
-        else {
+        } else {
             throw new JSONException(jsonObject == null
                     ? "TimeDownloaderHelper#parse given null jsonObject"
                     : "TimeDownloaderHelper#parse given empty jsonObject");

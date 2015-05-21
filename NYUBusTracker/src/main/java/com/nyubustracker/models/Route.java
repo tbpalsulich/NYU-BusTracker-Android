@@ -48,7 +48,8 @@ public class Route {
                 r.addStop(i, sharedManager.getStopByID(stops.getString(i)));
             }
             JSONArray segments = routeObject.getJSONArray(BusManager.TAG_SEGMENTS);
-            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Found " + segments.length() + " segments for route " + routeID);
+            if (MainActivity.LOCAL_LOGV)
+                Log.v(MainActivity.REFACTOR_LOG_TAG, "Found " + segments.length() + " segments for route " + routeID);
             for (int i = 0; i < segments.length(); i++) {
                 //if (MainActivity.LOCAL_LOGV) Log.v("MapDebugging", "parseJSON of Route adding segment ID " + segments.getJSONArray(i).getString(0) + " for " + routeID + "(" + r.getSegmentIDs().size() + " total)");
                 r.getSegmentIDs().add(segments.getJSONArray(i).getString(0));

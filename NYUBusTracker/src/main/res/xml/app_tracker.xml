@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools"
-           tools:ignore="TypographyDashes">
+    tools:ignore="TypographyDashes">
 
     <!-- Percentage of events to include in reports -->
     <string name="ga_sampleFrequency">100.0</string>

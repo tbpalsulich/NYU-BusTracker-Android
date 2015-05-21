@@ -87,13 +87,22 @@ import java.util.TimerTask;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 public class MainActivity extends Activity {
+    public static final String REFACTOR_LOG_TAG = "refactor";
+    public static final String LOG_TAG = "nyu_log_tag";
     private static final String RUN_ONCE_PREF = "runOnce";
     private static final String STOP_PREF = "stops";
     private static final String START_STOP_PREF = "startStop";
     private static final String END_STOP_PREF = "endStop";
     private static final String FIRST_TIME = "firstTime";
-    public static final String REFACTOR_LOG_TAG = "refactor";
-    public static final String LOG_TAG = "nyu_log_tag";
+    private static final Handler UIHandler;
+    public static int downloadsOnTheWire = 0;
+    private static ProgressDialog progressDialog;
+    private static SharedPreferences oncePreferences;
+
+    static {
+        UIHandler = new Handler(Looper.getMainLooper());
+    }
+
     private final CompoundButton.OnCheckedChangeListener cbListener = new CompoundButton.OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -102,8 +111,6 @@ public class MainActivity extends Activity {
             getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(s.getID(), isChecked).commit();
         }
     };
-    private static ProgressDialog progressDialog;
-    private static SharedPreferences oncePreferences;
     private double onStartTime;
     private Stop startStop;     // Stop object to keep track of the start location of the desired route.
     private Stop endStop;       // Keep track of the desired end location.
@@ -119,12 +126,6 @@ public class MainActivity extends Activity {
     private boolean offline = true;
     private MultipleOrientationSlidingDrawer drawer;
     private boolean justChangedStops = true;
-    public static int downloadsOnTheWire = 0;
-    private static final Handler UIHandler;
-
-    static {
-        UIHandler = new Handler(Looper.getMainLooper());
-    }
 
     public static void runOnUI(Runnable runnable) {
         UIHandler.post(runnable);
@@ -134,6 +135,30 @@ public class MainActivity extends Activity {
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
+    }
+
+    public static void pieceDownloadsTogether(final Context context) {
+        downloadsOnTheWire--;
+        if (BuildConfig.DEBUG)
+            Log.v(REFACTOR_LOG_TAG, "Downloads on the wire: " + downloadsOnTheWire);
+        if (downloadsOnTheWire <= 0) {
+            if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Downloading finished!");
+            oncePreferences.edit().putBoolean(FIRST_TIME, false).apply();
+            if (progressDialog != null) {
+                runOnUI(new Runnable() {
+                    @Override
+                    public void run() {
+                        Stop broadway = BusManager.getBusManager().getStopByName("715 Broadway");
+                        if (broadway != null) {
+                            context.getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).apply();
+                            broadway.setFavorite(true);
+                        }
+                        progressDialog.dismiss();
+                    }
+                });
+            }
+        }
+        // Else, we have nothing to do, since not all downloads are finished.
     }
 
     private void setUpMapIfNeeded() {
@@ -159,9 +184,9 @@ public class MainActivity extends Activity {
                         return !clickableMapMarkers.get(marker.getId());    // Return true to consume the event.
                     }
                 });
-                CameraUpdate center=
+                CameraUpdate center =
                         CameraUpdateFactory.newLatLng(BROADWAY);
-                CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
+                CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
 
                 mMap.moveCamera(center);
                 mMap.animateCamera(zoom);
@@ -208,8 +233,7 @@ public class MainActivity extends Activity {
             new Downloader(new RouteDownloaderHelper(), context).execute(DownloaderHelper.ROUTES_URL);
             new Downloader(new SegmentDownloaderHelper(), context).execute(DownloaderHelper.SEGMENTS_URL);
             new Downloader(new VersionDownloaderHelper(), context).execute(DownloaderHelper.VERSION_URL);
-        }
-        else if (!offline) {    // Only show the offline dialog once.
+        } else if (!offline) {    // Only show the offline dialog once.
             offline = true;
             Context context = getApplicationContext();
             CharSequence text = getString(R.string.unable_to_connect);
@@ -219,29 +243,6 @@ public class MainActivity extends Activity {
                 Toast.makeText(context, text, duration).show();
             }
         }
-    }
-
-    public static void pieceDownloadsTogether(final Context context) {
-        downloadsOnTheWire--;
-        if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Downloads on the wire: " + downloadsOnTheWire);
-        if (downloadsOnTheWire <= 0) {
-            if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Downloading finished!");
-            oncePreferences.edit().putBoolean(FIRST_TIME, false).apply();
-            if (progressDialog != null) {
-                runOnUI(new Runnable() {
-                @Override
-                public void run() {
-                        Stop broadway = BusManager.getBusManager().getStopByName("715 Broadway");
-                        if (broadway != null) {
-                            context.getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(broadway.getID(), true).apply();
-                            broadway.setFavorite(true);
-                        }
-                    progressDialog.dismiss();
-                }
-                });
-            }
-        }
-        // Else, we have nothing to do, since not all downloads are finished.
     }
 
     @Override
@@ -293,8 +294,7 @@ public class MainActivity extends Activity {
         if (oncePreferences.getBoolean(FIRST_TIME, true)) {
             if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Downloading because of first time");
             downloadEverything();
-        }
-        else {
+        } else {
             if (!sharedManager.hasRoutes() || !sharedManager.hasStops()) {
                 if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Parsing cached files...");
                 try {
@@ -309,11 +309,13 @@ public class MainActivity extends Activity {
                     Context context = getApplicationContext();
                     for (String timeURL : sharedManager.getTimesToDownload()) {
                         String timeFileName = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
-                        if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Trying to parse " + timeFileName);
+                        if (BuildConfig.DEBUG)
+                            Log.v(REFACTOR_LOG_TAG, "Trying to parse " + timeFileName);
                         try {
                             BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
                         } catch (JSONException e) {
-                            if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Didn't find time file, so downloading it: " + timeURL);
+                            if (BuildConfig.DEBUG)
+                                Log.v(REFACTOR_LOG_TAG, "Didn't find time file, so downloading it: " + timeURL);
                             new Downloader(new TimeDownloaderHelper(), context).execute(timeURL);
                         }
                     }
@@ -334,12 +336,12 @@ public class MainActivity extends Activity {
                     renewTimeUntilTimer();
                     setNextBusTime();
                 } catch (JSONException e) {
-                    if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Re-downloading because of an error.");
+                    if (BuildConfig.DEBUG)
+                        Log.v(REFACTOR_LOG_TAG, "Re-downloading because of an error.");
                     e.printStackTrace();
                     downloadEverything();
                 }
-            }
-            else {
+            } else {
                 setStartAndEndStops();
                 updateMapWithNewStartOrEnd();
             }
@@ -449,10 +451,11 @@ public class MainActivity extends Activity {
                             offline = false;
                             new Downloader(new BusDownloaderHelper(), getApplicationContext()).execute(DownloaderHelper.VEHICLES_URL);
                             updateMapWithNewBusLocations();
-                            if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Current start: " + startStop);
-                            if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Current end  : " + endStop);
-                        }
-                        else if (!offline) {
+                            if (BuildConfig.DEBUG)
+                                Log.v(REFACTOR_LOG_TAG, "Current start: " + startStop);
+                            if (BuildConfig.DEBUG)
+                                Log.v(REFACTOR_LOG_TAG, "Current end  : " + endStop);
+                        } else if (!offline) {
                             offline = true;
                             Context context = getApplicationContext();
                             CharSequence text = getString(R.string.unable_to_connect);
@@ -515,7 +518,8 @@ public class MainActivity extends Activity {
             m.remove();
         }
         busesOnMap = new ArrayList<>();
-        if (clickableMapMarkers == null) clickableMapMarkers = new HashMap<>();  // New set of buses means new set of clickable markers!
+        if (clickableMapMarkers == null)
+            clickableMapMarkers = new HashMap<>();  // New set of buses means new set of clickable markers!
         for (Route r : routesBetweenStartAndEnd) {
             for (Bus b : sharedManager.getBuses()) {
                 //if (BuildConfig.DEBUG) Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
@@ -540,14 +544,15 @@ public class MainActivity extends Activity {
         boolean validBuilder = false;
         for (Route r : routesBetweenStartAndEnd) {
             if (!r.getSegments().isEmpty()) {
-                if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Updating map with route: " + r.getLongName());
+                if (BuildConfig.DEBUG)
+                    Log.v(REFACTOR_LOG_TAG, "Updating map with route: " + r.getLongName());
                 for (Stop s : r.getStops()) {
                     for (Stop f : s.getFamily()) {
                         if ((!f.isHidden() && !f.isRelatedTo(startStop) && !f.isRelatedTo(endStop)) || (f == startStop || f == endStop)) {
                             // Only put one representative from a family of stops on the p
                             Marker mMarker = mMap.addMarker(new MarkerOptions().position(f.getLocation()).title(f.getName())
-                                            .anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.fromBitmap(
-                                                    BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_map_stop))));
+                                    .anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.fromBitmap(
+                                            BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_map_stop))));
                             clickableMapMarkers.put(mMarker.getId(), true);
                         }
                     }
@@ -586,8 +591,7 @@ public class MainActivity extends Activity {
             drawer.lock();
             drawer.setAllowSingleTap(false);
             sayBusIsOffline();
-        }
-        else {
+        } else {
             if (startStop.getOppositeStop() != null && startStop.distanceTo(stop) > startStop.getOppositeStop().distanceTo(stop))
                 startStop = startStop.getOppositeStop();
             ((TextView) findViewById(R.id.end_stop)).setText(stop.getUltimateName());
@@ -604,8 +608,7 @@ public class MainActivity extends Activity {
             setEndStop(null);
             displayStopError();
             return;
-        }
-        else {
+        } else {
             stop = stop.getUltimateParent();
         }
 
@@ -615,8 +618,7 @@ public class MainActivity extends Activity {
             startStop = endStop.getUltimateParent();
             ((TextView) findViewById(R.id.start_stop)).setText(startStop.getUltimateName());
             setEndStop(temp);
-        }
-        else { // We have a new start that isn't the same as the end.
+        } else { // We have a new start that isn't the same as the end.
             startStop = stop;
             ((TextView) findViewById(R.id.start_stop)).setText(stop.getUltimateName());
             if (!startStop.isConnectedTo(endStop)) {
@@ -669,15 +671,13 @@ public class MainActivity extends Activity {
             String[] routeArray = route.split("\\s");
             if (routeArray[0].length() == 1) {      // We have the A, B, C, E, etc. So, prepend route.
                 routeText = getString(R.string.route) + route;
-            }
-            else {
+            } else {
                 routeText = route;
             }
             ((TextView) findViewById(R.id.next_route)).setText(getString(R.string.via) + routeText);
             ((TextView) findViewById(R.id.next_bus)).setText(getString(R.string.next_bus_in));
             findViewById(R.id.safe_ride_button).setVisibility(View.GONE);
-        }
-        else showSafeRideInfoIfNeeded(currentTime);
+        } else showSafeRideInfoIfNeeded(currentTime);
         renewBusRefreshTimer();
         renewTimeUntilTimer();
         updateMapWithNewStartOrEnd();
@@ -695,8 +695,9 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void updateNextTimeSwitcher(final String newSwitcherText){
-        if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Updating switcher to [" + newSwitcherText + "]");
+    private void updateNextTimeSwitcher(final String newSwitcherText) {
+        if (BuildConfig.DEBUG)
+            Log.v(REFACTOR_LOG_TAG, "Updating switcher to [" + newSwitcherText + "]");
         if (drawer != null && !drawer.isMoving() && !mSwitcherCurrentText.equals(newSwitcherText)) {
             mSwitcher.setText(newSwitcherText);  // Pass resources so we return the proper string value.
             mSwitcherCurrentText = newSwitcherText;
@@ -757,8 +758,7 @@ public class MainActivity extends Activity {
             listView.setAdapter(adapter);
             dialog.setCanceledOnTouchOutside(true);
             dialog.show();  // Dismissed when a stop is clicked.
-        }
-        else if (startStop != null) {
+        } else if (startStop != null) {
             displayStopError();
         }
     }
@@ -785,8 +785,7 @@ public class MainActivity extends Activity {
             listView.setAdapter(adapter);
             dialog.setCanceledOnTouchOutside(true);
             dialog.show();
-        }
-        else {
+        } else {
             displayStopError();
         }
     }
@@ -840,8 +839,8 @@ public class MainActivity extends Activity {
             for (File f : files) {
                 if (f.delete()) {
                     if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Deleted " + f.toString());
-                }
-                else if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Could not delete " + f.toString());
+                } else if (BuildConfig.DEBUG)
+                    Log.v(REFACTOR_LOG_TAG, "Could not delete " + f.toString());
             }
         }
     }

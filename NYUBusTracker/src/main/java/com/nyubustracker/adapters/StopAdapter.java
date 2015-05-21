@@ -64,10 +64,8 @@ public class StopAdapter extends BaseAdapter {
                 holder.checkbox.setOnCheckedChangeListener(checkBoxOnCLickListener);
                 holder.text.setOnClickListener(textOnClickListener);
                 convertView.setTag(holder);
-            }
-            else return new View(null);   // Should never reach here.
-        }
-        else {
+            } else return new View(null);   // Should never reach here.
+        } else {
             holder = (ViewHolder) convertView.getTag();
         }
 

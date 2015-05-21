@@ -18,9 +18,9 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter {
 
     private final LayoutInflater inflater;
+    private final Context context;
     private List<Time> times;
     private Time currentTime;
-    private final Context context;
 
     public TimeAdapter(Context context, ArrayList<Time> mTimes) {
         // Cache the LayoutInflate to avoid asking for a new one each time.
@@ -62,10 +62,8 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
                 viewHolder.timeText = (TextView) convertView.findViewById(R.id.time_text);
                 viewHolder.viaRouteText = (TextView) convertView.findViewById(R.id.route_text);
                 convertView.setTag(viewHolder);
-            }
-            else return new View(null);
-        }
-        else {
+            } else return new View(null);
+        } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
         if (viewHolder.timeText != null) {
@@ -81,8 +79,7 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
             String route = times.get(position).getRoute();
             if (routeArray[0].length() == 1) {
                 viewHolder.viaRouteText.setText("Route " + route);
-            }
-            else {
+            } else {
                 viewHolder.viaRouteText.setText(route);
             }
         }
@@ -99,10 +96,8 @@ public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter
                 holder = new HeaderViewHolder();
                 holder.text = (TextView) convertView.findViewById(R.id.time_text);
                 convertView.setTag(holder);
-            }
-            else return new View(null); // Should never reach here.
-        }
-        else {
+            } else return new View(null); // Should never reach here.
+        } else {
             holder = (HeaderViewHolder) convertView.getTag();
         }
         // Set the header text to the time of week of this chunk of times.

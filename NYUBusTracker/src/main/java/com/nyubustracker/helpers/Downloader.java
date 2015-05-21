@@ -24,17 +24,37 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 public class Downloader extends AsyncTask<String, Void, JSONObject> {
-    private final DownloaderHelper helper;
     public static final String CREATED_FILES_DIR = "NYUCachedFiles";
     private static Context context;
+    private final DownloaderHelper helper;
+
+    public Downloader(DownloaderHelper helper, Context mContext) {
+        this.helper = helper;
+        context = mContext;
+    }
 
     public static Context getContext() {
         return context;
     }
 
-    public Downloader(DownloaderHelper helper, Context mContext) {
-        this.helper = helper;
-        context = mContext;
+    public static void cache(String fileName, JSONObject jsonObject) throws IOException {
+        if (jsonObject != null && !jsonObject.toString().isEmpty()) {
+            File path = new File(context.getFilesDir(), CREATED_FILES_DIR);
+            if (!path.mkdir() && BuildConfig.DEBUG) throw new RuntimeException("Failed to mkdir.");
+            File file = new File(path, fileName);
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
+            bufferedWriter.write(jsonObject.toString());
+            bufferedWriter.close();
+        }
+    }
+
+    public static String makeQuery(String param, String value, String charset) {
+        try {
+            return param + "=" + URLEncoder.encode(value, charset);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 
     @Override
@@ -53,8 +73,10 @@ public class Downloader extends AsyncTask<String, Void, JSONObject> {
     protected void onPostExecute(JSONObject result) {
         try {
             helper.parse(result);
-            if (BuildConfig.DEBUG) Log.v(MainActivity.REFACTOR_LOG_TAG, "helper class: " + helper.getClass() + " (" + MainActivity.downloadsOnTheWire + ")");
-            if (!helper.getClass().toString().contains("BusDownloaderHelper")) MainActivity.pieceDownloadsTogether(context);
+            if (BuildConfig.DEBUG)
+                Log.v(MainActivity.REFACTOR_LOG_TAG, "helper class: " + helper.getClass() + " (" + MainActivity.downloadsOnTheWire + ")");
+            if (!helper.getClass().toString().contains("BusDownloaderHelper"))
+                MainActivity.pieceDownloadsTogether(context);
         } catch (JSONException e) {
             Log.d(MainActivity.REFACTOR_LOG_TAG, "JSON Exception while parsing in onPostExecute.");
             e.printStackTrace();
@@ -104,25 +126,5 @@ public class Downloader extends AsyncTask<String, Void, JSONObject> {
             sb.append(line);
         }
         return sb.toString();
-    }
-
-    public static void cache(String fileName, JSONObject jsonObject) throws IOException {
-        if (jsonObject != null && !jsonObject.toString().isEmpty()) {
-            File path = new File(context.getFilesDir(), CREATED_FILES_DIR);
-            if (!path.mkdir() && BuildConfig.DEBUG) throw new RuntimeException("Failed to mkdir.");
-            File file = new File(path, fileName);
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
-            bufferedWriter.write(jsonObject.toString());
-            bufferedWriter.close();
-        }
-    }
-
-    public static String makeQuery(String param, String value, String charset) {
-        try {
-            return param + "=" + URLEncoder.encode(value, charset);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return "";
     }
 }

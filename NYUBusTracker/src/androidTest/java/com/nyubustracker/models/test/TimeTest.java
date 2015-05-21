@@ -8,7 +8,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class TimeTest extends TestCase{
+public class TimeTest extends TestCase {
     public void testAMConstructor() {
         Time t = new Time("12:10 AM", Time.TimeOfWeek.Weekday, "Route T");
         assertEquals("Route should be set", "Route T", t.getRoute());
@@ -77,8 +77,8 @@ public class TimeTest extends TestCase{
     public void testComparatorSameDay() {
         Time t0 = new Time("12:00 AM", Time.TimeOfWeek.Weekday, "Route T");
         Time t1 = new Time("12:01 AM", Time.TimeOfWeek.Weekday, "Route T");
-        Time t2 = new Time( "1:00 AM", Time.TimeOfWeek.Weekday, "Route T");
-        Time t3 = new Time( "1:00 PM", Time.TimeOfWeek.Weekday, "Route T");
+        Time t2 = new Time("1:00 AM", Time.TimeOfWeek.Weekday, "Route T");
+        Time t3 = new Time("1:00 PM", Time.TimeOfWeek.Weekday, "Route T");
         assertTrue(Time.compare.compare(t0, t1) < 0);
         assertTrue(Time.compare.compare(t0, t2) < 0);
         assertTrue(Time.compare.compare(t2, t1) > 0);
@@ -88,8 +88,8 @@ public class TimeTest extends TestCase{
     public void testComparatorDifferentDay() {
         Time t0 = new Time("12:00 AM", Time.TimeOfWeek.Weekday, "Route T");
         Time t1 = new Time("12:01 AM", Time.TimeOfWeek.Weekday, "Route T");
-        Time t2 = new Time( "1:00 PM", Time.TimeOfWeek.Friday, "Route T");
-        Time t3 = new Time( "1:00 PM", Time.TimeOfWeek.Weekend, "Route T");
+        Time t2 = new Time("1:00 PM", Time.TimeOfWeek.Friday, "Route T");
+        Time t3 = new Time("1:00 PM", Time.TimeOfWeek.Weekend, "Route T");
         assertTrue(Time.compare.compare(t0, t1) < 0);
         assertTrue(Time.compare.compare(t0, t2) < 0);
         assertTrue(Time.compare.compare(t2, t1) > 0);
@@ -99,16 +99,16 @@ public class TimeTest extends TestCase{
     }
 
     public void testComparatorEquals() {
-        Time t0 = new Time( "1:00 PM", Time.TimeOfWeek.Weekend, "Route T");
-        Time t1 = new Time( "1:00 PM", Time.TimeOfWeek.Weekend, "Route T");
+        Time t0 = new Time("1:00 PM", Time.TimeOfWeek.Weekend, "Route T");
+        Time t1 = new Time("1:00 PM", Time.TimeOfWeek.Weekend, "Route T");
         assertTrue(Time.compare.compare(t0, t1) == 0);
         assertEquals(t0, t1);
     }
 
     public void testGetTimeOfWeekAsString() {
         Time t1 = new Time("12:01 AM", Time.TimeOfWeek.Weekday, "Route T");
-        Time t2 = new Time( "1:00 AM", Time.TimeOfWeek.Friday, "Route T");
-        Time t3 = new Time( "1:00 PM", Time.TimeOfWeek.Weekend, "Route T");
+        Time t2 = new Time("1:00 AM", Time.TimeOfWeek.Friday, "Route T");
+        Time t3 = new Time("1:00 PM", Time.TimeOfWeek.Weekend, "Route T");
         assertEquals("Should return the time of week", "Weekday", t1.getTimeOfWeekAsString());
         assertEquals("Should return the time of week", "Friday", t2.getTimeOfWeekAsString());
         assertEquals("Should return the time of week", "Weekend", t3.getTimeOfWeekAsString());

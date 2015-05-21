@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:alpha=".85"
-                android:background="@color/time_list_header"
-                android:minHeight="30dp"
-                android:orientation="vertical"
-                android:paddingLeft="10dp">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:alpha=".85"
+    android:background="@color/time_list_header"
+    android:minHeight="30dp"
+    android:orientation="vertical"
+    android:paddingLeft="10dp">
 
     <TextView
         android:id="@+id/time_text"
@@ -18,5 +18,5 @@
         android:paddingTop="2dp"
         android:textColor="@color/main_text"
         android:textIsSelectable="false"
-        android:textSize="20sp"/>
+        android:textSize="20sp" />
 </RelativeLayout>

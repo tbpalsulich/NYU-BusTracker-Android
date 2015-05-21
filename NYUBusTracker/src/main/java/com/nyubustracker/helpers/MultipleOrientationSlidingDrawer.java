@@ -364,8 +364,7 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
                         canvas.drawBitmap(cache, handle.getRight(), 0, null);
                         break;
                 }
-            }
-            else {
+            } else {
                 // called when closing
                 canvas.save();
                 switch (orientation) {
@@ -385,8 +384,7 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
                 drawChild(canvas, mContent, drawingTime);
                 canvas.restore();
             }
-        }
-        else if (mExpanded) {
+        } else if (mExpanded) {
             drawChild(canvas, mContent, drawingTime);
         }
     }
@@ -539,8 +537,7 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
             mAnimationLastTime = now;
             mCurrentAnimationTime = now + ANIMATION_FRAME_DURATION;
             mAnimating = true;
-        }
-        else {
+        } else {
             if (mAnimating) {
                 mAnimating = false;
                 mHandler.removeMessages(MSG_ANIMATE);
@@ -557,20 +554,17 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
             content.measure(MeasureSpec.makeMeasureSpec(getRight() - getLeft(), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
             if (mOrientation == Orientation.TOP) {
                 content.layout(0, height - content.getMeasuredHeight(), content.getMeasuredWidth(), height);
-            }
-            else {
+            } else {
                 content.layout(0, mTopOffset + childHeight, content.getMeasuredWidth(), mTopOffset + childHeight + content.getMeasuredHeight());
             }
 
-        }
-        else {
+        } else {
             final int childWidth = mHandle.getWidth();
             int width = getRight() - getLeft() - childWidth - mTopOffset;
             content.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(getBottom() - getTop(), MeasureSpec.EXACTLY));
             if (mOrientation == Orientation.RIGHT) {
                 content.layout(childWidth + mTopOffset, 0, mTopOffset + childWidth + content.getMeasuredWidth(), content.getMeasuredHeight());
-            }
-            else {
+            } else {
                 content.layout(width - content.getMeasuredWidth(), 0, width, content.getMeasuredHeight());
             }
         }
@@ -584,18 +578,15 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
                 if (position == EXPANDED_FULL_OPEN) {
                     handle.offsetTopAndBottom(getBottom() - getTop() - mTopOffset - mHandleHeight - handle.getTop());
                     invalidate();
-                }
-                else if (position == COLLAPSED_FULL_CLOSED) {
+                } else if (position == COLLAPSED_FULL_CLOSED) {
                     handle.offsetTopAndBottom(-mBottomOffset - handle.getTop());
                     invalidate();
-                }
-                else {
+                } else {
                     final int top = handle.getTop();
                     int deltaY = position - top;
                     if (position < -mBottomOffset) {
                         deltaY = -mBottomOffset - top;
-                    }
-                    else if (position > getBottom() - getTop() - mTopOffset - mHandleHeight) {
+                    } else if (position > getBottom() - getTop() - mTopOffset - mHandleHeight) {
                         deltaY = getBottom() - getTop() - mTopOffset - mHandleHeight - top;
                     }
                     handle.offsetTopAndBottom(deltaY);
@@ -619,18 +610,15 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
                 if (position == EXPANDED_FULL_OPEN) {
                     handle.offsetTopAndBottom(mTopOffset - handle.getTop());
                     invalidate();
-                }
-                else if (position == COLLAPSED_FULL_CLOSED) {
+                } else if (position == COLLAPSED_FULL_CLOSED) {
                     handle.offsetTopAndBottom(mBottomOffset + getBottom() - getTop() - mHandleHeight - handle.getTop());
                     invalidate();
-                }
-                else {
+                } else {
                     final int top = handle.getTop();
                     int deltaY = position - top;
                     if (position < mTopOffset) {
                         deltaY = mTopOffset - top;
-                    }
-                    else if (deltaY > mBottomOffset + getBottom() - getTop() - mHandleHeight - top) {
+                    } else if (deltaY > mBottomOffset + getBottom() - getTop() - mHandleHeight - top) {
                         deltaY = mBottomOffset + getBottom() - getTop() - mHandleHeight - top;
                     }
                     handle.offsetTopAndBottom(deltaY);
@@ -652,18 +640,15 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
                 if (position == EXPANDED_FULL_OPEN) {
                     handle.offsetLeftAndRight(mTopOffset - handle.getLeft());
                     invalidate();
-                }
-                else if (position == COLLAPSED_FULL_CLOSED) {
+                } else if (position == COLLAPSED_FULL_CLOSED) {
                     handle.offsetLeftAndRight(-mBottomOffset);
                     invalidate();
-                }
-                else {
+                } else {
                     final int left = handle.getLeft();
                     int deltaX = position - left;
                     if (position < mTopOffset) {
                         deltaX = mTopOffset - left;
-                    }
-                    else if (deltaX > mBottomOffset + getRight() - getLeft() - mHandleWidth - left) {
+                    } else if (deltaX > mBottomOffset + getRight() - getLeft() - mHandleWidth - left) {
                         deltaX = mBottomOffset + getRight() - getLeft() - mHandleWidth - left;
                     }
                     handle.offsetLeftAndRight(deltaX);
@@ -685,18 +670,15 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
                 if (position == EXPANDED_FULL_OPEN) {
                     handle.offsetLeftAndRight(getRight() - getLeft() - mTopOffset - mHandleWidth - handle.getLeft());
                     invalidate();
-                }
-                else if (position == COLLAPSED_FULL_CLOSED) {
+                } else if (position == COLLAPSED_FULL_CLOSED) {
                     handle.offsetLeftAndRight(-mBottomOffset - handle.getLeft());
                     invalidate();
-                }
-                else {
+                } else {
                     final int left = handle.getLeft();
                     int deltaX = position - left;
                     if (position < -mBottomOffset) {
                         deltaX = -mBottomOffset - left;
-                    }
-                    else if (position > getRight() - getLeft() - mTopOffset - mHandleWidth) {
+                    } else if (position > getRight() - getLeft() - mTopOffset - mHandleWidth) {
                         deltaX = getRight() - getLeft() - mTopOffset - mHandleWidth - left;
                     }
                     handle.offsetLeftAndRight(deltaX);
@@ -766,8 +748,7 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
                         if (xVelocity > mMaximumMinorVelocity) {
                             xVelocity = mMaximumMinorVelocity;
                         }
-                    }
-                    else {
+                    } else {
                         negative = xVelocity < 0;
                         if (yVelocity < 0) {
                             yVelocity = -yVelocity;
@@ -794,22 +775,18 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
                                 if (mExpanded) {
                                     //animateClose(vertical ? top : left);
                                     animateClose(getSide());
-                                }
-                                else {
+                                } else {
                                     animateOpen(getSide());
                                     //animateOpen(vertical ? top : left);
                                 }
-                            }
-                            else {
+                            } else {
                                 performFling(vertical ? top : left, velocity, false);
                             }
 
-                        }
-                        else {
+                        } else {
                             performFling(vertical ? top : left, velocity, false);
                         }
-                    }
-                    else {
+                    } else {
                         performFling(vertical ? top : left, velocity, false);
                     }
                 }
@@ -857,8 +834,7 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
         if (mVertical) {
             int height = heightSpecSize - handle.getMeasuredHeight() - mTopOffset;
             mContent.measure(MeasureSpec.makeMeasureSpec(widthSpecSize, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
-        }
-        else {
+        } else {
             int width = widthSpecSize - handle.getMeasuredWidth() - mTopOffset;
             mContent.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(heightSpecSize, MeasureSpec.EXACTLY));
         }
@@ -902,8 +878,7 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
                     if (velocity > 0) {
                         mAnimatedVelocity = 0;
                     }
-                }
-                else {
+                } else {
                     // We are expanded, but they didn't move sufficiently to cause
                     // us to retract.  Animate back to the expanded position.
                     mAnimatedAcceleration = mMaximumAcceleration;
@@ -911,24 +886,21 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
                         mAnimatedVelocity = 0;
                     }
                 }
-            }
-            else if (always || (velocity > mMaximumMajorVelocity || (position > mTopOffset + (mVertical ? mHandleHeight : mHandleWidth) && velocity > -mMaximumMajorVelocity))) {
+            } else if (always || (velocity > mMaximumMajorVelocity || (position > mTopOffset + (mVertical ? mHandleHeight : mHandleWidth) && velocity > -mMaximumMajorVelocity))) {
                 // We are expanded, but they didn't move sufficiently to cause
                 // us to retract.  Animate back to the collapsed position.
                 mAnimatedAcceleration = mMaximumAcceleration;
                 if (velocity < 0) {
                     mAnimatedVelocity = 0;
                 }
-            }
-            else {
+            } else {
                 // We are expanded and are now going to animate away.
                 mAnimatedAcceleration = -mMaximumAcceleration;
                 if (velocity > 0) {
                     mAnimatedVelocity = 0;
                 }
             }
-        }
-        else {
+        } else {
             //else if (!always && (velocity > mMaximumMajorVelocity ||
             //		(position > (mVertical ? getHeight() : getWidth()) / 2 &&
             //				velocity > -mMaximumMajorVelocity))) {
@@ -938,8 +910,7 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
                 if (velocity < 0) {
                     mAnimatedVelocity = 0;
                 }
-            }
-            else {
+            } else {
                 // We are collapsed, but they didn't move sufficiently to cause
                 // us to retract.  Animate back to the collapsed position.
                 mAnimatedAcceleration = -mMaximumAcceleration;
@@ -983,27 +954,22 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
                 if (mAnimationPosition >= (mVertical ? getHeight() : getWidth()) - mTopOffset) {
                     mAnimating = false;
                     openDrawer();
-                }
-                else if (mAnimationPosition < -mBottomOffset) {
+                } else if (mAnimationPosition < -mBottomOffset) {
                     mAnimating = false;
                     closeDrawer();
-                }
-                else {
+                } else {
                     moveHandle((int) mAnimationPosition);
                     mCurrentAnimationTime += ANIMATION_FRAME_DURATION;
                     mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_ANIMATE), mCurrentAnimationTime);
                 }
-            }
-            else {
+            } else {
                 if (mAnimationPosition >= mBottomOffset + (mVertical ? getHeight() : getWidth()) - 1) {
                     mAnimating = false;
                     closeDrawer();
-                }
-                else if (mAnimationPosition < mTopOffset) {
+                } else if (mAnimationPosition < mTopOffset) {
                     mAnimating = false;
                     openDrawer();
-                }
-                else {
+                } else {
                     moveHandle((int) mAnimationPosition);
                     mCurrentAnimationTime += ANIMATION_FRAME_DURATION;
                     mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_ANIMATE), mCurrentAnimationTime);
@@ -1066,8 +1032,7 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
     public void toggle() {
         if (!mExpanded) {
             openDrawer();
-        }
-        else {
+        } else {
             closeDrawer();
         }
         invalidate();
@@ -1086,8 +1051,7 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
     public void animateToggle() {
         if (!mExpanded) {
             animateOpen();
-        }
-        else {
+        } else {
             animateClose();
         }
     }
@@ -1383,8 +1347,7 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
 
             if (mAnimateOnClick) {
                 animateToggle();
-            }
-            else {
+            } else {
                 toggle();
             }
         }

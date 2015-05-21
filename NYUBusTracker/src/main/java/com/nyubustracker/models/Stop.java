@@ -72,33 +72,23 @@ public class Stop implements Comparable<Stop> {
                 n++;
             }
             return Integer.parseInt(s.substring(0, n));
-        }
-        else return -1;
-    }
-
-    @Override
-    public int compareTo(@NonNull Stop stop2) {
-        if (this.getFavorite()) {
-            if (stop2.getFavorite()) {
-                return compareStartingNumbers(this.getName(), stop2.getName());
-            }
-            else return -1;
-        }
-        else if (stop2.getFavorite()) return 1;
-        else return compareStartingNumbers(this.getName(), stop2.getName());
+        } else return -1;
     }
 
     public static void parseJSON(JSONObject stopsJson) throws JSONException {
         JSONArray jStops = new JSONArray();
         BusManager sharedManager = BusManager.getBusManager();
         if (stopsJson != null) jStops = stopsJson.getJSONArray(BusManager.TAG_DATA);
-        if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "BusManager current # stops: " + sharedManager.getStops());
-        if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Parsing # stops: " + jStops.length());
+        if (MainActivity.LOCAL_LOGV)
+            Log.v(MainActivity.REFACTOR_LOG_TAG, "BusManager current # stops: " + sharedManager.getStops());
+        if (MainActivity.LOCAL_LOGV)
+            Log.v(MainActivity.REFACTOR_LOG_TAG, "Parsing # stops: " + jStops.length());
         for (int i = 0; i < jStops.length(); i++) {
             JSONObject stopObject = jStops.getJSONObject(i);
             String stopID = stopObject.getString(BusManager.TAG_STOP_ID);
             String stopName = stopObject.getString(BusManager.TAG_STOP_NAME);
-            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "*   Stop: " + stopID + " | " + stopName);
+            if (MainActivity.LOCAL_LOGV)
+                Log.v(MainActivity.REFACTOR_LOG_TAG, "*   Stop: " + stopID + " | " + stopName);
             JSONObject location = stopObject.getJSONObject(BusManager.TAG_LOCATION);
             String stopLat = location.getString(BusManager.TAG_LAT);
             String stopLng = location.getString(BusManager.TAG_LNG);
@@ -111,6 +101,16 @@ public class Stop implements Comparable<Stop> {
             //if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Number of stops in manager: " + sharedManager.numStops());
             //if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "___after adding " + s.name);
         }
+    }
+
+    @Override
+    public int compareTo(@NonNull Stop stop2) {
+        if (this.getFavorite()) {
+            if (stop2.getFavorite()) {
+                return compareStartingNumbers(this.getName(), stop2.getName());
+            } else return -1;
+        } else if (stop2.getFavorite()) return 1;
+        else return compareStartingNumbers(this.getName(), stop2.getName());
     }
 
     public Stop getOppositeStop() {
@@ -208,6 +208,7 @@ public class Stop implements Comparable<Stop> {
         }
         return false;
     }
+
     public boolean hasRouteByName(String name) {
         if (name.trim().isEmpty()) return false;
         for (Route r : routes) {
@@ -309,7 +310,7 @@ public class Stop implements Comparable<Stop> {
         return availableRoutes;
     }
 
-    public List<Time> getTimesTo(Stop endStop){
+    public List<Time> getTimesTo(Stop endStop) {
         List<Route> startRoutes = getRoutes();
         List<Route> endRoutes = endStop.getRoutes();
         List<Time> result = new ArrayList<>();

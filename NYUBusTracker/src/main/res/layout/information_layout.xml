@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:background="@color/list_background"
-              android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/list_background"
+    android:orientation="vertical">
 
     <TextView
         android:layout_width="wrap_content"
@@ -13,7 +13,7 @@
         android:gravity="center"
         android:text="@string/information"
         android:textColor="@color/main_text"
-        android:textSize="30sp"/>
+        android:textSize="30sp" />
 
     <Button
         android:layout_width="fill_parent"
@@ -22,7 +22,7 @@
         android:gravity="center"
         android:onClick="goToWebsite"
         android:text="@string/website"
-        android:textSize="25sp"/>
+        android:textSize="25sp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -32,7 +32,7 @@
         android:paddingTop="5dp"
         android:text="@string/programmed_by"
         android:textColor="@color/main_text"
-        android:textSize="25sp"/>
+        android:textSize="25sp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -43,7 +43,7 @@
         android:paddingTop="5dp"
         android:text="@string/name"
         android:textColor="@color/main_text"
-        android:textSize="25sp"/>
+        android:textSize="25sp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -53,7 +53,7 @@
         android:paddingTop="5dp"
         android:text="@string/open_source"
         android:textColor="@color/main_text"
-        android:textSize="25sp"/>
+        android:textSize="25sp" />
 
     <Button
         android:layout_width="fill_parent"
@@ -61,7 +61,7 @@
         android:onClick="goToGitHub"
         android:paddingTop="5dp"
         android:text="@string/github_link"
-        android:textSize="20sp"/>
+        android:textSize="20sp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -72,6 +72,6 @@
         android:paddingTop="5dp"
         android:text="@string/thanks"
         android:textColor="@color/main_text"
-        android:textSize="20sp"/>
+        android:textSize="20sp" />
 
 </LinearLayout>

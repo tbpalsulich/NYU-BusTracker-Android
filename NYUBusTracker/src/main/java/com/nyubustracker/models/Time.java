@@ -11,36 +11,11 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class Time implements Comparable<Time> {
-    // compare is used to sort the list of times being checked for the "nextBusTime" in MainActivity.
-    // Return a negative number if Time1 is before, positive number if time2 is before, and 0 otherwise.
-    @Override
-    public int compareTo(@NonNull Time time2) {
-        // timeOfWeek is an enum. ordinal() returns the rank of the given TimeOfWeek.
-        if (this.getTimeOfWeek().ordinal() == time2.getTimeOfWeek().ordinal()) {    // Times at the same time in the week.
-            if (this.isStrictlyBefore(time2)) {     // Checks hour and minute. Returns false if they're equal or time2 is before.
-                return -1;
-            }
-            if (time2.isStrictlyBefore(this)) {
-                return 1;
-            }
-            // Same exact time (hour, minute, and timeOfWeek). So, check if we're looking at the current time.
-            if (this.getRoute() == null) {
-                return -1;
-            }
-            if (time2.getRoute() == null) {
-                return 1;
-            }
-            // Times are the same, but we aren't comparing the current time.
-            return 0;
-        }
-        return this.getTimeOfWeek().ordinal() - time2.getTimeOfWeek().ordinal();
-    }
     private final TimeOfWeek timeOfWeek;  // Either Weekday, Friday, Weekend.
     private int hour;           // In 24 hour (military) format.
     private int min;
     private boolean AM;         // Used for parsing the input string ("8:04 PM") => 20:04, AM = true
     private String route;       // What route this time corresponds to.
-
     public Time(String time, TimeOfWeek mTimeOfWeek, String mRoute) {           // Input a string like "8:04 PM".
         timeOfWeek = mTimeOfWeek;
         route = mRoute;
@@ -70,6 +45,41 @@ public class Time implements Comparable<Time> {
         timeOfWeek = getCurrentTimeOfWeek();
     }
 
+    public static Time getCurrentTime(Calendar calendar) {
+        calendar.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+        return new Time(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+    }
+
+    public static Time getCurrentTime() {
+        return getCurrentTime(Calendar.getInstance());
+
+    }
+
+    // compare is used to sort the list of times being checked for the "nextBusTime" in MainActivity.
+    // Return a negative number if Time1 is before, positive number if time2 is before, and 0 otherwise.
+    @Override
+    public int compareTo(@NonNull Time time2) {
+        // timeOfWeek is an enum. ordinal() returns the rank of the given TimeOfWeek.
+        if (this.getTimeOfWeek().ordinal() == time2.getTimeOfWeek().ordinal()) {    // Times at the same time in the week.
+            if (this.isStrictlyBefore(time2)) {     // Checks hour and minute. Returns false if they're equal or time2 is before.
+                return -1;
+            }
+            if (time2.isStrictlyBefore(this)) {
+                return 1;
+            }
+            // Same exact time (hour, minute, and timeOfWeek). So, check if we're looking at the current time.
+            if (this.getRoute() == null) {
+                return -1;
+            }
+            if (time2.getRoute() == null) {
+                return 1;
+            }
+            // Times are the same, but we aren't comparing the current time.
+            return 0;
+        }
+        return this.getTimeOfWeek().ordinal() - time2.getTimeOfWeek().ordinal();
+    }
+
     private TimeOfWeek getCurrentTimeOfWeek() {
         Calendar rightNow = Calendar.getInstance();
         rightNow.setTimeZone(TimeZone.getTimeZone("America/New_York"));
@@ -79,16 +89,6 @@ public class Time implements Comparable<Time> {
             timeOfWeek = TimeOfWeek.Weekend;
         else if (dayOfWeek.equals("Friday")) timeOfWeek = TimeOfWeek.Friday;
         return timeOfWeek;
-    }
-
-    public static Time getCurrentTime(Calendar calendar) {
-        calendar.setTimeZone(TimeZone.getTimeZone("America/New_York"));
-        return new Time(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
-    }
-
-    public static Time getCurrentTime() {
-        return getCurrentTime(Calendar.getInstance());
-
     }
 
     // Returns a String representation of the time of week this Time is in.
@@ -174,8 +174,7 @@ public class Time implements Comparable<Time> {
                 minDifference += 60;
             }
             return new Time(hourDifference, minDifference);
-        }
-        else {
+        } else {
             return new Time(99, 99);    // This time is 'infinitely' far away.
         }
     }
