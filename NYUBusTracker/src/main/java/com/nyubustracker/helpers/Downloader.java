@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.nyubustracker.BuildConfig;
 import com.nyubustracker.R;
 import com.nyubustracker.activities.MainActivity;
 
@@ -23,9 +24,9 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 public class Downloader extends AsyncTask<String, Void, JSONObject> {
-    final DownloaderHelper helper;
+    private final DownloaderHelper helper;
     public static final String CREATED_FILES_DIR = "NYUCachedFiles";
-    static Context context;
+    private static Context context;
 
     public static Context getContext() {
         return context;
@@ -39,13 +40,10 @@ public class Downloader extends AsyncTask<String, Void, JSONObject> {
     @Override
     public JSONObject doInBackground(String... urls) {
         try {
-            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "First url: " + urls[0]);
+            if (BuildConfig.DEBUG) Log.v(MainActivity.REFACTOR_LOG_TAG, "First url: " + urls[0]);
             return new JSONObject(downloadUrl(urls[0]));
-        } catch (IOException e) {
+        } catch (IOException | JSONException e) {
             //Log.e("JSON", "DownloadURL IO error.");
-            e.printStackTrace();
-        } catch (JSONException e) {
-            //Log.e("JSON", "DownloadURL JSON error.");
             e.printStackTrace();
         }
         return null;
@@ -55,7 +53,7 @@ public class Downloader extends AsyncTask<String, Void, JSONObject> {
     protected void onPostExecute(JSONObject result) {
         try {
             helper.parse(result);
-            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "helper class: " + helper.getClass() + " (" + MainActivity.downloadsOnTheWire + ")");
+            if (BuildConfig.DEBUG) Log.v(MainActivity.REFACTOR_LOG_TAG, "helper class: " + helper.getClass() + " (" + MainActivity.downloadsOnTheWire + ")");
             if (!helper.getClass().toString().contains("BusDownloaderHelper")) MainActivity.pieceDownloadsTogether(context);
         } catch (JSONException e) {
             Log.d(MainActivity.REFACTOR_LOG_TAG, "JSON Exception while parsing in onPostExecute.");
@@ -111,7 +109,7 @@ public class Downloader extends AsyncTask<String, Void, JSONObject> {
     public static void cache(String fileName, JSONObject jsonObject) throws IOException {
         if (jsonObject != null && !jsonObject.toString().isEmpty()) {
             File path = new File(context.getFilesDir(), CREATED_FILES_DIR);
-            path.mkdir();
+            if (!path.mkdir() && BuildConfig.DEBUG) throw new RuntimeException("Failed to mkdir.");
             File file = new File(path, fileName);
             BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
             bufferedWriter.write(jsonObject.toString());
@@ -121,7 +119,7 @@ public class Downloader extends AsyncTask<String, Void, JSONObject> {
 
     public static String makeQuery(String param, String value, String charset) {
         try {
-            return String.format(param + "=" + URLEncoder.encode(value, charset));
+            return param + "=" + URLEncoder.encode(value, charset);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

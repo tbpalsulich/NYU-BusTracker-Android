@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
+import com.nyubustracker.BuildConfig;
 import com.nyubustracker.activities.MainActivity;
 import com.nyubustracker.models.Bus;
 import com.nyubustracker.models.Route;
@@ -37,7 +38,7 @@ public final class BusManager {
     public static final String TAG_VEHICLE_ID = "vehicle_id";
     public static final String TAG_SEGMENTS = "segments";
     public static final String TAG_STOPS = "stops";
-    public static final String TAG_OTHER = "Other";
+    private static final String TAG_OTHER = "Other";
     private static final String TAG_ROUTE = "route";
     private static final String TAG_WEEKDAY = "Weekday";
     private static final String TAG_FRIDAY = "Friday";
@@ -52,18 +53,18 @@ public final class BusManager {
     private static boolean isNotDuringSafeRide;
 
     private BusManager() {
-        stops = new ArrayList<Stop>();
-        routes = new ArrayList<Route>();
-        hideRoutes = new ArrayList<String>();
-        buses = new ArrayList<Bus>();
-        timesToDownload = new ArrayList<String>();
-        timesVersions = new HashMap<String, Integer>();
+        stops = new ArrayList<>();
+        routes = new ArrayList<>();
+        hideRoutes = new ArrayList<>();
+        buses = new ArrayList<>();
+        timesToDownload = new ArrayList<>();
+        timesVersions = new HashMap<>();
         isNotDuringSafeRide = false;
     }
 
     /*
     Given a JSONObject of the version file and a fFileGrabber, parses all of the times.
-    Version also has a list of hideroutes, hidestops, combine, and opposite stops. We also handle
+    Version also has a list of hideRoutes, hideStops, combine, and opposite stops. We also handle
     parsing those here, since we already have the file.
     To parse all of the times, we get the stop name from the version file then make a new request
     to get the times JSON object corresponding to that stop ID.
@@ -72,12 +73,12 @@ public final class BusManager {
      */
     public static void parseVersion(JSONObject versionJson) throws JSONException {
         ArrayList<Stop> stops = sharedBusManager.getStops();
-        //if (MainActivity.LOCAL_LOGV) Log.v("Debugging", "Looking for times for " + stops.size() + " stops.");
+        //if (BuildConfig.DEBUG) Log.v("Debugging", "Looking for times for " + stops.size() + " stops.");
         JSONArray jHides = new JSONArray();
         if (versionJson != null) jHides = versionJson.getJSONArray("hideroutes");
         for (int j = 0; j < jHides.length(); j++) {      // For each element of our list of hideroutes.
             String hideMeID = jHides.getString(j);      // ID of the route to hide.
-            //if (MainActivity.LOCAL_LOGV) Log.v("JSONDebug", "Hiding a route... " + hideMeID);
+            //if (BuildConfig.DEBUG) Log.v("JSONDebug", "Hiding a route... " + hideMeID);
             Route r = sharedBusManager.getRouteByID(hideMeID);
             hideRoutes.add(hideMeID);           // In case we "hide" the route before it exists.
             if (r != null) {
@@ -85,7 +86,7 @@ public final class BusManager {
                 for (Stop s : stops) {   // But, we must update any stops that have this route.
                     if (s.hasRouteByString(hideMeID)) {
                         s.getRoutes().remove(r);
-                        //if (MainActivity.LOCAL_LOGV) Log.v("JSONDebug", "Removing route " + r.getID() + " from " + s.getName());
+                        //if (BuildConfig.DEBUG) Log.v("JSONDebug", "Removing route " + r.getID() + " from " + s.getName());
                     }
                 }
             }
@@ -95,7 +96,7 @@ public final class BusManager {
         if (versionJson != null) jHideStops = versionJson.getJSONArray("hidestops");
         for (int j = 0; j < jHideStops.length(); j++) {
             String hideMeID = jHideStops.getString(j);
-            //if (MainActivity.LOCAL_LOGV) Log.v("JSONDebug", "Hiding a stop... " + hideMeID);
+            //if (BuildConfig.DEBUG) Log.v("JSONDebug", "Hiding a stop... " + hideMeID);
             Stop s = sharedBusManager.getStopByID(hideMeID);
             if (s != null) s.setHidden(true);
         }
@@ -140,14 +141,14 @@ public final class BusManager {
         for (int j = 0; j < jVersion.length(); j++) {
             JSONObject stopObject = jVersion.getJSONObject(j);
             String file = stopObject.getString("file");
-            //if (MainActivity.LOCAL_LOGV) Log.v("Debugging", "Looking for times for " + file);
+            //if (BuildConfig.DEBUG) Log.v("Debugging", "Looking for times for " + file);
             timesToDownload.add(DownloaderHelper.AMAZON_URL + file);
             timesVersions.put(file.substring(0, file.indexOf(".json")), stopObject.getInt("version"));
         }
     }
 
     public ArrayList<Stop> getStops() {
-        ArrayList<Stop> result = new ArrayList<Stop>(stops);
+        ArrayList<Stop> result = new ArrayList<>(stops);
         for (Stop stop : stops) {
             if (stop.isHidden()) { // || !stop.hasTimes()) {    Show stops without times for now.
                 result.remove(stop);
@@ -174,7 +175,7 @@ public final class BusManager {
                                 getAllTimes(s, s.getRoutes().get(i), routeTimes);
                                 t.cancel();
                             } catch (JSONException e) {
-                                if (MainActivity.LOCAL_LOGV)
+                                if (BuildConfig.DEBUG)
                                     Log.e("Greenwich", "Error parsing JSON...");
                                 e.printStackTrace();
                             }
@@ -190,7 +191,7 @@ public final class BusManager {
         getTimes(routeTimes, TAG_FRIDAY, s, Time.TimeOfWeek.Friday);
         getTimes(routeTimes, TAG_WEEKEND, s, Time.TimeOfWeek.Weekend);
         if (routeTimes.has(TAG_OTHER)) {
-            //if (MainActivity.LOCAL_LOGV) Log.d("Greenwich", "********Other route!!! " + r.getOtherLongName());
+            //if (BuildConfig.DEBUG) Log.d("Greenwich", "********Other route!!! " + r.getOtherLongName());
             getAllTimes(s, r, routeTimes.getJSONObject(TAG_OTHER));
             String route = routeTimes.getJSONObject(TAG_OTHER).getString(TAG_ROUTE);
             s.setOtherRoute(route.substring(route.indexOf("Route ") + "Route ".length()));
@@ -202,13 +203,13 @@ public final class BusManager {
     private static void getTimes(JSONObject routeTimes, String tag, Stop s, Time.TimeOfWeek timeOfWeek) throws JSONException {
         if (routeTimes.has(tag)) {
             JSONArray timesJson = routeTimes.getJSONArray(tag);
-            if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.LOG_TAG, "Found " + timesJson.length() + " " + timeOfWeek + " times.");
+            if (BuildConfig.DEBUG) Log.v(MainActivity.LOG_TAG, "Found " + timesJson.length() + " " + timeOfWeek + " times.");
             String route = routeTimes.getString(BusManager.TAG_ROUTE);
 
             if (route.contains("Route ")) {
                 route = route.substring(route.indexOf("Route ") + "Route ".length());
             }
-            if (MainActivity.LOCAL_LOGV) Log.d(MainActivity.LOG_TAG, timesJson.length() + " times for " + s);
+            if (BuildConfig.DEBUG) Log.d(MainActivity.LOG_TAG, timesJson.length() + " times for " + s);
             for (int k = 0; k < timesJson.length(); k++) {
                 s.addTime(new Time(timesJson.getString(k), timeOfWeek, route));
             }
@@ -218,10 +219,9 @@ public final class BusManager {
     public static void parseSegments(JSONObject segmentsJSON) throws JSONException {
         JSONObject jSegments = new JSONObject();
         if (segmentsJSON != null) jSegments = segmentsJSON.getJSONObject("data");
-        BusManager sharedManager = BusManager.getBusManager();
         if (jSegments != null) {
-            for (Route r : sharedManager.getRoutes()) {
-                if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Parsing segments for " + r + " (" + r.getSegmentIDs() + ")");
+            for (Route r : routes) {
+                if (BuildConfig.DEBUG) Log.v(MainActivity.REFACTOR_LOG_TAG, "Parsing segments for " + r + " (" + r.getSegmentIDs() + ")");
                 for (String seg : r.getSegmentIDs()) {
                     if (jSegments.has(seg)) {
                         r.getSegments().add(new PolylineOptions().addAll(PolyUtil.decode(jSegments.getString(seg))));
@@ -236,10 +236,6 @@ public final class BusManager {
             sharedBusManager = new BusManager();
         }
         return sharedBusManager;
-    }
-
-    ArrayList<Route> getRoutes() {
-        return routes;
     }
 
     public boolean isNotDuringSafeRide() {
@@ -286,9 +282,9 @@ public final class BusManager {
      */
     public Stop getStopByName(String stopName) {
         for (Stop s : stops) {
-            //if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Looking for " + stopName + " | " + s.getName());
+            //if (BuildConfig.DEBUG) Log.v(MainActivity.REFACTOR_LOG_TAG, "Looking for " + stopName + " | " + s.getName());
             if (s.getName().equals(stopName)) {
-                //if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Found it!");
+                //if (BuildConfig.DEBUG) Log.v(MainActivity.REFACTOR_LOG_TAG, "Found it!");
                 return s;
             }
         }
@@ -299,9 +295,9 @@ public final class BusManager {
     Given a route ID, getStopsByRouteID returns an ArrayList of all Stops visited by that Route.
      */
     public ArrayList<Stop> getStopsByRouteID(String routeID) {
-        ArrayList<Stop> result = new ArrayList<Stop>();
+        ArrayList<Stop> result = new ArrayList<>();
         for (Stop stop : stops) {
-            //if (MainActivity.LOCAL_LOGV) Log.v("Debugging", "Number of routes of stop " + j + ": " + stop.routes.size());
+            //if (BuildConfig.DEBUG) Log.v("Debugging", "Number of routes of stop " + j + ": " + stop.routes.size());
             if (stop.hasRouteByString(routeID)) {
                 result.add(stop);
             }
@@ -319,8 +315,8 @@ public final class BusManager {
      */
     public List<Stop> getConnectedStops(Stop stop) {
         stop = stop.getUltimateParent();
-        Set<Stop> resultSet = new HashSet<Stop>();
-        List<Stop> result = new ArrayList<Stop>();
+        Set<Stop> resultSet = new HashSet<>();
+        List<Stop> result = new ArrayList<>();
         if (stop != null) {
             ArrayList<Route> stopRoutes = stop.getRoutes();
             for (Route route : stopRoutes) {       // For every route servicing this stop:
@@ -334,11 +330,11 @@ public final class BusManager {
                     }
                 }
             }
-            result = new ArrayList<Stop>(resultSet);
+            result = new ArrayList<>(resultSet);
             Collections.sort(result);
             result.remove(stop);
         }
-        if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Found " + result.size() + " connected stops.");
+        if (BuildConfig.DEBUG) Log.v(MainActivity.REFACTOR_LOG_TAG, "Found " + result.size() + " connected stops.");
         return result;
     }
 
@@ -347,7 +343,7 @@ public final class BusManager {
         if (s == null) {
             s = new Stop(stopName, stopLat, stopLng, stopID, routes);
             stops.add(s);
-            //if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "BusManager num stops: " + stops.size());
+            //if (BuildConfig.DEBUG) Log.v(MainActivity.REFACTOR_LOG_TAG, "BusManager num stops: " + stops.size());
         }
         else {
             s.setValues(stopName, stopLat, stopLng, stopID, routes);
@@ -371,7 +367,7 @@ public final class BusManager {
      */
     public void addRoute(Route route) {
         if (!hideRoutes.contains(route.getID())) {
-            //if (MainActivity.LOCAL_LOGV) Log.v("JSONDebug", "Adding route: " + route.getID());
+            //if (BuildConfig.DEBUG) Log.v("JSONDebug", "Adding route: " + route.getID());
             routes.add(route);
         }
     }

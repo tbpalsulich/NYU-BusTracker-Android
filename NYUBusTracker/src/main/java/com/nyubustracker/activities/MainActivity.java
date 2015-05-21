@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -49,6 +48,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.nyubustracker.BuildConfig;
 import com.nyubustracker.R;
 import com.nyubustracker.adapters.StopAdapter;
 import com.nyubustracker.adapters.TimeAdapter;
@@ -80,13 +80,13 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 public class MainActivity extends Activity {
-    public static final boolean LOCAL_LOGV = true;
     private static final String RUN_ONCE_PREF = "runOnce";
     private static final String STOP_PREF = "stops";
     private static final String START_STOP_PREF = "startStop";
@@ -102,13 +102,13 @@ public class MainActivity extends Activity {
             getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE).edit().putBoolean(s.getID(), isChecked).commit();
         }
     };
-    static ProgressDialog progressDialog;
+    private static ProgressDialog progressDialog;
     private static SharedPreferences oncePreferences;
-    double onStartTime;
+    private double onStartTime;
     private Stop startStop;     // Stop object to keep track of the start location of the desired route.
     private Stop endStop;       // Keep track of the desired end location.
-    private HashMap<String, Boolean> clickableMapMarkers;   // Hash of all markers which are clickable (so we don't zoom in on buses).
-    private ArrayList<Marker> busesOnMap = new ArrayList<Marker>();
+    private Map<String, Boolean> clickableMapMarkers;   // Hash of all markers which are clickable (so we don't zoom in on buses).
+    private List<Marker> busesOnMap = new ArrayList<>();
     private TextSwitcher mSwitcher;
     private String mSwitcherCurrentText;
     private TimeAdapter timesAdapter;
@@ -120,7 +120,7 @@ public class MainActivity extends Activity {
     private MultipleOrientationSlidingDrawer drawer;
     private boolean justChangedStops = true;
     public static int downloadsOnTheWire = 0;
-    public static Handler UIHandler;
+    private static final Handler UIHandler;
 
     static {
         UIHandler = new Handler(Looper.getMainLooper());
@@ -169,12 +169,12 @@ public class MainActivity extends Activity {
         }
     }
 
-    String readSavedData(String fileName) throws JSONException {
-        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Reading saved data from " + fileName);
+    private String readSavedData(String fileName) throws JSONException {
+        if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Reading saved data from " + fileName);
         StringBuilder buffer = new StringBuilder("");
         try {
             File path = new File(getFilesDir(), Downloader.CREATED_FILES_DIR);
-            path.mkdir();
+            if (!path.mkdir() && BuildConfig.DEBUG) throw new RuntimeException("Failed to mkdir.");
             File file = new File(path, fileName);
             FileInputStream inputStream = new FileInputStream(file);
             InputStreamReader streamReader = new InputStreamReader(inputStream);
@@ -188,21 +188,20 @@ public class MainActivity extends Activity {
 
             inputStream.close();
         } catch (IOException e) {
-            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Failed to read " + fileName + "...");
+            if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Failed to read " + fileName + "...");
             throw new JSONException("Failed to read " + fileName);
         }
         return buffer.toString();
     }
 
-    private void downloadEverything(boolean block) {
+    private void downloadEverything() {
         deleteEverythingInMemory();
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
             offline = false;
             // Download and parse everything, put it all in persistent memory, continue.
-            if (block) progressDialog = ProgressDialog.show(this, getString(R.string.downloading), getString(R.string.wait), true, false);
-            else progressDialog = null;
+            progressDialog = ProgressDialog.show(this, getString(R.string.downloading), getString(R.string.wait), true, false);
             Context context = getApplicationContext();
             downloadsOnTheWire += 4;
             new Downloader(new StopDownloaderHelper(), context).execute(DownloaderHelper.STOPS_URL);
@@ -224,9 +223,9 @@ public class MainActivity extends Activity {
 
     public static void pieceDownloadsTogether(final Context context) {
         downloadsOnTheWire--;
-        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Downloads on the wire: " + downloadsOnTheWire);
+        if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Downloads on the wire: " + downloadsOnTheWire);
         if (downloadsOnTheWire <= 0) {
-            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Downloading finished!");
+            if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Downloading finished!");
             oncePreferences.edit().putBoolean(FIRST_TIME, false).apply();
             if (progressDialog != null) {
                 runOnUI(new Runnable() {
@@ -249,7 +248,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "onCreate!");
+        if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "onCreate!");
 
         setContentView(R.layout.activity_main);
 
@@ -268,7 +267,7 @@ public class MainActivity extends Activity {
                 TextView myText = new TextView(MainActivity.this);
                 myText.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.time_until_text_size));
                 myText.setTextColor(getResources().getColor(R.color.main_text));
-                myText.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
+                myText.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
                 myText.setEllipsize(TextUtils.TruncateAt.END);
                 myText.setSingleLine(true);
                 return myText;
@@ -292,12 +291,12 @@ public class MainActivity extends Activity {
         timesList.setAdapter(timesAdapter);
 
         if (oncePreferences.getBoolean(FIRST_TIME, true)) {
-            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Downloading because of first time");
-            downloadEverything(true);
+            if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Downloading because of first time");
+            downloadEverything();
         }
         else {
             if (!sharedManager.hasRoutes() || !sharedManager.hasStops()) {
-                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Parsing cached files...");
+                if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Parsing cached files...");
                 try {
                     JSONObject stopJson = new JSONObject(readSavedData(StopDownloaderHelper.STOP_JSON_FILE));
                     JSONObject routeJson = new JSONObject(readSavedData(RouteDownloaderHelper.ROUTE_JSON_FILE));
@@ -310,16 +309,16 @@ public class MainActivity extends Activity {
                     Context context = getApplicationContext();
                     for (String timeURL : sharedManager.getTimesToDownload()) {
                         String timeFileName = timeURL.substring(timeURL.lastIndexOf("/") + 1, timeURL.indexOf(".json"));
-                        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Trying to parse " + timeFileName);
+                        if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Trying to parse " + timeFileName);
                         try {
                             BusManager.parseTime(new JSONObject(readSavedData(timeFileName)));
                         } catch (JSONException e) {
-                            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Didn't find time file, so downloading it: " + timeURL);
+                            if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Didn't find time file, so downloading it: " + timeURL);
                             new Downloader(new TimeDownloaderHelper(), context).execute(timeURL);
                         }
                     }
                     SharedPreferences favoritePreferences = getSharedPreferences(Stop.FAVORITES_PREF, MODE_PRIVATE);
-                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Done parsing...");
+                    if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Done parsing...");
                     for (Stop s : sharedManager.getStops()) {
                         boolean result = favoritePreferences.getBoolean(s.getID(), false);
                         s.setFavorite(result);
@@ -335,9 +334,9 @@ public class MainActivity extends Activity {
                     renewTimeUntilTimer();
                     setNextBusTime();
                 } catch (JSONException e) {
-                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Re-downloading because of an error.");
+                    if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Re-downloading because of an error.");
                     e.printStackTrace();
-                    downloadEverything(true);
+                    downloadEverything();
                 }
             }
             else {
@@ -350,15 +349,15 @@ public class MainActivity extends Activity {
     @Override
     public void onStart() {
         super.onStart();
-        if (LOCAL_LOGV) Log.v("General Debugging", "onStart!");
+        if (BuildConfig.DEBUG) Log.v("General Debugging", "onStart!");
         onStartTime = System.currentTimeMillis();
-        FlurryAgent.onStartSession(this, getString(LOCAL_LOGV ? R.string.flurry_debug_api_key : R.string.flurry_api_key));
+        FlurryAgent.onStartSession(this, getString(BuildConfig.DEBUG ? R.string.flurry_debug_api_key : R.string.flurry_api_key));
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "onResume!");
+        if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "onResume!");
         if (endStop != null && startStop != null) {
             renewTimeUntilTimer();
             renewBusRefreshTimer();
@@ -370,7 +369,7 @@ public class MainActivity extends Activity {
     @Override
     public void onPause() {
         super.onPause();
-        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "onPause!");
+        if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "onPause!");
         cacheStartAndEndStops();
         if (timeUntilTimer != null) timeUntilTimer.cancel();
         if (busRefreshTimer != null) busRefreshTimer.cancel();
@@ -379,14 +378,14 @@ public class MainActivity extends Activity {
     @Override
     public void onStop() {
         super.onStop();
-        //        if (LOCAL_LOGV) Log.v("General Debugging", "onStop!");
+        //        if (BuildConfig.DEBUG) Log.v("General Debugging", "onStop!");
         FlurryAgent.onEndSession(this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "onDestroy!");
+        if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "onDestroy!");
         cacheStartAndEndStops();      // Remember user's preferences across lifetimes.
         if (timeUntilTimer != null)
             timeUntilTimer.cancel();           // Don't need a timer anymore -- must be recreated onResume.
@@ -399,14 +398,14 @@ public class MainActivity extends Activity {
         else super.onBackPressed();
     }
 
-    void cacheStartAndEndStops() {
+    private void cacheStartAndEndStops() {
         if (endStop != null)
             getSharedPreferences(STOP_PREF, MODE_PRIVATE).edit().putString(END_STOP_PREF, endStop.getName()).apply();         // Creates or updates cache file.
         if (startStop != null)
             getSharedPreferences(STOP_PREF, MODE_PRIVATE).edit().putString(START_STOP_PREF, startStop.getName()).apply();
     }
 
-    void sayBusIsOffline() {
+    private void sayBusIsOffline() {
         updateNextTimeSwitcher(getString(R.string.offline));
         ((TextView) findViewById(R.id.next_bus)).setText("");
         ((TextView) findViewById(R.id.next_route)).setText("");
@@ -450,8 +449,8 @@ public class MainActivity extends Activity {
                             offline = false;
                             new Downloader(new BusDownloaderHelper(), getApplicationContext()).execute(DownloaderHelper.VEHICLES_URL);
                             updateMapWithNewBusLocations();
-                            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Current start: " + startStop);
-                            if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Current end  : " + endStop);
+                            if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Current start: " + startStop);
+                            if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Current end  : " + endStop);
                         }
                         else if (!offline) {
                             offline = true;
@@ -473,7 +472,7 @@ public class MainActivity extends Activity {
     Returns the best location we can, checking every available location provider.
     If no provider is available (e.g. all location services turned off), this will return null.
      */
-    public Location getLocation() {
+    private Location getLocation() {
         Location bestLocation = null;
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         for (String provider : locationManager.getProviders(true)) {
@@ -485,7 +484,7 @@ public class MainActivity extends Activity {
         return bestLocation;
     }
 
-    void setStartAndEndStops() {
+    private void setStartAndEndStops() {
         String end = getSharedPreferences(STOP_PREF, MODE_PRIVATE).getString(END_STOP_PREF, "3rd Ave & 14th St");         // Creates or updates cache file.
         String start = getSharedPreferences(STOP_PREF, MODE_PRIVATE).getString(START_STOP_PREF, "715 Broadway");
         if (startStop == null) setStartStop(BusManager.getBusManager().getStopByName(start));
@@ -515,11 +514,11 @@ public class MainActivity extends Activity {
         for (Marker m : busesOnMap) {
             m.remove();
         }
-        busesOnMap = new ArrayList<Marker>();
-        if (clickableMapMarkers == null) clickableMapMarkers = new HashMap<String, Boolean>();  // New set of buses means new set of clickable markers!
+        busesOnMap = new ArrayList<>();
+        if (clickableMapMarkers == null) clickableMapMarkers = new HashMap<>();  // New set of buses means new set of clickable markers!
         for (Route r : routesBetweenStartAndEnd) {
             for (Bus b : sharedManager.getBuses()) {
-                //if (LOCAL_LOGV) Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
+                //if (BuildConfig.DEBUG) Log.v("BusLocations", "bus id: " + b.getID() + ", bus route: " + b.getRoute() + " vs route: " + r.getID());
                 if (b.getRoute().equals(r.getID())) {
                     Marker mMarker = mMap.addMarker(new MarkerOptions().position(b.getLocation()).icon(BitmapDescriptorFactory.fromBitmap(rotateBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_bus_arrow), b.getHeading()))).anchor(0.5f, 0.5f));
                     clickableMapMarkers.put(mMarker.getId(), false);    // Unable to click on buses.
@@ -536,12 +535,12 @@ public class MainActivity extends Activity {
         if (startStop == null || endStop == null) return;
 
         List<Route> routesBetweenStartAndEnd = startStop.getRoutesTo(endStop);
-        clickableMapMarkers = new HashMap<String, Boolean>();
+        clickableMapMarkers = new HashMap<>();
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         boolean validBuilder = false;
         for (Route r : routesBetweenStartAndEnd) {
             if (!r.getSegments().isEmpty()) {
-                if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Updating map with route: " + r.getLongName());
+                if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Updating map with route: " + r.getLongName());
                 for (Stop s : r.getStops()) {
                     for (Stop f : s.getFamily()) {
                         if ((!f.isHidden() && !f.isRelatedTo(startStop) && !f.isRelatedTo(endStop)) || (f == startStop || f == endStop)) {
@@ -642,7 +641,7 @@ public class MainActivity extends Activity {
 
         final Time currentTime = Time.getCurrentTime();
 
-        ArrayList<Time> tempTimesBetweenStartAndEnd = new ArrayList<Time>(timesBetweenStartAndEnd);
+        ArrayList<Time> tempTimesBetweenStartAndEnd = new ArrayList<>(timesBetweenStartAndEnd);
         tempTimesBetweenStartAndEnd.add(currentTime);
         Collections.sort(tempTimesBetweenStartAndEnd);
         int index = tempTimesBetweenStartAndEnd.indexOf(currentTime);
@@ -697,7 +696,7 @@ public class MainActivity extends Activity {
     }
 
     private void updateNextTimeSwitcher(final String newSwitcherText){
-        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Updating switcher to [" + newSwitcherText + "]");
+        if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Updating switcher to [" + newSwitcherText + "]");
         if (drawer != null && !drawer.isMoving() && !mSwitcherCurrentText.equals(newSwitcherText)) {
             mSwitcher.setText(newSwitcherText);  // Pass resources so we return the proper string value.
             mSwitcherCurrentText = newSwitcherText;
@@ -792,7 +791,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void displayStopError() {
+    private void displayStopError() {
         Context context = getApplicationContext();
         CharSequence text = getString(R.string.no_stops_available);
         int duration = Toast.LENGTH_LONG;
@@ -834,35 +833,16 @@ public class MainActivity extends Activity {
     }
 
     private void deleteEverythingInMemory() {
-        if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Trying to delete all files.");
+        if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Trying to delete all files.");
         File directory = new File(getFilesDir(), Downloader.CREATED_FILES_DIR);
         File[] files = directory.listFiles();
         if (files != null) {
             for (File f : files) {
                 if (f.delete()) {
-                    if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Deleted " + f.toString());
+                    if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Deleted " + f.toString());
                 }
-                else if (LOCAL_LOGV) Log.v(REFACTOR_LOG_TAG, "Could not delete " + f.toString());
+                else if (BuildConfig.DEBUG) Log.v(REFACTOR_LOG_TAG, "Could not delete " + f.toString());
             }
         }
-    }
-
-    private void showErrorAndFinish() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Error downloading")
-                .setCancelable(false)
-                .setPositiveButton("Refresh", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        finish();
-                    }
-                })
-                .setNegativeButton("Try again later", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        downloadEverything(true);
-                    }
-                });
-        AlertDialog alert = builder.create();
-        alert.show();
     }
 }

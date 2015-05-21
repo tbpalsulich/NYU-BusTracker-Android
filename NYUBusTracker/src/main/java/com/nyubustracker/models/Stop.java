@@ -1,5 +1,6 @@
 package com.nyubustracker.models;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -18,27 +19,28 @@ import java.util.Map;
 
 public class Stop implements Comparable<Stop> {
     public static final String FAVORITES_PREF = "favorites";
-    final ArrayList<Stop> childStops;
-    String name, id;
-    LatLng loc;
-    String[] routesString;
-    ArrayList<Route> routes = null;
-    String otherRoute = null;
-    Map<String, List<Time>> times = null;
-    boolean favorite;
-    Stop parent;
-    Stop oppositeStop;
-    boolean hidden;
+    private final ArrayList<Stop> childStops;
+    private String name;
+    private String id;
+    private LatLng loc;
+    private String[] routesString;
+    private ArrayList<Route> routes = null;
+    private String otherRoute = null;
+    private Map<String, List<Time>> times = null;
+    private boolean favorite;
+    private Stop parent;
+    private Stop oppositeStop;
+    private boolean hidden;
 
     public Stop(String mName, String mLat, String mLng, String mID, String[] mRoutes) {
         name = cleanName(mName);
         loc = new LatLng(Double.parseDouble(mLat), Double.parseDouble(mLng));
         id = mID;
         routesString = mRoutes;
-        times = new HashMap<String, List<Time>>();
-        routes = new ArrayList<Route>();
+        times = new HashMap<>();
+        routes = new ArrayList<>();
         otherRoute = "";
-        childStops = new ArrayList<Stop>();
+        childStops = new ArrayList<>();
         BusManager sharedManager = BusManager.getBusManager();
         for (String s : mRoutes) {
             Route r = sharedManager.getRouteByID(s);
@@ -54,7 +56,7 @@ public class Stop implements Comparable<Stop> {
         return name;
     }
 
-    public static int compareStartingNumbers(String stop, String stop2) {
+    private static int compareStartingNumbers(String stop, String stop2) {
         int stopN = getStartingNumber(stop);
         int stopN2 = getStartingNumber(stop2);
         if (stopN > -1 && stopN2 > -1) return Integer.signum(stopN - stopN2);
@@ -63,7 +65,7 @@ public class Stop implements Comparable<Stop> {
         return Integer.signum(stopN - stopN2);
     }
 
-    public static int getStartingNumber(String s) {
+    private static int getStartingNumber(String s) {
         if (Character.isDigit(s.charAt(0))) {
             int n = 0;
             while (n < s.length() && Character.isDigit(s.charAt(n))) {
@@ -75,7 +77,7 @@ public class Stop implements Comparable<Stop> {
     }
 
     @Override
-    public int compareTo(Stop stop2) {
+    public int compareTo(@NonNull Stop stop2) {
         if (this.getFavorite()) {
             if (stop2.getFavorite()) {
                 return compareStartingNumbers(this.getName(), stop2.getName());
@@ -105,7 +107,7 @@ public class Stop implements Comparable<Stop> {
             for (int j = 0; j < stopRoutes.length(); j++) {
                 routes[j] = stopRoutes.getString(j);
             }
-            Stop s = sharedManager.getStop(stopName, stopLat, stopLng, stopID, routes);
+            Stop s = sharedManager.getStop(stopName, stopLat, stopLng, stopID, routes); // Creates the stop.
             //if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "Number of stops in manager: " + sharedManager.numStops());
             //if (MainActivity.LOCAL_LOGV) Log.v(MainActivity.REFACTOR_LOG_TAG, "___after adding " + s.name);
         }
@@ -125,14 +127,6 @@ public class Stop implements Comparable<Stop> {
 
     public void setHidden(boolean hidden) {
         this.hidden = hidden;
-    }
-
-    public boolean hasTimes() {
-        if (times.size() > 0) return true;
-        for (Stop childStop : childStops) {
-            if (childStop.hasTimes()) return true;
-        }
-        return false;
     }
 
     public void setOtherRoute(String r) {
@@ -162,7 +156,7 @@ public class Stop implements Comparable<Stop> {
     }
 
     public ArrayList<Stop> getFamily() {
-        ArrayList<Stop> result = new ArrayList<Stop>(childStops);
+        ArrayList<Stop> result = new ArrayList<>(childStops);
         if (parent != null) {
             result.add(parent);
             if (parent.oppositeStop != null) {
@@ -176,7 +170,7 @@ public class Stop implements Comparable<Stop> {
         return result;
     }
 
-    public ArrayList<Stop> getChildStops() {
+    private ArrayList<Stop> getChildStops() {
         return childStops;
     }
 
@@ -223,7 +217,7 @@ public class Stop implements Comparable<Stop> {
     }
 
     public ArrayList<Route> getRoutes() {
-        ArrayList<Route> result = new ArrayList<Route>(routes);
+        ArrayList<Route> result = new ArrayList<>(routes);
         for (Stop child : childStops) {
             for (Route childRoute : child.getRoutes()) {
                 if (!result.contains(childRoute)) {
@@ -306,7 +300,7 @@ public class Stop implements Comparable<Stop> {
         Stop startStop = this;
         ArrayList<Route> startRoutes = startStop.getUltimateParent().getRoutes();        // All the routes leaving the start stop.
         ArrayList<Route> endRoutes = endStop.getUltimateParent().getRoutes();
-        ArrayList<Route> availableRoutes = new ArrayList<Route>();               // All the routes connecting the two.
+        ArrayList<Route> availableRoutes = new ArrayList<>();               // All the routes connecting the two.
         for (Route r : startRoutes) {
             if (endRoutes.contains(r) && !availableRoutes.contains(r)) {
                 availableRoutes.add(r);
@@ -318,7 +312,7 @@ public class Stop implements Comparable<Stop> {
     public List<Time> getTimesTo(Stop endStop){
         List<Route> startRoutes = getRoutes();
         List<Route> endRoutes = endStop.getRoutes();
-        List<Time> result = new ArrayList<Time>();
+        List<Time> result = new ArrayList<>();
         for (Route r : startRoutes) {
             if (endRoutes.contains(r) && times.containsKey(r.getLongName())) {
                 result.addAll(times.get(r.getLongName()));

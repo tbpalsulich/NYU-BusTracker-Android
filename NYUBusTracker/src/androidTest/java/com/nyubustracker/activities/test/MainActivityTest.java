@@ -9,32 +9,26 @@ import android.widget.TextView;
 
 import com.nyubustracker.R;
 import com.nyubustracker.activities.MainActivity;
-import com.nyubustracker.helpers.BusManager;
 import com.nyubustracker.helpers.MultipleOrientationSlidingDrawer;
 
 public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActivity> {
-    Activity mActivity;
+    private Activity mActivity;
 
-    TextView startText;
-    String startTextCorrect;
+    private TextView startText;
+    private String startTextCorrect;
 
-    TextView endText;
-    String endTextCorrect;
+    private TextView endText;
+    private String endTextCorrect;
 
-    TextView callSafeRideButton;
-    String safeRideTextCorrect;
+    private TextView callSafeRideButton;
+    private String safeRideTextCorrect;
 
-    TextView startButton;
-    TextView endButton;
+    private MultipleOrientationSlidingDrawer drawer;
+    private TextSwitcher nextTime;
+    private TextView nextRoute;
+    private TextView nextBus;
 
-    MultipleOrientationSlidingDrawer drawer;
-    TextSwitcher nextTime;
-    TextView nextRoute;
-    TextView nextBus;
-
-    BusManager busManager;
-
-    View decorView;
+    private View decorView;
 
     public MainActivityTest() {
         super(MainActivity.class);
@@ -55,15 +49,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         callSafeRideButton = (TextView) mActivity.findViewById(R.id.safe_ride_button);
 
-        startButton = (TextView) mActivity.findViewById(R.id.start_stop);
-        endButton = (TextView) mActivity.findViewById(R.id.end_stop);
         drawer = (MultipleOrientationSlidingDrawer) mActivity.findViewById(R.id.sliding_drawer);
 
         startTextCorrect = mActivity.getString(R.string.start);
         safeRideTextCorrect = mActivity.getString(R.string.call_safe_ride);
         endTextCorrect = mActivity.getString(R.string.end);
-
-        busManager = BusManager.getBusManager();
 
         decorView = mActivity.getWindow().getDecorView();
     }

@@ -41,7 +41,7 @@ public class Bus {
         }
     }
 
-    Bus setLocation(String lat, String lng) {
+    private Bus setLocation(String lat, String lng) {
         loc = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
         return this;
     }
@@ -54,7 +54,7 @@ public class Bus {
         return route;
     }
 
-    Bus setRoute(String mRoute) {
+    private Bus setRoute(String mRoute) {
         route = mRoute;
         return this;
     }
@@ -67,7 +67,7 @@ public class Bus {
         }
     }
 
-    Bus setHeading(String mHeading) {
+    private Bus setHeading(String mHeading) {
         heading = mHeading;
         return this;
     }

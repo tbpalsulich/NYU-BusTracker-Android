@@ -2,14 +2,12 @@ package com.nyubustracker.helpers;
 
 import android.util.Log;
 
+import com.nyubustracker.BuildConfig;
 import com.nyubustracker.activities.MainActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 
 public class TimeDownloaderHelper implements DownloaderHelper {
@@ -17,7 +15,7 @@ public class TimeDownloaderHelper implements DownloaderHelper {
     public void parse(JSONObject jsonObject) throws JSONException, IOException {
         if (jsonObject != null && jsonObject.toString().length() > 0) {
             BusManager.parseTime(jsonObject);
-            if (MainActivity.LOCAL_LOGV) {
+            if (BuildConfig.DEBUG) {
                 Log.v(MainActivity.LOG_TAG, "Creating time cache file: " + jsonObject.getString("stop_id"));
                 Log.v(MainActivity.LOG_TAG, "*   result: " + jsonObject.toString());
             }

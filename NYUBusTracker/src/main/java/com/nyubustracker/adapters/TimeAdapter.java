@@ -17,10 +17,10 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 
 public class TimeAdapter extends BaseAdapter implements StickyListHeadersAdapter {
 
-    private LayoutInflater inflater;
+    private final LayoutInflater inflater;
     private List<Time> times;
     private Time currentTime;
-    private Context context;
+    private final Context context;
 
     public TimeAdapter(Context context, ArrayList<Time> mTimes) {
         // Cache the LayoutInflate to avoid asking for a new one each time.

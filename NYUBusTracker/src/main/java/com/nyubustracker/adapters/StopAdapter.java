@@ -20,7 +20,7 @@ public class StopAdapter extends BaseAdapter {
     private final LayoutInflater mInflater;
     private final View.OnClickListener textOnClickListener;
     private final CompoundButton.OnCheckedChangeListener checkBoxOnCLickListener;
-    private List<Stop> stops = new ArrayList<Stop>();
+    private List<Stop> stops = new ArrayList<>();
 
     // Constructor. Just used to initialize variables.
     public StopAdapter(Context context, List<Stop> mStops, View.OnClickListener listener, CompoundButton.OnCheckedChangeListener cbListener) {

@@ -36,7 +36,7 @@ import com.nyubustracker.R;
 
 /**
  * MultipleOrientationSlidingDrawer is a copy of SlidingTray (http://aniqroid.sileria.com/doc/api/com/sileria/android/view/SlidingTray.html)
- * which is a modification of {@link android.widget.SlidingDrawer} with two major changes:
+ * which is a modification of android.widget.SlidingDrawer with two major changes:
  * <ul>
  * <li>It lets you create the drawer programmatically instead of just via xml</li>
  * <li>Secondly you can {@link #setOrientation(Orientation)} to any 4 corners of the parent</li>
@@ -95,6 +95,7 @@ import com.nyubustracker.R;
  * @author Ahmed Shakil
  * @author PatrickF
  */
+@SuppressWarnings("WeakerAccess")
 public class MultipleOrientationSlidingDrawer extends ViewGroup {
 
     private static final int TAP_THRESHOLD = 6;
@@ -244,20 +245,13 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
     }
 
     /**
-     * Get the current orientation of this sliding tray.
-     */
-    public Orientation getOrientation() {
-        return mOrientation;
-    }
-
-    /**
      * Lets you change the orientation of the sliding tray at runtime.
      * <p/>
      * Orientation must be from one of TOP, LEFT, BOTTOM, RIGHT.
      *
      * @param orientation orientation of the sliding tray.
      */
-    public void setOrientation(Orientation orientation) {
+    private void setOrientation(Orientation orientation) {
         mOrientation = orientation;
 
         mVertical = mOrientation == Orientation.BOTTOM || mOrientation == Orientation.TOP;
@@ -555,7 +549,7 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
         }
     }
 
-    public void measureContent() {
+    private void measureContent() {
         final View content = mContent;
         if (mVertical) {
             final int childHeight = mHandle.getHeight();
@@ -1308,7 +1302,7 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
 
         public final int value;
 
-        private Side(int value) {
+        Side(int value) {
             this.value = value;
         }
 
@@ -1326,7 +1320,7 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
         TOP(0), LEFT(1), BOTTOM(2), RIGHT(3);
         public final int value;
 
-        private Orientation(int value) {
+        Orientation(int value) {
             this.value = value;
         }
 
@@ -1343,36 +1337,36 @@ public class MultipleOrientationSlidingDrawer extends ViewGroup {
     /**
      * Callback invoked when the drawer is opened.
      */
-    public static interface OnDrawerOpenListener {
+    public interface OnDrawerOpenListener {
         /**
          * Invoked when the drawer becomes fully open.
          */
-        public void onDrawerOpened();
+        void onDrawerOpened();
     }
 
     /**
      * Callback invoked when the drawer is closed.
      */
-    public static interface OnDrawerCloseListener {
+    public interface OnDrawerCloseListener {
         /**
          * Invoked when the drawer becomes fully closed.
          */
-        public void onDrawerClosed();
+        void onDrawerClosed();
     }
 
     /**
      * Callback invoked when the drawer is scrolled.
      */
-    public static interface OnDrawerScrollListener {
+    public interface OnDrawerScrollListener {
         /**
          * Invoked when the user starts dragging/flinging the drawer's handle.
          */
-        public void onScrollStarted();
+        void onScrollStarted();
 
         /**
          * Invoked when the user stops dragging/flinging the drawer's handle.
          */
-        public void onScrollEnded();
+        void onScrollEnded();
     }
 
     /**

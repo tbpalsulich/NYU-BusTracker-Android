@@ -22,8 +22,8 @@ public class Route {
     private ArrayList<Stop> stops = null;
 
     public Route(String mLongName, String mRouteID) {
-        segmentIDs = new ArrayList<String>();
-        segments = new ArrayList<PolylineOptions>();
+        segmentIDs = new ArrayList<>();
+        segments = new ArrayList<>();
         longName = mLongName;
         routeID = mRouteID;
         sharedManager = BusManager.getBusManager();
@@ -58,7 +58,7 @@ public class Route {
         }
     }
 
-    void addStop(int index, Stop stop) {
+    private void addStop(int index, Stop stop) {
         if (stops.contains(stop)) stops.remove(stop);
         if (stops.size() == index) stops.add(stop);
         else stops.add(index, stop);

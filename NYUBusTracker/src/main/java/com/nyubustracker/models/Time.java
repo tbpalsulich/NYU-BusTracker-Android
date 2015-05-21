@@ -1,14 +1,12 @@
 package com.nyubustracker.models;
 
 import android.content.res.Resources;
-import android.util.Log;
+import android.support.annotation.NonNull;
 
 import com.nyubustracker.R;
-import com.nyubustracker.activities.MainActivity;
 import com.nyubustracker.helpers.BusManager;
 
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -16,7 +14,7 @@ public class Time implements Comparable<Time> {
     // compare is used to sort the list of times being checked for the "nextBusTime" in MainActivity.
     // Return a negative number if Time1 is before, positive number if time2 is before, and 0 otherwise.
     @Override
-    public int compareTo(Time time2) {
+    public int compareTo(@NonNull Time time2) {
         // timeOfWeek is an enum. ordinal() returns the rank of the given TimeOfWeek.
         if (this.getTimeOfWeek().ordinal() == time2.getTimeOfWeek().ordinal()) {    // Times at the same time in the week.
             if (this.isStrictlyBefore(time2)) {     // Checks hour and minute. Returns false if they're equal or time2 is before.
